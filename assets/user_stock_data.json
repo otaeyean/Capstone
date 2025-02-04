@@ -1,0 +1,35 @@
+{
+    "stocks": [
+      {
+        "name": "삼성전자",
+        "ticker": "005930",
+        "price": 71800,
+        "quantity": 50
+      },
+      {
+        "name": "네이버",
+        "ticker": "035420",
+        "price": 187500,
+        "quantity": 15
+      },
+      {
+        "name": "LG전자",
+        "ticker": "066570",
+        "price": 145000,
+        "quantity": 25
+      },
+      {
+        "name": "Apple",
+        "ticker": "AAPL",
+        "price": 189000,
+        "quantity": 30
+      },
+      {
+        "name": "Microsoft",
+        "ticker": "MSFT",
+        "price": 320000,
+        "quantity": 18
+      }
+    ]
+  }
+  
