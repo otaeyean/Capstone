@@ -1,43 +1,106 @@
 import 'package:flutter/material.dart';
-
-class StockDetailScreen extends StatelessWidget {
+import './detail_widgets/stock_change_info.dart';
+import 'chart/chart_placeholder.dart';
+import './detail_widgets/info.dart';
+import './detail_widgets/description.dart';
+import './news/news.dart';
+import './investment_main/mock_investment_screen.dart';
+class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
-
   StockDetailScreen({required this.stock});
-
+  @override
+  _StockDetailScreenState createState() => _StockDetailScreenState();
+}
+class _StockDetailScreenState extends State<StockDetailScreen> {
+  bool isFavorite = false;
+  void _toggleFavorite() {
+    setState(() {
+      isFavorite = !isFavorite;
+    });
+    final snackBar = SnackBar(
+      content: Text(isFavorite ? '관심 항목으로 등록되었습니다' : '관심 항목에서 삭제되었습니다'),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(stock['name']),
+        backgroundColor: Colors.white,  
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black), 
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        elevation: 0,  
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Ticker: ${stock['ticker']}'),
-            SizedBox(height: 8),
-            Text('Price: ${stock['price']}원'),
-            SizedBox(height: 8),
-            Text('Change: ${stock['change_value']}원'),
-            SizedBox(height: 8),
-            Text('Description: ${stock['description']}'),
-            SizedBox(height: 8),
-            Text('Market: ${stock['market']}'),
-            SizedBox(height: 8),
-            Text('Quantity: ${stock['quantity']}'),
-            SizedBox(height: 8),
-            Text(
-              stock['change_value'] > 0
-                  ? 'Price increased by ${stock['rise_percent']}%'
-                  : 'Price decreased by ${stock['fall_percent']}%',
-              style: TextStyle(
-                color: stock['change_value'] > 0 ? Colors.green : Colors.red,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    StockInfo(stock: widget.stock),
+                    SizedBox(height: 5),
+                    StockChangeInfo(stock: widget.stock),
+                  ],
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.star : Icons.star_border,
+                        color: isFavorite ? Colors.yellow : Colors.grey,
+                      ),
+                      onPressed: _toggleFavorite,
+                    ),
+                    Icon(
+                      Icons.notifications_none, 
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Divider(),
+          Expanded(
+            child: DefaultTabController(
+              length: 3,
+              child: Column(
+                children: [
+                  TabBar(
+                    tabs: [
+                      Tab(text: '차트'),
+                      Tab(text: '뉴스'),
+                      Tab(text: '모의 투자'),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        SingleChildScrollView(  
+                          child: Column(
+                            children: [
+                              StockChartPlaceholder(),
+                              StockDescription(stock: widget.stock),
+                            ],
+                          ),
+                        ),
+                        NewsScreen(),  
+                        MockInvestmentScreen(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

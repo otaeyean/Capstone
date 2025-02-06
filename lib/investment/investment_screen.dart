@@ -16,6 +16,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   bool isVolumeAscending = true;
   bool isRise = true;  // 기본 상승률로 설정
 
+  // JSON 파일에서 데이터 로드
   Future<void> loadUserStockData() async {
     String jsonString = await rootBundle.loadString('assets/user_stock_data.json');
     final data = jsonDecode(jsonString);
@@ -34,9 +35,12 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   void _sortByPrice() {
     setState(() {
       isPriceAscending = !isPriceAscending;
-      stocks.sort((a, b) => isPriceAscending
-          ? a['price'].compareTo(b['price'])
-          : b['price'].compareTo(a['price']));
+      stocks.sort((a, b) {
+        // 가격을 숫자로 변환하여 비교
+        double priceA = double.tryParse(a['price'].toString().replaceAll(',', '').replaceAll('원', '')) ?? 0.0;
+        double priceB = double.tryParse(b['price'].toString().replaceAll(',', '').replaceAll('원', '')) ?? 0.0;
+        return isPriceAscending ? priceA.compareTo(priceB) : priceB.compareTo(priceA);
+      });
     });
   }
 
@@ -44,9 +48,12 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   void _sortByVolume() {
     setState(() {
       isVolumeAscending = !isVolumeAscending;
-      stocks.sort((a, b) => isVolumeAscending
-          ? a['quantity'].compareTo(b['quantity'])
-          : b['quantity'].compareTo(a['quantity']));
+      stocks.sort((a, b) {
+        // 거래량을 숫자로 변환하여 비교
+        return isVolumeAscending
+            ? a['quantity'].compareTo(b['quantity'])
+            : b['quantity'].compareTo(a['quantity']);
+      });
     });
   }
 
@@ -57,12 +64,15 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     });
   }
 
-  // 상승률 계산 (주식 가격 변화율)
-  double _calculateChangePercent(Map<String, dynamic> stock) {
-    double price = double.tryParse(stock['price'].toString().replaceAll(',', '').replaceAll('원', '')) ?? 0.0;
-    double changeValue = double.tryParse(stock['change_value'].toString()) ?? 0.0;
-    return (changeValue / price) * 100;
-  }
+double _calculateChangePercent(Map<String, dynamic> stock) {
+  double price = double.tryParse(stock['price'].toString().replaceAll(',', '').replaceAll('원', '')) ?? 0.0;
+  double changeValue = double.tryParse(stock['change_value'].toString()) ?? 0.0;
+
+  // 상승률/하락률을 계산 (현재가 기준)
+  double changePercent = (price != 0) ? (changeValue / price) * 100 : 0.0;
+
+  return isRise ? (changePercent > 0 ? changePercent : 0.0) : (changePercent < 0 ? changePercent.abs() : 0.0);
+}
 
   @override
   Widget build(BuildContext context) {
@@ -91,12 +101,14 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
           Expanded(
             child: ListView(
               children: [
+                // 정렬 가능한 헤더 추가
                 SortableHeader(
                   onPriceSort: _sortByPrice,
                   onVolumeSort: _sortByVolume,
                   isRise: isRise,
                   toggleChangePercentage: _toggleChangePercentage,
                 ),
+                // 주식 목록 추가
                 StockList(
                   stocks: stocks,
                   isRise: isRise,
