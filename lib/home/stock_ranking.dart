@@ -30,17 +30,17 @@ class _StockRankingState extends State<StockRanking> {
         stockRankings = stocks
             .where((stock) => stock['market'] == selectedMarket)
             .toList()
-            ..sort((a, b) => (b['rise_percent']).compareTo(a['rise_percent']));
+            ..sort((a, b) => (b['rise_percent'] ?? 0.0).compareTo(a['rise_percent'] ?? 0.0));
       } else if (selectedCategory == "하락률") {
         stockRankings = stocks
             .where((stock) => stock['market'] == selectedMarket)
             .toList()
-            ..sort((a, b) => (b['fall_percent']).compareTo(a['fall_percent']));
+            ..sort((a, b) => (b['fall_percent'] ?? 0.0).compareTo(a['fall_percent'] ?? 0.0));
       } else if (selectedCategory == "거래량") {
         stockRankings = stocks
             .where((stock) => stock['market'] == selectedMarket)
             .toList()
-            ..sort((a, b) => (b['quantity']).compareTo(a['quantity']));
+            ..sort((a, b) => (b['quantity'] ?? 0).compareTo(a['quantity'] ?? 0));
       }
 
       stockRankings = stockRankings.take(5).toList();
@@ -86,7 +86,9 @@ class _StockRankingState extends State<StockRanking> {
               var stock = entry.value;
               bool isRise = selectedCategory == "상승률";
               bool isFall = selectedCategory == "하락률";
-              double percent = isRise ? stock['rise_percent'] : stock['fall_percent'];
+              double percent = isRise
+                  ? (stock['rise_percent'] ?? 0.0)
+                  : (stock['fall_percent'] ?? 0.0);
               Color textColor = isRise ? Colors.red : (isFall ? Colors.blue : Colors.black);
               String arrow = isRise ? "▲" : (isFall ? "▼" : "");
 
@@ -95,7 +97,13 @@ class _StockRankingState extends State<StockRanking> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => StockDetailScreen(stock: stock),
+                      builder: (context) => StockDetailScreen(stock: {
+                        'name': stock['name'],
+                        'price': stock['price'].toString(), // 🔥 안전한 변환
+                        'rise_percent': stock['rise_percent'] ?? 0.0, // 🔥 Null 체크
+                        'fall_percent': stock['fall_percent'] ?? 0.0,
+                        'quantity': stock['quantity'] ?? 0,
+                      }),
                     ),
                   );
                 },
