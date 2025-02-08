@@ -30,13 +30,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ⚠ **null 값 방지 처리** ⚠
+    // ⚠ **null 값 방지 처리 (데이터 타입 변환 추가)**
     final stock = {
       'name': widget.stock['name'] ?? '이름 없음',
-      'price': widget.stock['price'] ?? '0',
-      'rise_percent': widget.stock['rise_percent'] ?? 0.0,
-      'fall_percent': widget.stock['fall_percent'] ?? 0.0,
-      'quantity': widget.stock['quantity'] ?? 0,
+      'price': widget.stock['price'].toString(), // 🔥 안전한 변환
+      'rise_percent': (widget.stock['rise_percent'] ?? 0.0).toDouble(), // 🔥 Null 체크 + double 변환
+      'fall_percent': (widget.stock['fall_percent'] ?? 0.0).toDouble(), // 🔥 Null 체크 + double 변환
+      'quantity': widget.stock['quantity'] ?? 0, // 🔥 Null 체크
     };
 
     return Scaffold(

@@ -20,8 +20,8 @@ class StockList extends StatelessWidget {
         itemBuilder: (context, index) {
           var stock = stocks[index];
 
-          double risePercent = stock['rise_percent'] ?? 0.0;
-          double fallPercent = stock['fall_percent'] ?? 0.0;
+          double risePercent = (stock['rise_percent'] ?? 0.0).toDouble();
+          double fallPercent = (stock['fall_percent'] ?? 0.0).toDouble();
 
           // 🔹 상승률/하락률 포맷팅 및 색상 설정
           String changeText = isRise
@@ -37,7 +37,13 @@ class StockList extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => StockDetailScreen(stock: stock),
+                  builder: (context) => StockDetailScreen(stock: {
+                    'name': stock['name'],
+                    'price': stock['price'].toString(), // 🔥 안전한 변환 추가
+                    'rise_percent': risePercent, // 🔥 Null 체크 및 변환
+                    'fall_percent': fallPercent, // 🔥 Null 체크 및 변환
+                    'quantity': stock['quantity'] ?? 0, // 🔥 Null 체크
+                  }),
                 ),
               );
             },
@@ -56,7 +62,7 @@ class StockList extends StatelessWidget {
                     Expanded(
                       flex: 2,
                       child: Text(
-                        stock['name'],
+                        stock['name'] ?? '알 수 없음', // 🔥 Null 체크 추가
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -64,7 +70,7 @@ class StockList extends StatelessWidget {
                     Expanded(
                       flex: 2,
                       child: Text(
-                        "${stock['price']} 원",
+                        "${stock['price'].toString()} 원",
                         style: TextStyle(fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
@@ -85,7 +91,7 @@ class StockList extends StatelessWidget {
                     Expanded(
                       flex: 1,
                       child: Text(
-                        stock['quantity'].toString(),
+                        (stock['quantity'] ?? 0).toString(), // 🔥 Null 체크 추가
                         style: TextStyle(fontSize: 16),
                         textAlign: TextAlign.right,
                       ),
