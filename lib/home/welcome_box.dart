@@ -6,7 +6,7 @@ class WelcomeBox extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.blue[50],
+        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Column(
@@ -18,7 +18,7 @@ class WelcomeBox extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundImage: AssetImage('assets/user_image.png'), // 예시 이미지
+                child: Icon(Icons.person, size: 30), // 아이콘으로 사용자 이미지 대체
               ),
               SizedBox(width: 20),
               Column(

@@ -5,14 +5,19 @@ import './detail_widgets/info.dart';
 import './detail_widgets/description.dart';
 import './news/news.dart';
 import './investment_main/mock_investment_screen.dart';
+
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
+
   StockDetailScreen({required this.stock});
+
   @override
   _StockDetailScreenState createState() => _StockDetailScreenState();
 }
+
 class _StockDetailScreenState extends State<StockDetailScreen> {
   bool isFavorite = false;
+
   void _toggleFavorite() {
     setState(() {
       isFavorite = !isFavorite;
@@ -22,16 +27,26 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
+
   @override
   Widget build(BuildContext context) {
+    // ⚠ **null 값 방지 처리** ⚠
+    final stock = {
+      'name': widget.stock['name'] ?? '이름 없음',
+      'price': widget.stock['price'] ?? '0',
+      'rise_percent': widget.stock['rise_percent'] ?? 0.0,
+      'fall_percent': widget.stock['fall_percent'] ?? 0.0,
+      'quantity': widget.stock['quantity'] ?? 0,
+    };
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,  
+        backgroundColor: Colors.white,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black), 
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        elevation: 0,  
+        elevation: 0,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,14 +54,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    StockInfo(stock: widget.stock),
+                    StockInfo(stock: stock),
                     SizedBox(height: 5),
-                    StockChangeInfo(stock: widget.stock),
+                    StockChangeInfo(stock: stock),
                   ],
                 ),
                 Row(
@@ -59,7 +74,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                       onPressed: _toggleFavorite,
                     ),
                     Icon(
-                      Icons.notifications_none, 
+                      Icons.notifications_none,
                       color: Colors.grey,
                     ),
                   ],
@@ -83,15 +98,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        SingleChildScrollView(  
+                        SingleChildScrollView(
                           child: Column(
                             children: [
                               StockChartPlaceholder(),
-                              StockDescription(stock: widget.stock),
+                              StockDescription(stock: stock),
                             ],
                           ),
                         ),
-                        NewsScreen(),  
+                        NewsScreen(),
                         MockInvestmentScreen(),
                       ],
                     ),

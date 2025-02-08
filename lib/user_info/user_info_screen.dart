@@ -1,38 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:stockapp/data/user_stock_data.dart';
+import 'package:stockapp/user_info/mystock_list.dart';
+import 'package:stockapp/user_info/portfolio_summary.dart';
+import 'package:stockapp/user_info/sort_dropdown.dart';
+import 'package:stockapp/user_info/user_balance.dart';
+import 'package:stockapp/user_info/user_profile.dart';
 
-class UserInfoScreen extends StatelessWidget {
+class UserInfoScreen extends StatefulWidget {
+  @override
+  _UserInfoScreenState createState() => _UserInfoScreenState();
+}
+
+class _UserInfoScreenState extends State<UserInfoScreen> {
+  List<UserStockData> _userStocks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStockData();
+  }
+
+  // JSON에서 주식 데이터 불러오기
+  void _loadStockData() async {
+    List<UserStockData> stocks = await loadUserStockData();
+    setState(() {
+      _userStocks = stocks;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("내 종목 목록"),
-        backgroundColor: Colors.blue,
+        title: Text("내 정보"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
       ),
-      body: FutureBuilder<List<UserStockData>>(
-        future: loadUserStockData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            List<UserStockData> userStocks = snapshot.data!;
-            return ListView.builder(
-              itemCount: userStocks.length,
-              itemBuilder: (context, index) {
-                var stock = userStocks[index];
-                return ListTile(
-                  title: Text(stock.name),
-                  subtitle: Text('주식 수: ${stock.quantity} | 총 보유액: ${stock.totalValue} 원'),
-                  trailing: Text('가격: ${stock.price} 원'),
-                );
-              },
-            );
-          } else {
-            return Center(child: Text('데이터 없음'));
-          }
-        },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              UserProfile(),
+              SizedBox(height: 16),
+              UserBalance(),
+              SizedBox(height: 16),
+              PortfolioSummary(),
+              SizedBox(height: 16),
+              SortDropdown(),
+              SizedBox(height: 10),
+              MyStockList(stocks: _userStocks), // ✅ 데이터 전달
+            ],
+          ),
+        ),
       ),
     );
   }
