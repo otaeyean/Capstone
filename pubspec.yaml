@@ -1,6 +1,8 @@
 name: stockapp
 description: "A new Flutter project."
-publish_to: 'none'
+
+# Prevent accidental publishing to pub.dev
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
@@ -10,15 +12,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-
+  http: ^1.2.2
+  cupertino_icons: ^1.0.5
+  intl: ^0.18.0
+  
 dev_dependencies:
+  flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true
+
+  # Add assets section to your application
   assets:
-    - assets/company_data.json
+    - assets/company_data.json  # Correct path to your JSON file
     - assets/user_stock_data.json
+  # If you want to add images or other assets in the future:
+  #   - images/a_dot_ham.jpeg
