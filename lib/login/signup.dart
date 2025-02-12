@@ -9,8 +9,8 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  final TextEditingController _passwordController = TextEditingController(); 
-  final TextEditingController _nicknameController = TextEditingController(); 
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nicknameController = TextEditingController();
 
   @override
   void dispose() {
@@ -21,7 +21,7 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> _signUp() async {
     final password = _passwordController.text.trim();
-    final nickname = _nicknameController.text.trim(); 
+    final nickname = _nicknameController.text.trim();
 
     if (nickname.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -35,6 +35,8 @@ class _SignupPageState extends State<SignupPage> {
       "userId": nickname,
       "password": password,
     });
+
+    print('✅ 요청 Body: $body');
 
     try {
       final response = await http.post(
@@ -91,7 +93,7 @@ class _SignupPageState extends State<SignupPage> {
                   TextSpan(text: ' 회원님의\n '),
                   TextSpan(
                     text: '계정',
-                    style: TextStyle(color: Colors.blue, fontFamily: "GmarketBold"),
+                    style: TextStyle(color: const Color.fromARGB(173, 13, 13, 14), fontFamily: "GmarketBold"),
                   ),
                   TextSpan(text: '을 만들어주세요.\n\n', style: TextStyle(fontFamily: "GmarketBold")),
                 ],
@@ -137,11 +139,11 @@ class _SignupPageState extends State<SignupPage> {
                   onPressed: _signUp,
                   child: Text('회원가입 하기', style: TextStyle(color: Colors.white, fontFamily: "GmarketBold")),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.black,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                 ),

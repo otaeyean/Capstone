@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:stockapp/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,6 +13,8 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController(); 
 
+  bool isLoggedIn = false; // 로그인 상태 추적 변수
+
   @override
   void dispose() {
     _nicknameController.dispose();
@@ -19,55 +22,98 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-Future<void> _login() async {
-  final nickname = _nicknameController.text.trim();
-  final password = _passwordController.text.trim();
-
-  if (nickname.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('닉네임과 비밀번호를 입력해주세요.')),
-    );
-    return;
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus(); // 앱 시작 시 로그인 상태 확인
   }
 
-  final url = Uri.parse('http://withyou.me:8080/login');
-  final body = jsonEncode({
-    "userId": nickname,
-    "password": password,
-  });
+  // 로그인 상태 확인
+  void _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isLoggedIn = prefs.getString('nickname') != null; // SharedPreferences에서 닉네임이 있으면 로그인된 상태
+    });
+  }
 
-  try {
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'accept': '*/*',
-      },
-      body: body,
-    );
+  // 로그인 함수
+  Future<void> _login() async {
+    final nickname = _nicknameController.text.trim();
+    final password = _passwordController.text.trim();
 
-    if (response.statusCode == 200) {
+    if (nickname.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$nickname 님 어서오세요!')),
+        SnackBar(content: Text('닉네임과 비밀번호를 입력해주세요.')),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://withyou.me:8080/login');
+    final body = jsonEncode({
+      "userId": nickname,
+      "password": password,
+    });
+
+    print('✅요청 Body: $body');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': '*/*',
+        },
+        body: body,
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MyApp()),
-      );
-    } else {
-      final error = jsonDecode(response.body)['message'] ?? '로그인 실패!';
+      print('✅응답 상태 코드: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final message = response.body;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$nickname 님 어서오세요!')),
+        );
+
+        // 로그인 성공 시 닉네임을 SharedPreferences에 저장
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString('nickname', nickname);
+
+        // 로그인 상태 변경
+        setState(() {
+          isLoggedIn = true;
+        });
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MyApp()),
+        );
+      } else {
+        final error = jsonDecode(response.body)['message'] ?? '로그인 실패!';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error)),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        SnackBar(content: Text('오류가 발생했습니다: $e')),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('오류가 발생했습니다: $e')),
+  }
+
+  // 로그아웃 함수
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove('nickname'); // SharedPreferences에서 닉네임 삭제
+
+    setState(() {
+      isLoggedIn = false; // 로그인 상태 업데이트
+    });
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()), // 로그아웃 후 로그인 페이지로 이동
     );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +124,14 @@ Future<void> _login() async {
           '로그인',
           style: TextStyle(fontFamily: "GmarketBold"),
         ),
+        actions: [
+          // 로그인이 되어있다면 로그아웃 버튼 표시
+          if (isLoggedIn)
+            IconButton(
+              icon: Icon(Icons.exit_to_app),
+              onPressed: _logout, // 로그아웃 함수 실행
+            ),
+        ],
       ),
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
@@ -100,7 +154,7 @@ Future<void> _login() async {
                   TextSpan(
                     text: '로그인',
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: const Color.fromARGB(173, 13, 13, 14),
                       fontFamily: "GmarketBold",
                     ),
                   ),
@@ -145,20 +199,20 @@ Future<void> _login() async {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _login,
+                  onPressed: isLoggedIn ? null : _login, // 로그인 된 상태에서는 버튼 비활성화
                   child: Text(
-                    '로그인',
+                    isLoggedIn ? '로그인됨' : '로그인',
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: "GmarketBold",
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.black,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                 ),

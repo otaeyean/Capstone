@@ -1,7 +1,8 @@
+//✅
 import 'package:flutter/material.dart';
 import 'home/home_screen.dart';
 import 'investment/investment_screen.dart';
-import 'chatbot/chatbot_screen.dart';
+import 'chatbot/chatbot_main_screen.dart';
 import 'user_info/user_info_screen.dart';
 
 void main() {
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '주식 앱',
+      title: 'WithYou',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white, // 전체 배경을 흰색으로 설정
@@ -48,9 +49,6 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("주식 앱"),
-      ),
       body: IndexedStack(
         index: _currentIndex, // 현재 선택된 탭에 맞는 화면을 보여줌
         children: _pages, // 각 페이지 위젯 리스트
