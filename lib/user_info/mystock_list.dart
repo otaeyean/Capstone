@@ -5,7 +5,7 @@ import 'package:stockapp/investment/stock_detail_screen.dart';
 class MyStockList extends StatelessWidget {
   final List<UserStockData> stocks;
 
-  MyStockList({required this.stocks}); // ✅ UserInfoScreen에서 데이터 받기
+  MyStockList({required this.stocks}); 
 
   @override
   Widget build(BuildContext context) {

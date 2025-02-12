@@ -6,9 +6,15 @@ class StockChangeInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isPositive = stock['change_value'] > 0;
+    double changeValue = (stock['change_value'] ?? 0.0).toDouble();
+    double risePercent = (stock['rise_percent'] ?? 0.0).toDouble();
+    double fallPercent = (stock['fall_percent'] ?? 0.0).toDouble();
+
+    bool isPositive = changeValue > 0;
+
     return Text(
-      '어제보다 ${isPositive ? '+' : ''}${stock['change_value']}원 (${isPositive ? stock['rise_percent'] : stock['fall_percent']}%)',
+      '어제보다 ${isPositive ? '+' : ''}${changeValue.toStringAsFixed(0)}원 '
+      '(${isPositive ? risePercent.toStringAsFixed(2) : fallPercent.toStringAsFixed(2)}%)',
       style: TextStyle(
         color: isPositive ? Colors.red : Colors.blue,
         fontSize: 13,
@@ -16,3 +22,4 @@ class StockChangeInfo extends StatelessWidget {
     );
   }
 }
+

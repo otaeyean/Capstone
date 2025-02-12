@@ -46,12 +46,27 @@ class _StockListWidgetState extends State<StockListWidget> {
           child: Card(
             margin: EdgeInsets.symmetric(vertical: 5),
             elevation: 1,
+            color: const Color.fromARGB(255, 255, 252, 245), // 배경을 연한 회색으로 변경
             child: ListTile(
-              title: Text(stock.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              title: Text(
+                stock.name,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black, // 제목 텍스트 색상 검정색으로 변경
+                ),
+              ),
               trailing: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('${stock.price} 원', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(
+                    '${stock.price} 원',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black, // 가격 텍스트 색상 검정색으로 변경
+                    ),
+                  ),
                   Text(
                     stock.risePercent > 0
                         ? "+${stock.risePercent.toStringAsFixed(2)}%"

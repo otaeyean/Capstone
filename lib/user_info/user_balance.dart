@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './user_balance_serve.dart';
+import '../server/userInfo/user_balance_server.dart';
 
 class UserBalance extends StatefulWidget {
   final String userId; 

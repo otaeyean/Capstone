@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:stockapp/stock_api_service.dart';
 import '../investment/stock_detail_screen.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart';
 
 class StockRanking extends StatefulWidget {
   @override
@@ -12,6 +11,8 @@ class _StockRankingState extends State<StockRanking> {
   String selectedMarket = "국내"; // 국내/해외 선택
   String selectedCategory = "상승률"; // 상승률, 하락률, 거래량 선택
   List<Map<String, dynamic>> stockRankings = [];
+  bool isLoading = true; // ✅ 로딩 상태 변수
+  bool isError = false; // ✅ API 실패 감지 변수
 
   @override
   void initState() {
@@ -19,50 +20,61 @@ class _StockRankingState extends State<StockRanking> {
     _loadStockData();
   }
 
+  // 🔹 주식 데이터 불러오기
   Future<void> _loadStockData() async {
-    String jsonString = await rootBundle.loadString('assets/company_data.json');
-    final data = jsonDecode(jsonString)['stocks'];
+    if (!mounted) return; // ✅ 현재 위젯이 활성화된 상태인지 확인
 
     setState(() {
-      List<Map<String, dynamic>> stocks = List<Map<String, dynamic>>.from(data);
+      isLoading = true;
+      isError = false; // ✅ 에러 상태 초기화
+    });
 
+    List<Map<String, dynamic>> stocks = [];
+
+    try {
       if (selectedCategory == "상승률") {
-        stockRankings = stocks
-            .where((stock) => stock['market'] == selectedMarket)
-            .toList()
-            ..sort((a, b) => (b['rise_percent']).compareTo(a['rise_percent']));
+        stocks = await fetchStockData("rise");
       } else if (selectedCategory == "하락률") {
-        stockRankings = stocks
-            .where((stock) => stock['market'] == selectedMarket)
-            .toList()
-            ..sort((a, b) => (b['fall_percent']).compareTo(a['fall_percent']));
+        stocks = await fetchStockData("fall");
       } else if (selectedCategory == "거래량") {
-        stockRankings = stocks
-            .where((stock) => stock['market'] == selectedMarket)
-            .toList()
-            ..sort((a, b) => (b['quantity']).compareTo(a['quantity']));
+        stocks = await fetchStockData("trade-volume");
       }
 
-      stockRankings = stockRankings.take(5).toList();
-    });
+      if (stocks.isEmpty) throw Exception("데이터 없음"); // ✅ 빈 데이터 처리
+
+      if (mounted) {
+        setState(() {
+          stockRankings = stocks.take(5).toList();
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("🚨 데이터 로딩 실패: $e");
+      if (mounted) {
+        setState(() {
+          isError = true; // ✅ 오류 상태 true 설정
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 국내/해외 선택 버튼
+        // ✅ 국내/해외 선택 버튼
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildMarketButton("국내"),
-            SizedBox(width: 16), // 간격 추가
+            SizedBox(width: 16),
             _buildMarketButton("해외"),
           ],
         ),
         SizedBox(height: 10),
 
-        // 상승률, 하락률, 거래량 선택
+        // ✅ 상승률, 하락률, 거래량 선택 버튼
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -73,62 +85,99 @@ class _StockRankingState extends State<StockRanking> {
         ),
         SizedBox(height: 10),
 
-        // 주식 순위 리스트
-        Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.grey[200], // 연한 회색 배경
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: stockRankings.asMap().entries.map((entry) {
-              int rank = entry.key + 1;
-              var stock = entry.value;
-              bool isRise = selectedCategory == "상승률";
-              bool isFall = selectedCategory == "하락률";
-              double percent = isRise ? stock['rise_percent'] : stock['fall_percent'];
-              Color textColor = isRise ? Colors.red : (isFall ? Colors.blue : Colors.black);
-              String arrow = isRise ? "▲" : (isFall ? "▼" : "");
+        // ✅ 로딩 중 화면
+        if (isLoading)
+          Center(child: CircularProgressIndicator())
+        // ✅ 에러 발생 시 메시지 표시
+        else if (isError)
+          Center(child: Text("데이터를 불러올 수 없습니다.", style: TextStyle(color: Colors.red, fontSize: 16)))
+        else
+          // ✅ 주식 순위 리스트
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ListView.builder(
+              shrinkWrap: true, // ✅ 내부 리스트뷰 자동 조절
+              physics: NeverScrollableScrollPhysics(), // ✅ 외부 스크롤과 충돌 방지
+              itemCount: stockRankings.length,
+              itemBuilder: (context, index) {
+                int rank = index + 1;
+                var stock = stockRankings[index];
+                bool isRise = selectedCategory == "상승률";
+                bool isFall = selectedCategory == "하락률";
+                bool isVolume = selectedCategory == "거래량";
+                
+                // ✅ 값 결정 (거래량 or 상승률/하락률 %)
+                String valueText;
+                Color textColor = Colors.black;
+                String arrow = "";
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => StockDetailScreen(stock: stock),
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("$rank. ${stock['name']}", style: TextStyle(fontSize: 16)),
-                      Row(
-                        children: [
-                          Text(
-                            "${stock['price'].toString()} 원",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            "$arrow${percent.toStringAsFixed(2)}%",
-                            style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                if (isRise) {
+                  double percent = stock['changeRate'] ?? 0.0;
+                  valueText = "▲ ${percent.toStringAsFixed(2)}%";
+                  textColor = Colors.red;
+                } else if (isFall) {
+                  double percent = stock['changeRate'] ?? 0.0;
+                  valueText = "▼ ${percent.toStringAsFixed(2)}%";
+                  textColor = Colors.blue;
+                } else if (isVolume) {
+                  int tradeVolume = stock['tradeVolume'] ?? 0;
+                  valueText = "$tradeVolume"; // 🔥 거래량 그대로 표시
+                  textColor = Colors.black;
+                } else {
+                  valueText = "N/A";
+                }
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StockDetailScreen(stock: stock),
                       ),
-                    ],
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey.shade300, width: 1), // ✅ 줄 추가
+                      ),
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("$rank. ${stock['stockName']}",
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Row(
+                          children: [
+                            Text(
+                              "${stock['currentPrice'].toString()} 원",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              valueText,
+                              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }
 
+  // ✅ 국내/해외 버튼 스타일
   Widget _buildMarketButton(String market) {
     return ElevatedButton(
       onPressed: () {
@@ -147,6 +196,7 @@ class _StockRankingState extends State<StockRanking> {
     );
   }
 
+  // ✅ 카테고리 버튼 스타일
   Widget _buildCategoryButton(String category, IconData icon) {
     return GestureDetector(
       onTap: () {
