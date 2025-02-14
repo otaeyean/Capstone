@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:stockapp/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../server/login/login_server.dart';
+import 'package:stockapp/main.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,9 +10,9 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nicknameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController(); 
-
+  final TextEditingController _passwordController = TextEditingController();
   bool isLoggedIn = false; // 로그인 상태 추적 변수
+  bool rememberMe = false; // "아이디, 비밀번호 기억하기" 체크 상태
 
   @override
   void dispose() {
@@ -26,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _checkLoginStatus(); // 앱 시작 시 로그인 상태 확인
+    _loadRememberMe(); // "아이디, 비밀번호 기억하기" 상태 확인
   }
 
   // 로그인 상태 확인
@@ -33,6 +33,18 @@ class _LoginPageState extends State<LoginPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       isLoggedIn = prefs.getString('nickname') != null; // SharedPreferences에서 닉네임이 있으면 로그인된 상태
+    });
+  }
+
+  // "아이디, 비밀번호 기억하기" 상태 확인
+  void _loadRememberMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rememberMe = prefs.getBool('rememberMe') ?? false;
+      if (rememberMe) {
+        _nicknameController.text = prefs.getString('nickname') ?? '';
+        _passwordController.text = prefs.getString('password') ?? '';
+      }
     });
   }
 
@@ -48,54 +60,41 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final url = Uri.parse('http://withyou.me:8080/login');
-    final body = jsonEncode({
-      "userId": nickname,
-      "password": password,
-    });
+    // AuthService 호출
+    final result = await AuthService.login(nickname, password);
 
-    print('✅요청 Body: $body');
+    if (result['success']) {
+      final message = result['message'];
+      final balance = result['balance']; // 서버로부터 받은 balance 값
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'accept': '*/*',
-        },
-        body: body,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$nickname 님 어서오세요!')) // 로그인 성공 메시지
       );
 
-      print('✅응답 상태 코드: ${response.statusCode}');
+      // 로그인 성공 시 닉네임과 보유금액을 SharedPreferences에 저장
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('nickname', nickname);
+      prefs.setDouble('balance', balance.toDouble()); // balance 저장
 
-      if (response.statusCode == 200) {
-        final message = response.body;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$nickname 님 어서오세요!')),
-        );
-
-        // 로그인 성공 시 닉네임을 SharedPreferences에 저장
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setString('nickname', nickname);
-
-        // 로그인 상태 변경
-        setState(() {
-          isLoggedIn = true;
-        });
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyApp()),
-        );
+      if (rememberMe) {
+        prefs.setString('password', password); // 비밀번호 저장
       } else {
-        final error = jsonDecode(response.body)['message'] ?? '로그인 실패!';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error)),
-        );
+        prefs.remove('password'); // 비밀번호 삭제
       }
-    } catch (e) {
+      prefs.setBool('rememberMe', rememberMe); // "아이디, 비밀번호 기억하기" 상태 저장
+
+      // 로그인 상태 변경
+      setState(() {
+        isLoggedIn = true;
+      });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MyApp()),
+      );
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('오류가 발생했습니다: $e')),
+        SnackBar(content: Text(result['message'])),
       );
     }
   }
@@ -193,6 +192,20 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               obscureText: true,
+            ),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                Checkbox(
+                  value: rememberMe,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      rememberMe = value ?? false;
+                    });
+                  },
+                ),
+                Text('아이디, 비밀번호 기억하기', style: TextStyle(fontSize: 14)),
+              ],
             ),
             SizedBox(height: 150),
             Center(

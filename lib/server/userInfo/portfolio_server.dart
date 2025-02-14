@@ -1,4 +1,3 @@
-// portfolio_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ class PortfolioService {
         throw Exception('Failed to load portfolio data');
       }
     } catch (e) {
-      print("✅xception caught during GET request: $e");
+      print("✅Exception caught during GET request: $e");
       rethrow;
     }
   }

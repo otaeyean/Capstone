@@ -24,7 +24,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   }
 
   void _loadUserId() async {
-    String? savedUserId = await AuthService.getUserId(); // ✅ AuthService 사용
+    String? savedUserId = await AuthService.getUserId(); // AuthService 사용
     if (savedUserId == null || savedUserId.isEmpty) {
       Navigator.pushReplacementNamed(context, '/login');
     } else {
@@ -43,7 +43,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return userId.isEmpty // ✅ userId가 없으면 로딩 표시
+    return userId.isEmpty // userId가 없으면 로딩 표시
         ? Center(child: CircularProgressIndicator())
         : Scaffold(
             appBar: AppBar(

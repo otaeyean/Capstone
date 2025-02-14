@@ -1,4 +1,3 @@
-//✅
 import 'package:flutter/material.dart';
 import 'home/home_screen.dart';
 import 'investment/investment_screen.dart';
@@ -57,8 +56,9 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _currentIndex, // 현재 탭을 표시
         onTap: _onItemTapped, // 탭을 누르면 호출되는 함수
         backgroundColor: Colors.white, // 하단 바 색상 흰색
-        selectedItemColor: Colors.blue, // 선택된 아이템 색상 파란색
-        unselectedItemColor: Colors.grey, // 선택되지 않은 아이템 색상
+        selectedItemColor: Colors.black, // 선택된 아이템 색상 파란색
+        unselectedItemColor: Colors.grey, // 선택되지 않은 아이템 색상 회색
+        elevation: 0, // 그림자 없애기
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -78,6 +78,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
+      backgroundColor: Colors.white,
     );
   }
 }

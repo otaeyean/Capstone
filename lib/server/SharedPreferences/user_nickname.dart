@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+//UserInfoScreen에서 사용
 class AuthService {
   static Future<String?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();

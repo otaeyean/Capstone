@@ -16,6 +16,8 @@ dependencies:
   cupertino_icons: ^1.0.5
   intl: ^0.18.0
   shared_preferences: ^2.0.15
+  url_launcher: ^6.1.14
+  html: ^0.15.0  
 
 dev_dependencies:
   flutter_lints: ^4.0.0

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../server/userInfo/user_balance_server.dart';
-
+import '../server/userInfo/portfolio_server.dart';
 class UserBalance extends StatefulWidget {
   final String userId; 
 
@@ -12,6 +12,25 @@ class UserBalance extends StatefulWidget {
 
 class _UserBalanceState extends State<UserBalance> {
   double balance = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBalance(); // 화면이 로드될 때 balance 값 받아오기
+  }
+
+  // 서버에서 balance 값을 받아오는 함수
+  void _fetchBalance() async {
+    try {
+      final data = await PortfolioService.fetchPortfolioData(widget.userId);
+      setState(() {
+        balance = data['balance'].toDouble(); // balance 값을 가져와서 상태 업데이트
+      });
+    } catch (e) {
+      print("Balance fetch error: $e");
+    }
+  }
+
   final TextEditingController _controller = TextEditingController();
 
   void _updateBalance() async {
@@ -34,7 +53,77 @@ class _UserBalanceState extends State<UserBalance> {
       });
     }
   }
-  
+
+  void _showBalanceInputDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white, 
+        title: Text(
+          "금액 입력",
+          style: TextStyle(color: Colors.black), 
+        ),
+        content: TextField(
+          controller: _controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: "금액을 입력하세요",
+            hintStyle: TextStyle(color: Colors.black45), 
+          ),
+          style: TextStyle(color: Colors.black), 
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("취소", style: TextStyle(color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () {
+              _updateBalance(); // 서버로 전송
+              Navigator.pop(context);
+            },
+            child: Text("확인", style: TextStyle(color: Colors.blue)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+    void _confirmResetBalance(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white, 
+          title: Text(
+            "금액 초기화",
+            style: TextStyle(color: Colors.black), 
+          ),
+          content: Text(
+            "설정해놓으신 금액이 초기화됩니다. 진행하시겠습니까?",
+            style: TextStyle(color: Colors.black), 
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), 
+              child: Text("취소", style: TextStyle(color: Colors.black)), 
+            ),
+            TextButton(
+              onPressed: () {
+                _resetBalance(); 
+                Navigator.pop(context);
+              },
+              child: Text("확인", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -63,34 +152,12 @@ class _UserBalanceState extends State<UserBalance> {
             ),
             SizedBox(width: 10),
             GestureDetector(
-              onTap: _resetBalance, // 초기화 요청
+              onTap: () => _confirmResetBalance(context), 
               child: Text("초기화", style: TextStyle(color: Colors.red, fontSize: 14, decoration: TextDecoration.underline)),
             ),
           ],
         ),
       ],
-    );
-  }
-
-  void _showBalanceInputDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("금액 입력"),
-          content: TextField(controller: _controller, keyboardType: TextInputType.number, decoration: InputDecoration(hintText: "금액을 입력하세요")),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text("취소")),
-            TextButton(
-              onPressed: () {
-                _updateBalance(); // 서버로 전송
-                Navigator.pop(context);
-              },
-              child: Text("확인"),
-            ),
-          ],
-        );
-      },
     );
   }
 }
