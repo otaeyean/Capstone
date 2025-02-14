@@ -15,11 +15,11 @@ Future<List<Map<String, dynamic>>> fetchStockData(String endpoint, {String perio
       List<dynamic> data = json.decode(decodedBody);
       return data.map((item) => item as Map<String, dynamic>).toList();
     } else {
-      print("✅Failed to fetch stock data. Error: ${response.statusCode}");
+      print("Failed to fetch stock data. Error: ${response.statusCode}");
       return [];
     }
   } catch (e) {
-    print("✅Error fetching stock data: $e");
+    print("Error fetching stock data: $e");
     return [];
   }
 }

@@ -14,7 +14,7 @@ class _StockRankingState extends State<StockRanking> {
   bool isLoading = true; // ✅ 로딩 상태 변수
   bool isError = false; // ✅ API 실패 감지 변수
 
-  @override
+  @overrideP
   void initState() {
     super.initState();
     _loadStockData();
@@ -146,7 +146,7 @@ class _StockRankingState extends State<StockRanking> {
                       border: Border(
                         bottom: BorderSide(color: Colors.grey.shade300, width: 1), // ✅ 줄 추가
                       ),
-                      color: const Color.fromARGB(255, 255, 255, 255),
+                      color: Colors.white,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
