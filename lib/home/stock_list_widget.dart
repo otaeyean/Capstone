@@ -22,6 +22,7 @@ class StockListWidget extends StatelessWidget {
           child: Card(
             margin: EdgeInsets.symmetric(vertical: 5),
             elevation: 1,
+            color: const Color.fromARGB(255, 255, 252, 245), // 배경을 연한 회색으로 변경
             child: ListTile(
               title: Text(stock["name"], style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               trailing: Column(

@@ -22,3 +22,4 @@ class StockChangeInfo extends StatelessWidget {
     );
   }
 }
+

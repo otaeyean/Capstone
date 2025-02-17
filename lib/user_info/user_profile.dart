@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 class UserProfile extends StatelessWidget {
+  final String userId; 
+
+  UserProfile({required this.userId}); 
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -12,7 +16,7 @@ class UserProfile extends StatelessWidget {
         ),
         SizedBox(width: 10),
         Text(
-          "OOOO 유저님!\n즐거운 주식 되세요~",
+          "$userId 님!\n즐거운 주식 되세요~", 
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ],

@@ -31,13 +31,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   @override
   Widget build(BuildContext context) {
 
+
     // ✅ **null 값 방지 및 필드명 수정**
     final stock = {
-      'name': widget.stock['stockName'] ?? '이름 없음', // 🔥 필드명 일치
-      'price': widget.stock['currentPrice']?.toString() ?? "0 원", // 🔥 가격 null 체크
-      'changePrice': widget.stock['changePrice'] ?? 0.0, // 🔥 변동금액 null 체크
-      'changeRate': widget.stock['changeRate'] ?? 0.0, // 🔥 변동률 null 체크
+      'name': widget.stock['stockName'] ?? '이름 없음', // ✅ stockName 사용
+      'price': widget.stock['currentPrice'].toString(),
+      'rise_percent': (widget.stock['changeRate'] ?? 0.0).toDouble(),
+      'fall_percent': (widget.stock['changeRate'] ?? 0.0).toDouble(),
+      'quantity': widget.stock['tradeVolume'] ?? 0,
+
     };
+
+    final String stockName = stock['name']; // ✅ 올바른 stockName 저장
 
     return Scaffold(
       appBar: AppBar(
@@ -121,8 +126,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                             ],
                           ),
                         ),
-                        NewsScreen(),
-                        MockInvestmentScreen(),
+                        NewsScreen(stockName: stockName), // ✅ stockName 전달
+                        MockInvestmentScreen(), // ✅ stockName 전달
                       ],
                     ),
                   ),
