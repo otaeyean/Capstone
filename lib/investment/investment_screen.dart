@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stockapp/investment/sortable_header.dart';
 import 'package:stockapp/stock_api_service.dart';
 import 'stock_list.dart';
-
+import 'search_stock_screen.dart'; // ✅ 검색 기능 추가
 
 class InvestmentScreen extends StatefulWidget {
   @override
@@ -11,10 +11,10 @@ class InvestmentScreen extends StatefulWidget {
 
 class _InvestmentScreenState extends State<InvestmentScreen> {
   List<Map<String, dynamic>> stocks = [];
-  List<Map<String, dynamic>> filteredStocks = [];
+  List<Map<String, dynamic>> allStocks = []; // ✅ 전체 주식 리스트 저장
   bool isLoading = true;
-  String selectedSort = "상승률순"; // ✅ 기본 정렬 방식
-  String selectedCategory = "전체"; // ✅ 기본 카테고리
+  String selectedSort = "상승률순";
+  String selectedCategory = "전체";
 
   @override
   void initState() {
@@ -22,61 +22,82 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     _loadStockData();
   }
 
-  // 🔹 API 호출 (정렬 기준 변경 시)
   Future<void> _loadStockData() async {
     setState(() {
       isLoading = true;
     });
 
     List<Map<String, dynamic>> stockData = [];
+    List<Map<String, dynamic>> overseasData = [];
+
     try {
       if (selectedSort == "상승률순") {
         stockData = await fetchStockData("rise");
+        overseasData = await fetchStockData("rise/overseas", period: "DAILY");
       } else if (selectedSort == "하락률순") {
         stockData = await fetchStockData("fall");
+        overseasData = await fetchStockData("fall/overseas", period: "DAILY");
       } else if (selectedSort == "거래량순") {
         stockData = await fetchStockData("trade-volume");
+        overseasData = await fetchStockData("trade-volume/overseas");
       }
 
       setState(() {
-        stocks = stockData;
-        _filterStocksByCategory(); // ✅ 카테고리에 맞게 필터링
+        allStocks = [...stockData, ...overseasData]; // ✅ 전체 리스트 저장
+        _filterStocksByCategory(selectedCategory);
         isLoading = false;
       });
     } catch (e) {
-      print("🚨 데이터 로딩 실패: $e");
+      print("데이터 로딩 실패: $e");
       setState(() {
         isLoading = false;
       });
     }
   }
 
-  // 🔹 카테고리 필터링
-  void _filterStocksByCategory() {
+  void _filterStocksByCategory(String category) {
     setState(() {
-      if (selectedCategory == "전체") {
-        filteredStocks = List.from(stocks);
+      selectedCategory = category;
+      if (category == "전체") {
+        stocks = allStocks;
+      } else if (category == "국내") {
+        stocks = allStocks.where((stock) => !stock.containsKey("excd")).toList();
+      } else if (category == "해외") {
+        stocks = allStocks.where((stock) => stock.containsKey("excd")).toList();
       } else {
-        filteredStocks = stocks
-            .where((stock) => stock['category'] == selectedCategory)
+        stocks = [];
+      }
+    });
+  }
+
+  void _filterStocksByQuery(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filterStocksByCategory(selectedCategory);
+      } else {
+        stocks = allStocks
+            .where((stock) => stock['stockName'].toString().toLowerCase().startsWith(query.toLowerCase()))
             .toList();
       }
     });
   }
 
-  // 🔹 정렬 옵션 선택 바텀시트
   void _showSortOptions() {
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return Container(
-          padding: EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildSortOption("상승률순"),
               _buildSortOption("하락률순"),
-              _buildSortOption("거래량순"),
+              _buildSortOption("거래량순")
             ],
           ),
         );
@@ -84,24 +105,20 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     );
   }
 
-  // 🔹 정렬 옵션 UI
   Widget _buildSortOption(String option) {
     return ListTile(
-      title: Text(
-        option,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: selectedSort == option ? FontWeight.bold : FontWeight.normal,
-          color: selectedSort == option ? Colors.blue : Colors.black,
-        ),
-      ),
+      title: Text(option,
+          style: TextStyle(
+              fontSize: 14,
+              fontWeight: selectedSort == option ? FontWeight.bold : FontWeight.normal,
+              color: selectedSort == option ? Colors.blue : Colors.black)),
       trailing: selectedSort == option ? Icon(Icons.check, color: Colors.blue) : null,
       onTap: () {
+        Navigator.pop(context);
         setState(() {
           selectedSort = option;
+          _loadStockData();
         });
-        Navigator.pop(context);
-        _loadStockData();
       },
     );
   }
@@ -110,79 +127,86 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('모의 투자'),
+        title: Text('모의 투자', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        actions: [
-          // 🔹 정렬 기준 버튼 (오른쪽 상단)
-          Container(
-            margin: EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: Colors.grey[200], // ✅ 회색 배경 추가
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TextButton(
-              onPressed: _showSortOptions,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                minimumSize: Size(100, 40), // ✅ 네모 박스 느낌 유지
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    selectedSort, // ✅ 선택한 정렬 방식 표시
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                  ),
-                  SizedBox(width: 5),
-                  Icon(Icons.arrow_drop_down, color: Colors.black), // ✅ 아래 화살표 아이콘 추가
-                ],
-              ),
-            ),
-          ),
-        ],
+        centerTitle: true,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // 🔹 카테고리 선택 (아래로 이동)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: ["전체", "국내", "해외", "관심"].map((category) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedCategory = category;
-                            _filterStocksByCategory();
-                          });
-                        },
-                        child: Text(
-                          category,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: selectedCategory == category ? Colors.red : Colors.black,
-                          ),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: "종목 검색",
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    onChanged: _filterStocksByQuery,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Row(
+                        children: ["전체", "국내", "해외", "관심"].map((category) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 16),
+                            child: GestureDetector(
+                              onTap: () => _filterStocksByCategory(category),
+                              child: Text(
+                                category,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: selectedCategory == category ? Colors.red : Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(right: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: TextButton(
+                        onPressed: _showSortOptions,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(selectedSort, style: TextStyle(color: Colors.black, fontSize: 14)),
+                            Icon(Icons.arrow_drop_down, color: Colors.black, size: 18),
+                          ],
                         ),
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-
-                // 🔹 테이블 헤더 (정렬 기능 제거된 UI)
                 StockSortHeader(),
+              Expanded(
+  child: stocks.isEmpty
+      ? Center(child: Text("데이터 없음", style: TextStyle(fontSize: 18, color: Colors.grey)))
+      : StockList(
+          stocks: stocks,
+          isTradeVolumeSelected: selectedSort == "거래량순", // ✅ "거래량순" 선택 시 true 전달
+        ),
+),
 
-                // 🔹 주식 목록
-                Expanded(
-                  child: StockList(
-                    endpoint: selectedSort == "거래량순" ? "trade-volume" : (selectedSort == "상승률순" ? "rise" : "fall"),
-                    period: "DAILY",
-                  ),
-                ),
               ],
             ),
     );

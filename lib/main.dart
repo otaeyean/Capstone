@@ -48,9 +48,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("주식 앱"),
-      ),
+
       body: IndexedStack(
         index: _currentIndex, // 현재 선택된 탭에 맞는 화면을 보여줌
         children: _pages, // 각 페이지 위젯 리스트

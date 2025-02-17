@@ -30,13 +30,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ⚠ **null 값 방지 처리 (데이터 타입 변환 추가)**
+
+    // ✅ **null 값 방지 및 필드명 수정**
     final stock = {
-      'name': widget.stock['name'] ?? '이름 없음',
-      'price': widget.stock['price'].toString(), // 🔥 안전한 변환
-      'rise_percent': (widget.stock['rise_percent'] ?? 0.0).toDouble(), // 🔥 Null 체크 + double 변환
-      'fall_percent': (widget.stock['fall_percent'] ?? 0.0).toDouble(), // 🔥 Null 체크 + double 변환
-      'quantity': widget.stock['quantity'] ?? 0, // 🔥 Null 체크
+      'name': widget.stock['stockName'] ?? '이름 없음', // 🔥 필드명 일치
+      'price': widget.stock['currentPrice']?.toString() ?? "0 원", // 🔥 가격 null 체크
+      'changePrice': widget.stock['changePrice'] ?? 0.0, // 🔥 변동금액 null 체크
+      'changeRate': widget.stock['changeRate'] ?? 0.0, // 🔥 변동률 null 체크
     };
 
     return Scaffold(
@@ -59,9 +59,24 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    StockInfo(stock: stock),
+                    Text(
+                      stock['name'],
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
                     SizedBox(height: 5),
-                    StockChangeInfo(stock: stock),
+                    Text(
+                      stock['price'], // ✅ null 방지된 가격 표시
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      "어제보다 ${stock['changePrice']}원 (${stock['changeRate']}%)", // ✅ 변동금액, 변동률 표시
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: stock['changeRate'] >= 0 ? Colors.red : Colors.blue,
+                      ),
+                    ),
                   ],
                 ),
                 Row(

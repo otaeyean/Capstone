@@ -10,7 +10,6 @@ Future<List<Map<String, dynamic>>> fetchStockData(String endpoint, {String perio
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      // 🔥 UTF-8 디코딩 추가
       final decodedBody = utf8.decode(response.bodyBytes); 
       List<dynamic> data = json.decode(decodedBody);
       return data.map((item) => item as Map<String, dynamic>).toList();
