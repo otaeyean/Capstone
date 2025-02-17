@@ -14,7 +14,7 @@ class _StockRankingState extends State<StockRanking> {
   bool isLoading = true; // ✅ 로딩 상태 변수
   bool isError = false; // ✅ API 실패 감지 변수
 
-  @overrideP
+  @override
   void initState() {
     super.initState();
     _loadStockData();
