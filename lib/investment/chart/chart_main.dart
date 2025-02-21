@@ -1,0 +1,64 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stockapp/investment/chart/stock_provider.dart';
+import 'stock_chart_view.dart';
+import 'stock_chart_controls.dart';
+
+class StockChartMain extends StatefulWidget {
+  final String stockCode;
+
+  const StockChartMain({Key? key, required this.stockCode}) : super(key: key);
+
+  @override
+  _StockChartMainState createState() => _StockChartMainState();
+}
+
+class _StockChartMainState extends State<StockChartMain> {
+  String _selectedPeriod = "D";
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<StockProvider>(context, listen: false)
+          .loadStockData(widget.stockCode, period: _selectedPeriod);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<StockProvider>(
+      builder: (context, stockProvider, child) {
+        if (stockProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (stockProvider.errorMessage.isNotEmpty) {
+          return Center(
+            child: Text(stockProvider.errorMessage, style: TextStyle(color: Colors.red, fontSize: 16)),
+          );
+        }
+
+        if (stockProvider.stockPrices.isEmpty) {
+          return const Center(child: Text("No stock data available"));
+        }
+
+        return Column(
+          children: [
+            StockChartView(stockProvider: stockProvider),
+            StockChartControls(
+              selectedPeriod: _selectedPeriod,
+              onPeriodSelected: (period) {
+                setState(() {
+                  _selectedPeriod = period;
+                  Provider.of<StockProvider>(context, listen: false)
+                      .loadStockData(widget.stockCode, period: _selectedPeriod);
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

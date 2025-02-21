@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stockapp/investment/sortable_header.dart';
 import 'package:stockapp/stock_api_service.dart';
-import 'stock_list.dart';
-import 'search_stock_screen.dart'; // ✅ 검색 기능 추가
+import 'package:stockapp/investment/stock_list.dart';
+import 'stock_detail_screen.dart'; // ✅ 상세 화면 import
 
 class InvestmentScreen extends StatefulWidget {
   @override
@@ -11,10 +11,13 @@ class InvestmentScreen extends StatefulWidget {
 
 class _InvestmentScreenState extends State<InvestmentScreen> {
   List<Map<String, dynamic>> stocks = [];
-  List<Map<String, dynamic>> allStocks = []; // ✅ 전체 주식 리스트 저장
+  List<Map<String, dynamic>> allStocks = [];
+  List<Map<String, dynamic>> searchResults = []; // ✅ 검색 결과 따로 저장
+  bool isDropdownVisible = false;
   bool isLoading = true;
   String selectedSort = "상승률순";
   String selectedCategory = "전체";
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -43,7 +46,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       }
 
       setState(() {
-        allStocks = [...stockData, ...overseasData]; // ✅ 전체 리스트 저장
+        allStocks = [...stockData, ...overseasData];
         _filterStocksByCategory(selectedCategory);
         isLoading = false;
       });
@@ -70,16 +73,33 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     });
   }
 
+  // 🔹 검색 기능 (리스트와 분리)
   void _filterStocksByQuery(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filterStocksByCategory(selectedCategory);
+        searchResults = [];
+        isDropdownVisible = false;
       } else {
-        stocks = allStocks
+        searchResults = allStocks
             .where((stock) => stock['stockName'].toString().toLowerCase().startsWith(query.toLowerCase()))
             .toList();
+        isDropdownVisible = searchResults.isNotEmpty;
       }
     });
+  }
+
+  // 🔹 검색 결과 선택 시 상세 페이지 이동
+  void _goToStockDetail(Map<String, dynamic> stock) {
+    setState(() {
+      _searchController.text = stock['stockName'];
+      isDropdownVisible = false;
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StockDetailScreen(stock: stock),
+      ),
+    );
   }
 
   void _showSortOptions() {
@@ -137,22 +157,47 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                // 🔹 검색창 (리스트와 완전히 독립)
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.search),
-                      hintText: "종목 검색",
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.search),
+                          hintText: "종목 검색",
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        onChanged: _filterStocksByQuery,
                       ),
-                    ),
-                    onChanged: _filterStocksByQuery,
+                      if (isDropdownVisible)
+                        Container(
+                          margin: EdgeInsets.only(top: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                          ),
+                          child: Column(
+                            children: searchResults.map((stock) {
+                              return ListTile(
+                                title: Text(stock['stockName']),
+                                onTap: () => _goToStockDetail(stock),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
+                
+                // 🔹 정렬 및 필터 UI
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -198,15 +243,16 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                   ],
                 ),
                 StockSortHeader(),
-              Expanded(
-  child: stocks.isEmpty
-      ? Center(child: Text("데이터 없음", style: TextStyle(fontSize: 18, color: Colors.grey)))
-      : StockList(
-          stocks: stocks,
-          isTradeVolumeSelected: selectedSort == "거래량순", // ✅ "거래량순" 선택 시 true 전달
-        ),
-),
 
+                // 🔹 주식 리스트 (검색과 완전 독립)
+                Expanded(
+                  child: stocks.isEmpty
+                      ? Center(child: Text("데이터 없음", style: TextStyle(fontSize: 18, color: Colors.grey)))
+                      : StockList(
+                          stocks: List<Map<String, dynamic>>.from(stocks),
+                          isTradeVolumeSelected: selectedSort == "거래량순",
+                        ),
+                ),
               ],
             ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../investment/chart/chart_main.dart'; // ✅ 차트 import
 import './detail_widgets/stock_change_info.dart';
-import 'chart/chart_placeholder.dart';
 import './detail_widgets/info.dart';
 import './detail_widgets/description.dart';
 import './news/news.dart';
@@ -30,19 +30,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    // ✅ **null 값 방지 및 필드명 수정**
     final stock = {
-      'name': widget.stock['stockName'] ?? '이름 없음', // ✅ stockName 사용
-      'price': widget.stock['currentPrice'].toString(),
-      'rise_percent': (widget.stock['changeRate'] ?? 0.0).toDouble(),
-      'fall_percent': (widget.stock['changeRate'] ?? 0.0).toDouble(),
+      'name': widget.stock['stockName'] ?? '이름 없음',
+      'price': (widget.stock['currentPrice'] ?? 0).toDouble(),
+      'changePrice': (widget.stock['changePrice'] ?? 0.0).toDouble(),
+      'changeRate': (widget.stock['changeRate'] ?? 0.0).toDouble(),
       'quantity': widget.stock['tradeVolume'] ?? 0,
-
     };
 
-    final String stockName = stock['name']; // ✅ 올바른 stockName 저장
+    final String stockName = stock['name'];
 
     return Scaffold(
       appBar: AppBar(
@@ -70,12 +66,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      stock['price'], // ✅ null 방지된 가격 표시
+                      "${stock['price']} 원",
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                     ),
                     SizedBox(height: 5),
                     Text(
-                      "어제보다 ${stock['changePrice']}원 (${stock['changeRate']}%)", // ✅ 변동금액, 변동률 표시
+                      "어제보다 ${stock['changePrice']}원 (${stock['changeRate']}%)",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -121,13 +117,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                         SingleChildScrollView(
                           child: Column(
                             children: [
-                              StockChartPlaceholder(),
+                              StockChartMain(stockCode: widget.stock['stockCode']),  // ✅ 차트 적용
                               StockDescription(stock: stock),
                             ],
                           ),
                         ),
-                        NewsScreen(stockName: stockName), // ✅ stockName 전달
-                        MockInvestmentScreen(), // ✅ stockName 전달
+                        NewsScreen(stockName: stockName),
+                        MockInvestmentScreen(),
                       ],
                     ),
                   ),
