@@ -19,10 +19,9 @@ dependencies:
   shared_preferences: ^2.0.15
   url_launcher: ^6.1.14
   html: ^0.15.0  
-  fl_chart: ^0.70.2
   syncfusion_flutter_charts: 20.4.54  # ✅ 안정적인 버전으로 변경
   provider: ^6.1.2
-
+  smooth_page_indicator: ^1.1.0
 dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test:

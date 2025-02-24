@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../server/login/login_server.dart';
 import 'package:stockapp/main.dart';
+import './signup.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,8 +12,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool isLoggedIn = false; // 로그인 상태 추적 변수
-  bool rememberMe = false; // "아이디, 비밀번호 기억하기" 체크 상태
+  bool isLoggedIn = false;
 
   @override
   void dispose() {
@@ -24,31 +24,16 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus(); // 앱 시작 시 로그인 상태 확인
-    _loadRememberMe(); // "아이디, 비밀번호 기억하기" 상태 확인
+    _checkLoginStatus();
   }
 
-  // 로그인 상태 확인
   void _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      isLoggedIn = prefs.getString('nickname') != null; // SharedPreferences에서 닉네임이 있으면 로그인된 상태
+      isLoggedIn = prefs.getString('nickname') != null;
     });
   }
 
-  // "아이디, 비밀번호 기억하기" 상태 확인
-  void _loadRememberMe() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      rememberMe = prefs.getBool('rememberMe') ?? false;
-      if (rememberMe) {
-        _nicknameController.text = prefs.getString('nickname') ?? '';
-        _passwordController.text = prefs.getString('password') ?? '';
-      }
-    });
-  }
-
-  // 로그인 함수
   Future<void> _login() async {
     final nickname = _nicknameController.text.trim();
     final password = _passwordController.text.trim();
@@ -60,33 +45,18 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // AuthService 호출
     final result = await AuthService.login(nickname, password);
 
     if (result['success']) {
-      final message = result['message'];
-      final balance = result['balance']; // 서버로부터 받은 balance 값
+      final balance = result['balance'];
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$nickname 님 어서오세요!')) // 로그인 성공 메시지
+        SnackBar(content: Text('$nickname 님 어서오세요!'))
       );
 
-      // 로그인 성공 시 닉네임과 보유금액을 SharedPreferences에 저장
       final prefs = await SharedPreferences.getInstance();
       prefs.setString('nickname', nickname);
-      prefs.setDouble('balance', balance.toDouble()); // balance 저장
-
-      if (rememberMe) {
-        prefs.setString('password', password); // 비밀번호 저장
-      } else {
-        prefs.remove('password'); // 비밀번호 삭제
-      }
-      prefs.setBool('rememberMe', rememberMe); // "아이디, 비밀번호 기억하기" 상태 저장
-
-      // 로그인 상태 변경
-      setState(() {
-        isLoggedIn = true;
-      });
+      prefs.setDouble('balance', balance.toDouble());
 
       Navigator.pushReplacement(
         context,
@@ -99,21 +69,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // 로그아웃 함수
-  Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove('nickname'); // SharedPreferences에서 닉네임 삭제
-
-    setState(() {
-      isLoggedIn = false; // 로그인 상태 업데이트
-    });
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => LoginPage()), // 로그아웃 후 로그인 페이지로 이동
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,12 +79,15 @@ class _LoginPageState extends State<LoginPage> {
           style: TextStyle(fontFamily: "GmarketBold"),
         ),
         actions: [
-          // 로그인이 되어있다면 로그아웃 버튼 표시
-          if (isLoggedIn)
-            IconButton(
-              icon: Icon(Icons.exit_to_app),
-              onPressed: _logout, // 로그아웃 함수 실행
-            ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SignupPage()),
+              );
+            },
+            child: Text('회원가입', style: TextStyle(color: Colors.black)),
+          ),
         ],
       ),
       resizeToAvoidBottomInset: true,
@@ -193,28 +151,14 @@ class _LoginPageState extends State<LoginPage> {
               ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Checkbox(
-                  value: rememberMe,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      rememberMe = value ?? false;
-                    });
-                  },
-                ),
-                Text('아이디, 비밀번호 기억하기', style: TextStyle(fontSize: 14)),
-              ],
-            ),
             SizedBox(height: 150),
             Center(
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: isLoggedIn ? null : _login, // 로그인 된 상태에서는 버튼 비활성화
+                  onPressed: _login,
                   child: Text(
-                    isLoggedIn ? '로그인됨' : '로그인',
+                    '로그인',
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: "GmarketBold",
