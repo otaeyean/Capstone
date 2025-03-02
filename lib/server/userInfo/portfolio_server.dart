@@ -16,7 +16,7 @@ class PortfolioService {
         final data = jsonDecode(response.body);
         return data;
       } else {
-        print("✅가져오기 실패함함. Status code: ${response.statusCode}");
+        print("✅가져오기 실패함. Status code: ${response.statusCode}");
         throw Exception('Failed to load portfolio data');
       }
     } catch (e) {

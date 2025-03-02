@@ -11,11 +11,11 @@ class StockInfo extends StatelessWidget {
       children: [
         Text(
           stock['name'],
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         Text(
           '${stock['price']}원',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
       ],
     );

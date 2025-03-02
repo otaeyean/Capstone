@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../investment/chart/chart_main.dart'; // ✅ 차트 import
 import './detail_widgets/stock_change_info.dart';
+import 'chart/chart_main.dart';
 import './detail_widgets/info.dart';
-import './detail_widgets/description.dart';
 import './news/news.dart';
 import './investment_main/mock_investment_screen.dart';
+import './detail_widgets/description.dart';
+import 'package:stockapp/server/investment/stock_description_server.dart'; // API 요청 추가
 
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
@@ -17,6 +18,29 @@ class StockDetailScreen extends StatefulWidget {
 
 class _StockDetailScreenState extends State<StockDetailScreen> {
   bool isFavorite = false;
+  bool isLoading = true;
+  String? companyDescription;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCompanyDescription();
+  }
+
+  Future<void> _fetchCompanyDescription() async {
+    try {
+      String response = await fetchCompanyDescription(widget.stock['stockName']);
+      setState(() {
+        companyDescription = response;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        companyDescription = null;
+        isLoading = false;
+      });
+    }
+  }
 
   void _toggleFavorite() {
     setState(() {
@@ -32,13 +56,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   Widget build(BuildContext context) {
     final stock = {
       'name': widget.stock['stockName'] ?? '이름 없음',
-      'price': (widget.stock['currentPrice'] ?? 0).toDouble(),
-      'changePrice': (widget.stock['changePrice'] ?? 0.0).toDouble(),
-      'changeRate': (widget.stock['changeRate'] ?? 0.0).toDouble(),
+      'price': widget.stock['currentPrice'].toString(),
+      'rise_percent': (widget.stock['changeRate'] ?? 0.0).toDouble(),
+      'fall_percent': (widget.stock['changeRate'] ?? 0.0).toDouble(),
       'quantity': widget.stock['tradeVolume'] ?? 0,
     };
 
     final String stockName = stock['name'];
+    final String stockCode = widget.stock['stockCode'] ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -60,24 +85,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      stock['name'],
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
+                    StockInfo(stock: stock),
                     SizedBox(height: 5),
-                    Text(
-                      "${stock['price']} 원",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      "어제보다 ${stock['changePrice']}원 (${stock['changeRate']}%)",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: stock['changeRate'] >= 0 ? Colors.red : Colors.blue,
-                      ),
-                    ),
+                    StockChangeInfo(stock: stock),
                   ],
                 ),
                 Row(
@@ -101,14 +111,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           Divider(),
           Expanded(
             child: DefaultTabController(
-              length: 3,
+              length: 4,
               child: Column(
                 children: [
                   TabBar(
                     tabs: [
                       Tab(text: '차트'),
-                      Tab(text: '뉴스'),
                       Tab(text: '모의 투자'),
+                      Tab(text: '뉴스'),
+                      Tab(text: '상세 정보'),
                     ],
                   ),
                   Expanded(
@@ -117,13 +128,20 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                         SingleChildScrollView(
                           child: Column(
                             children: [
-                              StockChartMain(stockCode: widget.stock['stockCode']),  // ✅ 차트 적용
-                              StockDescription(stock: stock),
+                               StockChartMain(stockCode: widget.stock['stockCode']),  // ✅ 차트 적용
+                             
                             ],
                           ),
                         ),
-                        NewsScreen(stockName: stockName),
                         MockInvestmentScreen(),
+                        NewsScreen(stockName: stockName),
+                        SingleChildScrollView(
+                          child: isLoading
+                              ? Center(child: CircularProgressIndicator())
+                              : companyDescription != null
+                                  ? StockDescription(stock: stock, description: companyDescription!)
+                                  : Container(),
+                        ),
                       ],
                     ),
                   ),

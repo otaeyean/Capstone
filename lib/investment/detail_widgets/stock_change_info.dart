@@ -16,8 +16,8 @@ class StockChangeInfo extends StatelessWidget {
       '어제보다 ${isPositive ? '+' : ''}${changeValue.toStringAsFixed(0)}원 '
       '(${isPositive ? risePercent.toStringAsFixed(2) : fallPercent.toStringAsFixed(2)}%)',
       style: TextStyle(
-        color: isPositive ? Colors.red : Colors.blue,
-        fontSize: 13,
+        color: Colors.black,
+        fontSize: 16,
       ),
     );
   }
