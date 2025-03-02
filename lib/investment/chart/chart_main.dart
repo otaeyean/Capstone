@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stockapp/investment/chart/stock_provider.dart';
+import 'stock_provider.dart';
 import 'stock_chart_view.dart';
-import 'stock_chart_controls.dart';
 
 class StockChartMain extends StatefulWidget {
   final String stockCode;
@@ -46,16 +45,6 @@ class _StockChartMainState extends State<StockChartMain> {
         return Column(
           children: [
             StockChartView(stockProvider: stockProvider),
-            StockChartControls(
-              selectedPeriod: _selectedPeriod,
-              onPeriodSelected: (period) {
-                setState(() {
-                  _selectedPeriod = period;
-                  Provider.of<StockProvider>(context, listen: false)
-                      .loadStockData(widget.stockCode, period: _selectedPeriod);
-                });
-              },
-            ),
           ],
         );
       },
