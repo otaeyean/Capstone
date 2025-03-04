@@ -16,18 +16,13 @@ class WelcomeBox extends StatelessWidget {
               color: Colors.black, // 검정색 배경
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(child: CircularProgressIndicator(color: Colors.white,)), // 로딩 Indicator
-              ],
-            ),
+            child: Center(child: CircularProgressIndicator(color: Colors.white)),
           );
         } else if (snapshot.hasError) {
           return _buildLoginRequiredBox(context); // 오류 발생 시 로그인 유도
         } else if (snapshot.hasData) {
-          final userId = snapshot.data;
-          return _buildUserInfoScreenButton(context, userId!);
+          final userId = snapshot.data!;
+          return _buildUserInfoScreenButton(context, userId);
         } else {
           return _buildLoginRequiredBox(context); // 데이터 없을 시 로그인 유도
         }
@@ -44,7 +39,6 @@ class WelcomeBox extends StatelessWidget {
   Widget _buildLoginRequiredBox(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // LoginPage로 이동
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => LoginPage()),
@@ -62,8 +56,10 @@ class WelcomeBox extends StatelessWidget {
             Text(
               '로그인을 진행해주세요!', // 변경된 텍스트
               style: TextStyle(
+                fontFamily: 'MinSans',
+                fontWeight: FontWeight.w900,
                 fontSize: 18,
-                color: Colors.white, // 텍스트 색상 흰색
+                color: Colors.white,
               ),
             ),
             SizedBox(height: 10),
@@ -71,25 +67,17 @@ class WelcomeBox extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: Colors.grey[800], // 프로필 사진 배경색을 회색으로 변경
-                  child: Icon(
-                    Icons.person,
-                    size: 30,
-                    color: Colors.white, // 프로필 아이콘 색상 변경
-                  ),
+                  backgroundColor: Colors.grey[800], // 프로필 사진 배경색 회색
+                  child: Icon(Icons.person, size: 30, color: Colors.white),
                 ),
                 SizedBox(width: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '총 자산: -',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    Text(
-                      '보유 주식: -',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    Text('총 자산: -',
+                        style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, color: Colors.white)),
+                    Text('보유 주식: -',
+                        style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, color: Colors.white)),
                   ],
                 ),
               ],
@@ -104,7 +92,6 @@ class WelcomeBox extends StatelessWidget {
   Widget _buildUserInfoScreenButton(BuildContext context, String userId) {
     return GestureDetector(
       onTap: () {
-        // UserInfoScreen으로 이동
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => UserInfoScreen()),
@@ -119,37 +106,28 @@ class WelcomeBox extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '반갑습니다! $userId 님!', // 변경된 텍스트
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 10),
             Row(
               children: [
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 30,
-                    color: Colors.grey,
-                  ),
+                  child: Icon(Icons.person, size: 30, color: Colors.grey),
                 ),
                 SizedBox(width: 20),
+
+                /// ✅ `da 님`을 프로필 옆으로 이동
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '총 자산: 5,000,000원',
-                      style: TextStyle(color: Colors.white),
+                      '$userId 님',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
-                    Text(
-                      '보유 주식: 500주',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    SizedBox(height: 5), // 간격 추가
+
+                    /// ✅ `총 자산` & `보유 주식`을 프로필 네임 아래로 이동
+                    Text('총 자산: 5,000,000원', style: TextStyle(color: Colors.white)),
+                    Text('보유 주식: 500주', style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ],

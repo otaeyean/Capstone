@@ -10,18 +10,19 @@ class StockRanking extends StatefulWidget {
 
 class _StockRankingState extends State<StockRanking> {
   String selectedMarket = "국내";
-  String selectedCategory = "상승률";
+  List<String> categories = ["상승률", "하락률", "거래량"];
+  int categoryIndex = 0;
   List<Map<String, dynamic>> stockData = [];
   List<Map<String, dynamic>> visibleRankings = [];
   bool isLoading = true;
   bool isError = false;
-  int startIndex = 0;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _loadStockData();
+    _startAutoSwitch();
   }
 
   @override
@@ -39,13 +40,14 @@ class _StockRankingState extends State<StockRanking> {
     });
 
     List<Map<String, dynamic>> stocks = [];
+    String category = categories[categoryIndex];
 
     try {
-      if (selectedCategory == "상승률") {
+      if (category == "상승률") {
         stocks = await fetchStockData("rise");
-      } else if (selectedCategory == "하락률") {
+      } else if (category == "하락률") {
         stocks = await fetchStockData("fall");
-      } else if (selectedCategory == "거래량") {
+      } else if (category == "거래량") {
         stocks = await fetchStockData("trade-volume");
       }
 
@@ -54,14 +56,8 @@ class _StockRankingState extends State<StockRanking> {
       if (mounted) {
         setState(() {
           stockData = stocks;
-          startIndex = 0;
           visibleRankings = stockData.sublist(0, 5);
           isLoading = false;
-        });
-
-        _timer?.cancel();
-        _timer = Timer.periodic(Duration(seconds: 3), (_) {
-          _updateRanking();
         });
       }
     } catch (e) {
@@ -74,12 +70,14 @@ class _StockRankingState extends State<StockRanking> {
     }
   }
 
-  void _updateRanking() {
-    if (!mounted || stockData.length < 10) return;
+  void _startAutoSwitch() {
+    _timer = Timer.periodic(Duration(seconds: 3), (_) {
+      if (!mounted) return;
 
-    setState(() {
-      startIndex = (startIndex + 1) % 6;
-      visibleRankings = stockData.sublist(startIndex, startIndex + 5);
+      setState(() {
+        categoryIndex = (categoryIndex + 1) % categories.length;
+      });
+      _loadStockData();
     });
   }
 
@@ -98,11 +96,7 @@ class _StockRankingState extends State<StockRanking> {
         SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildCategoryButton("상승률", Icons.trending_up),
-            _buildCategoryButton("하락률", Icons.trending_down),
-            _buildCategoryButton("거래량", Icons.swap_vert),
-          ],
+          children: categories.map((c) => _buildCategoryButton(c)).toList(),
         ),
         SizedBox(height: 10),
         if (isLoading)
@@ -115,51 +109,48 @@ class _StockRankingState extends State<StockRanking> {
             ),
           )
         else
-          AnimatedSwitcher(
-            duration: Duration(milliseconds: 800),
-            child: _buildStockList(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: AnimatedSwitcher(
+                duration: Duration(milliseconds: 800),
+                transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                child: _buildStockList(),
+              ),
+            ),
           ),
       ],
     );
   }
 
-Widget _buildCategoryButton(String category, IconData icon) {
-  bool isSelected = selectedCategory == category;
-  Color iconColor;
-  
-  if (isSelected) {
-    if (category == "상승률") {
-      iconColor = Colors.red;
-    } else if (category == "하락률") {
-      iconColor = Colors.blue;
-    } else {
-      iconColor = Colors.black;
-    }
-  } else {
-    iconColor = Colors.grey;
-  }
+  Widget _buildCategoryButton(String category) {
+    bool isSelected = categories[categoryIndex] == category;
+    Color iconColor = isSelected
+        ? (category == "상승률"
+            ? Colors.red
+            : category == "하락률"
+                ? Colors.blue
+                : Colors.orange)
+        : Colors.grey;
 
-  return GestureDetector(
-    onTap: () {
-      setState(() {
-        selectedCategory = category;
-        _loadStockData();
-      });
-    },
-    child: Column(
+    IconData iconData = category == "상승률"
+        ? Icons.trending_up
+        : category == "하락률"
+            ? Icons.trending_down
+            : Icons.autorenew;
+
+    return Column(
       children: [
-        Icon(icon, color: iconColor),
+        Icon(iconData, color: iconColor, size: 20),
         Text(
           category,
           style: TextStyle(
-            color: isSelected ? iconColor : Colors.grey,
+            color: iconColor,
             fontSize: 14,
           ),
         ),
       ],
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildMarketButton(String market) {
     bool isSelected = selectedMarket == market;
@@ -189,75 +180,57 @@ Widget _buildCategoryButton(String category, IconData icon) {
     );
   }
 
-Widget _buildStockList() {
-  return Column(
-    key: ValueKey(startIndex),
-    children: visibleRankings.map((stock) {
-      int rank = stockData.indexOf(stock) + 1;
-      bool isRise = selectedCategory == "상승률";
-      bool isFall = selectedCategory == "하락률";
+  Widget _buildStockList() {
+    return Column(
+      key: ValueKey(categoryIndex),
+      children: visibleRankings.map((stock) {
+        int rank = stockData.indexOf(stock) + 1;
+        double changeRate = stock['changeRate'];
+        bool isRising = changeRate >= 0;
+        Color textColor = isRising ? Colors.red : Colors.blue;
+        String arrow = isRising ? '▲' : '▼';
 
-      String valueText;
-      Color textColor;
-
-      if (isRise || isFall) {
-        double percent = stock['changeRate'] ?? 0.0;
-        String sign = isRise ? "+" : "-";
-        valueText = "$sign${percent.abs().toStringAsFixed(2)}%";
-        textColor = isRise ? Colors.red : Colors.blue;
-      } else {
-        int tradeVolume = stock['tradeVolume'] ?? 0;
-        valueText = "$tradeVolume";
-        textColor = Colors.black;
-      }
-
-      return GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => StockDetailScreen(stock: stock),
-            ),
-          );
-        },
-        child: Card(
-          margin: EdgeInsets.symmetric(vertical: 5),
-          elevation: 1,
-          color: const Color.fromARGB(255, 255, 255, 255),
-          child: ListTile(
-            title: Row(
-              children: [
-                Text(
-                  "$rank. ",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Expanded(
-                  child: Text(
-                    "${stock['stockName']}",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StockDetailScreen(stock: stock),
+              ),
+            );
+          },
+          child: Card(
+            color: Colors.white,
+            elevation: 2,
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "$rank. ${stock['stockName']}",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
-            ),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  "${stock['currentPrice'].toString()} 원",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  valueText,
-                  style: TextStyle(color: textColor),
-                ),
-              ],
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "${stock['currentPrice']} 원",
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor),
+                      ),
+                      Text(
+                        "$arrow ${changeRate.toStringAsFixed(2)}%",
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textColor),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    }).toList(),
-  );
-}
+        );
+      }).toList(),
+    );
+  }
 }

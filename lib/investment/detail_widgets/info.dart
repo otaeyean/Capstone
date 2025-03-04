@@ -15,7 +15,7 @@ class StockInfo extends StatelessWidget {
         ),
         Text(
           '${stock['price']}원',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ],
     );

@@ -31,7 +31,7 @@ class NewsService {
               });
             }
           } catch (e) {
-            print('❌ 뉴스 변환 오류: $e');
+            //print('❌ 뉴스 변환 오류: $e');
           }
         }
 

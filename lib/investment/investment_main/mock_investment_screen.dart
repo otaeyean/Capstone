@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
-import 'mock_buy.dart'; 
-import 'mock_sell.dart'; 
+import 'stock_buy.dart';
+import 'stock_sell.dart';
+import 'stock_history_list.dart';
 class MockInvestmentScreen extends StatefulWidget {
+  final String stockCode;
+
+  MockInvestmentScreen({required this.stockCode});
+
   @override
   _MockInvestmentScreenState createState() => _MockInvestmentScreenState();
 }
 
 class _MockInvestmentScreenState extends State<MockInvestmentScreen> {
-  int _selectedTabIndex = 0; 
+  int _selectedTabIndex = 0;
 
   void _onTabSelected(int index) {
     setState(() {
-      _selectedTabIndex = index; 
+      _selectedTabIndex = index;
     });
   }
 
@@ -64,13 +69,12 @@ class _MockInvestmentScreenState extends State<MockInvestmentScreen> {
               ),
             ],
           ),
-          
           Expanded(
             child: _selectedTabIndex == 0
-                ? MockBuyScreen() 
+                ? MockBuyScreen(stockCode: widget.stockCode) // stockCode 전달
                 : _selectedTabIndex == 1
-                    ? MockSellScreen() 
-                    : Center(child: Text('전체 주문 내역')), 
+                    ? MockSellScreen(stockCode: widget.stockCode) // 필요하면 전달
+                    : OrderHistoryScreen(stockCode: widget.stockCode),
           ),
         ],
       ),

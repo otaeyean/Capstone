@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import './detail_widgets/stock_change_info.dart';
 import 'chart/chart_main.dart';
-import './detail_widgets/info.dart';
 import './news/news.dart';
 import './investment_main/mock_investment_screen.dart';
 import './detail_widgets/description.dart';
 import 'package:stockapp/server/investment/stock_description_server.dart'; // API 요청 추가
+import 'package:stockapp/investment/detail_widgets/stock_info.dart'; // ✅ StockInfo 추가
+import 'package:stockapp/investment/detail_widgets/info.dart';
 
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
@@ -28,6 +29,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   Future<void> _fetchCompanyDescription() async {
+    if (widget.stock['stockName'] == null) return; // ✅ stockName이 없으면 요청 X
     try {
       String response = await fetchCompanyDescription(widget.stock['stockName']);
       setState(() {
@@ -85,9 +87,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    StockInfo(stock: stock),
                     SizedBox(height: 5),
-                    StockChangeInfo(stock: stock),
+                    StockInfo(stock: stock),
+                    StockChangeInfo(stock: stock), // ✅ StockInfo 제거
                   ],
                 ),
                 Row(
@@ -125,22 +127,20 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   Expanded(
                     child: TabBarView(
                       children: [
+                        StockChartMain(stockCode: widget.stock['stockCode']), // ✅ 차트 적용
+                        MockInvestmentScreen(stockCode: stockCode), // ✅ stockCode 전달
+                        NewsScreen(stockName: stockName),
                         SingleChildScrollView(
                           child: Column(
                             children: [
-                               StockChartMain(stockCode: widget.stock['stockCode']),  // ✅ 차트 적용
-                             
+                              isLoading
+                                  ? Center(child: CircularProgressIndicator())
+                                  : companyDescription != null
+                                      ? StockDescription(stock: stock, description: companyDescription!)
+                                      : Text('회사 소개 정보를 불러올 수 없습니다.', style: TextStyle(color: Colors.red)),
+                              if (stockCode.isNotEmpty) StockInfoDetail(stockCode: stockCode), // ✅ stockCode 체크
                             ],
                           ),
-                        ),
-                        MockInvestmentScreen(),
-                        NewsScreen(stockName: stockName),
-                        SingleChildScrollView(
-                          child: isLoading
-                              ? Center(child: CircularProgressIndicator())
-                              : companyDescription != null
-                                  ? StockDescription(stock: stock, description: companyDescription!)
-                                  : Container(),
                         ),
                       ],
                     ),

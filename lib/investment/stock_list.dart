@@ -74,7 +74,7 @@ class StockList extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       stock['stockName'] ?? '알 수 없음',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontFamily: 'MinSans', fontSize: 17, fontWeight: FontWeight.w900),
                     ),
                   ),
                   Expanded(
@@ -85,8 +85,9 @@ class StockList extends StatelessWidget {
                         Text(
                           priceText,
                           style: TextStyle(
+                            fontFamily: 'MinSans',
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
                             color: priceColor, // ✅ 거래량 선택 시 검은색, 상승/하락 선택 시 변동률 색상
                           ),
                         ),
@@ -100,12 +101,12 @@ class StockList extends StatelessWidget {
                       children: [
                         Text(
                           changeText,
-                          style: TextStyle(fontSize: 16, color: changeColor),
+                          style: TextStyle(fontFamily: 'MinSans', fontSize: 16, fontWeight: FontWeight.w900, color: changeColor),
                         ),
                         SizedBox(height: 2),
                         Text(
                           changePriceText,
-                          style: TextStyle(fontSize: 12, color: changeColor),
+                          style: TextStyle(fontFamily: 'MinSans', fontSize: 15, fontWeight: FontWeight.w900, color: changeColor),
                         ),
                       ],
                     ),
@@ -114,7 +115,7 @@ class StockList extends StatelessWidget {
                     flex: 1,
                     child: Text(
                       formatTradeVolume(stock['tradeVolume'] ?? 0),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.amber),
+                      style: TextStyle(fontFamily: 'MinSans',fontSize: 16, fontWeight: FontWeight.w400, color: Colors.amber),
                       textAlign: TextAlign.right,
                     ),
                   ),

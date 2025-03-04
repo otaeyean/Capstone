@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:stockapp/server/investment/news_server.dart'; // ✅ 뉴스 API 가져오기
+import 'package:stockapp/server/investment/news/news_server.dart';
+import 'package:stockapp/server/investment/news/news_prediction_server.dart';
+import './news_prediction.dart';
+import './news_loading_placeholder.dart'; // ✅ 로딩 애니메이션 추가
 
 class NewsScreen extends StatefulWidget {
   final String stockName;
@@ -13,68 +16,87 @@ class NewsScreen extends StatefulWidget {
 
 class _NewsScreenState extends State<NewsScreen> {
   late Future<List<Map<String, dynamic>>> futureNews;
+  String? predictionText;
 
   @override
   void initState() {
     super.initState();
-    futureNews = NewsService.fetchNews(widget.stockName); // ✅ 서비스에서 데이터 요청
+    futureNews = NewsService.fetchNews(widget.stockName);
   }
 
-void _launchURL(String url) async {
-  final Uri uri = Uri.parse(url);
-  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-    throw 'Could not launch $url';
+  void fetchPredictionData() async {
+    final result = await NewsPredictionService.fetchPrediction(widget.stockName);
+    setState(() {
+      predictionText = result;
+    });
   }
-}
+
+  void _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: futureNews,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+      builder: (context, newsSnapshot) {
+        if (newsSnapshot.connectionState == ConnectionState.waiting) {
+          return Padding(
+            padding: EdgeInsets.all(10),
+            child: NewsLoadingPlaceholder(), // ✅ 로딩 애니메이션 추가
+          );
+        } else if (newsSnapshot.hasError ||
+            !newsSnapshot.hasData ||
+            newsSnapshot.data!.isEmpty) {
           return Center(child: Text('관련 뉴스가 없습니다.'));
         }
 
-        List<Map<String, dynamic>> articles = snapshot.data!;
+        if (predictionText == null) {
+          fetchPredictionData();
+        }
 
-        return ListView.builder(
+        List<Map<String, dynamic>> articles = newsSnapshot.data!;
+
+        return ListView(
           padding: EdgeInsets.all(10),
-          itemCount: articles.length,
-          itemBuilder: (context, index) {
-            final article = articles[index];
+          children: [
+            if (predictionText != null)
+              NewsPredictionWidget(predictionText: predictionText!), // ✅ 예측 UI 적용
 
-            return Card(
-              color: Colors.white,
-              margin: EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                contentPadding: EdgeInsets.all(10),
-                leading: article['imageUrl'] != null && article['imageUrl'].isNotEmpty
-                    ? Image.network(
-                        article['imageUrl'],
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
+            ...articles.map((article) {
+              return Card(
+                color: Colors.white,
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  contentPadding: EdgeInsets.all(10),
+                  leading: article['imageUrl'] != null && article['imageUrl'].isNotEmpty
+                      ? Image.network(
+                          article['imageUrl'],
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            width: 60,
+                            height: 60,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Container(
                           width: 60,
                           height: 60,
                           color: Colors.white,
                         ),
-                      )
-                    : Container(
-                        width: 60,
-                        height: 60,
-                        color: Colors.white,
-                      ),
-                title: Text(article['title'], style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(article['summary'] ?? '',
-                    maxLines: 2, overflow: TextOverflow.ellipsis),
-                onTap: () => _launchURL(article['link']),
-              ),
-            );
-          },
+                  title: Text(article['title'], style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(article['summary'] ?? '',
+                      maxLines: 2, overflow: TextOverflow.ellipsis),
+                  onTap: () => _launchURL(article['link']),
+                ),
+              );
+            }).toList(),
+          ],
         );
       },
     );
