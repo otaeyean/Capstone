@@ -54,13 +54,15 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     List<dynamic> filteredOrders = _orderHistory.where((order) {
-      if (_selectedTabIndex == 0) return order["transactionType"] == "BUY";
-      if (_selectedTabIndex == 1) return order["transactionType"] == "SELL";
-      return true;
-    }).toList();
+    bool matchesStockCode = order["stockCode"] == widget.stockCode;
+    if (_selectedTabIndex == 0) return matchesStockCode && order["transactionType"] == "BUY";
+    if (_selectedTabIndex == 1) return matchesStockCode && order["transactionType"] == "SELL";
+    return matchesStockCode;
+  }).toList();
+
 
     return Scaffold(
-      backgroundColor: Colors.white, // 배경 흰색
+      backgroundColor: Colors.white, 
       body: Column(
         children: [
           Padding(
@@ -134,7 +136,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                         Text("${order['totalAmount']}원", style: TextStyle(color: Colors.black, fontSize: 14)),
                                       ],
                                     ),
-                                    Divider(color: Colors.grey), // 구분선 회색
+                                    Divider(color: Colors.grey), 
                                   ],
                                 ),
                               );

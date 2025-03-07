@@ -12,18 +12,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.3.0 # 최신 버전으로 업데이트
+  http: ^1.3.0 
   cupertino_icons: ^1.0.5
   intl: ^0.18.0
 
   shared_preferences: ^2.0.15
   url_launcher: ^6.1.14
   html: ^0.15.0  
-  syncfusion_flutter_charts: 20.4.54  # ✅ 안정적인 버전으로 변경
+  syncfusion_flutter_charts: 20.4.54 
   provider: ^6.1.2
   smooth_page_indicator: ^1.1.0
   shimmer: ^3.0.0
-
+  flutter_animate: ^4.2.0
+  
 dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test:
