@@ -62,7 +62,6 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
       print("구매 실패");
     }
   }
-
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -72,9 +71,9 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
       },
     );
 
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 2), () {
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); 
       }
     });
   }
@@ -87,6 +86,46 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
       });
     }
   }
+
+void _showConfirmationDialog() {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white, 
+        title: Row(
+          children: [
+            Text("매수 확인"),
+            SizedBox(width: 8), 
+            Icon(Icons.help_outline, color: Colors.black), 
+          ],
+        ),
+        content: Text(
+          "체결 가격: ${_price.toStringAsFixed(0)}원\n구매 수량: $confirmedQuantity주\n\n진행하시겠습니까?",
+          style: TextStyle(color: Colors.black), 
+        ),
+        actions: [
+           TextButton(
+            onPressed: () => Navigator.of(context).pop(), 
+            child: Text("취소",style: TextStyle(color: Colors.black), 
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); 
+              _buyStock(); 
+            },
+            child: Text(
+              "확인",
+              style: TextStyle(color: Colors.red), 
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +234,7 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
     return Container(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: confirmedQuantity != null ? _buyStock : null,
+        onPressed: confirmedQuantity != null ? _showConfirmationDialog : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           padding: EdgeInsets.symmetric(vertical: 16),

@@ -63,6 +63,44 @@ class _MockSellScreenState extends State<MockSellScreen> {
     }
   }
 
+void _showConfirmationDialog() {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white, 
+        title: Row(
+          children: [
+            Text("매도 확인"),
+            SizedBox(width: 8), 
+            Icon(Icons.help_outline, color: Colors.black), 
+          ],
+        ),
+        content: Text(
+          "체결 가격: ${_price.toStringAsFixed(0)}원\n매도 수량: $confirmedQuantity주\n\n진행하시겠습니까?",
+          style: TextStyle(color: Colors.black), 
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(), 
+            child: Text("취소",style: TextStyle(color: Colors.black), 
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); 
+              _sellStock();
+            },
+            child: Text("확인", style: TextStyle(color: Colors.blue), 
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -72,9 +110,9 @@ class _MockSellScreenState extends State<MockSellScreen> {
       },
     );
 
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 2), () {
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); 
       }
     });
   }
@@ -191,18 +229,18 @@ class _MockSellScreenState extends State<MockSellScreen> {
     );
   }
 
-  Widget _buildSellButton() {
-    return Container(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: confirmedQuantity != null ? _sellStock : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          padding: EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: Text('매도하기', style: TextStyle(color: Colors.white, fontSize: 18)),
+Widget _buildSellButton() {
+  return Container(
+    width: double.infinity,
+    child: ElevatedButton(
+      onPressed: confirmedQuantity != null ? _showConfirmationDialog : null, 
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.black,
+        padding: EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-    );
-  }
+      child: Text('매도하기', style: TextStyle(color: Colors.white, fontSize: 18)),
+    ),
+  );
+}
 }
