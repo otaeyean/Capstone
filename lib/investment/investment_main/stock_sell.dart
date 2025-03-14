@@ -18,7 +18,7 @@ class _MockSellScreenState extends State<MockSellScreen> {
   TextEditingController _quantityController = TextEditingController();
   final UserBalanceService _balanceService = UserBalanceService();
   double? _balance;
-  double _price = 10; // 가격을 10원으로 하드코딩
+  double _price = 10; // 가격을 10?�으�??�드코딩
   String? userId;
   int? confirmedQuantity;
 
@@ -52,14 +52,14 @@ class _MockSellScreenState extends State<MockSellScreen> {
 
     bool success = await StockServer.sellStock(userId!, widget.stockCode, confirmedQuantity!);
     if (success) {
-      print("매도 성공");
+      print("매도 ?�공");
       _loadBalance(userId!);
       setState(() {
         confirmedQuantity = null; 
       });
       _showSuccessDialog();
     } else {
-      print("매도 실패");
+      print("매도 ?�패");
     }
   }
 
@@ -72,13 +72,13 @@ void _showConfirmationDialog() {
         backgroundColor: Colors.white, 
         title: Row(
           children: [
-            Text("매도 확인"),
+            Text("매도 ?�인"),
             SizedBox(width: 8), 
             Icon(Icons.help_outline, color: Colors.black), 
           ],
         ),
         content: Text(
-          "체결 가격: ${_price.toStringAsFixed(0)}원\n매도 수량: $confirmedQuantity주\n\n진행하시겠습니까?",
+          "체결 가�? ${_price.toStringAsFixed(0)}??n매도 ?�량: $confirmedQuantity�?n\n진행?�시겠습?�까?",
           style: TextStyle(color: Colors.black), 
         ),
         actions: [
@@ -92,7 +92,7 @@ void _showConfirmationDialog() {
               Navigator.of(context).pop(); 
               _sellStock();
             },
-            child: Text("확인", style: TextStyle(color: Colors.blue), 
+            child: Text("?�인", style: TextStyle(color: Colors.blue), 
             ),
           ),
         ],
@@ -152,7 +152,7 @@ void _showConfirmationDialog() {
   Widget _buildBalanceWidget() {
     return _balance != null
         ? Text(
-            '보유 금액 ${_balance!.toStringAsFixed(0)}원',
+            '보유 금액 ${_balance!.toStringAsFixed(0)}??,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           )
         : Shimmer.fromColors(
@@ -173,10 +173,10 @@ void _showConfirmationDialog() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
+          Text('?�재가', style: TextStyle(color: Colors.black, fontSize: 16)),
           SizedBox(height: 8),
           Text(
-            '${_price.toStringAsFixed(0)}원',
+            '${_price.toStringAsFixed(0)}??,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
@@ -195,12 +195,12 @@ void _showConfirmationDialog() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('수량', style: TextStyle(color: Colors.black, fontSize: 16)),
+          Text('?�량', style: TextStyle(color: Colors.black, fontSize: 16)),
           SizedBox(height: 8),
           TextField(
             controller: _quantityController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(hintText: '몇 주 매도할까요?', border: InputBorder.none),
+            decoration: InputDecoration(hintText: '�?�?매도?�까??', border: InputBorder.none),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             onChanged: (value) => _confirmQuantity(),
           ),
@@ -221,9 +221,9 @@ void _showConfirmationDialog() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('매도 확인', style: TextStyle(fontFamily: 'MinSans', color: Colors.blue, fontSize: 20,fontWeight: FontWeight.w800)),
+          Text('매도 ?�인', style: TextStyle(fontFamily: 'MinSans', color: Colors.blue, fontSize: 20,fontWeight: FontWeight.w800)),
           SizedBox(height: 8),
-          Text('체결 가격: ${_price.toStringAsFixed(0)}원\n매도 수량: $confirmedQuantity주'),
+          Text('체결 가�? ${_price.toStringAsFixed(0)}??n매도 ?�량: $confirmedQuantity�?),
         ],
       ),
     );
@@ -239,8 +239,9 @@ Widget _buildSellButton() {
         padding: EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      child: Text('매도하기', style: TextStyle(color: Colors.white, fontSize: 18)),
+      child: Text('매도?�기', style: TextStyle(color: Colors.white, fontSize: 18)),
     ),
   );
 }
 }
+

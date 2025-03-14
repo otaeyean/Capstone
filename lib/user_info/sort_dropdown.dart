@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stockapp/data/user_stock_model.dart';  // 수정된 모델 파일 사용
+import 'package:stockapp/data/user_stock_model.dart';  // ?�정??모델 ?�일 ?�용
 class SortDropdown extends StatefulWidget {
   final List<UserStockModel> stocks;
   final Function(List<UserStockModel>) onSortChanged;
@@ -11,16 +11,16 @@ class SortDropdown extends StatefulWidget {
 }
 
 class _SortDropdownState extends State<SortDropdown> {
-  String selectedSort = "수익률 순";
+  String selectedSort = "?�익�???;
 
   void _sortStocks(List<UserStockModel> stocks) {
-    if (selectedSort == "수익률 순") {
-      stocks.sort((a, b) => b.profitRate.compareTo(a.profitRate)); // 내림차순으로 정렬
-    } else if (selectedSort == "보유 자산 순") {
-      stocks.sort((a, b) => b.totalValue.compareTo(a.totalValue)); // 내림차순으로 정렬
+    if (selectedSort == "?�익�???) {
+      stocks.sort((a, b) => b.profitRate.compareTo(a.profitRate)); // ?�림차순?�로 ?�렬
+    } else if (selectedSort == "보유 ?�산 ??) {
+      stocks.sort((a, b) => b.totalValue.compareTo(a.totalValue)); // ?�림차순?�로 ?�렬
     }
 
-    widget.onSortChanged(stocks); // 정렬된 리스트를 전달
+    widget.onSortChanged(stocks); // ?�렬??리스?��? ?�달
   }
 
   @override
@@ -28,7 +28,7 @@ class _SortDropdownState extends State<SortDropdown> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.grey[200],  // 배경 색상
+        color: Colors.grey[200],  // 배경 ?�상
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey, width: 1),
       ),
@@ -38,7 +38,7 @@ class _SortDropdownState extends State<SortDropdown> {
         isExpanded: true,
         dropdownColor: Colors.white,
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-        items: ["수익률 순", "보유 자산 순"].map((String value) {
+        items: ["?�익�???, "보유 ?�산 ??].map((String value) {
           return DropdownMenuItem<String>(
             value: value,
             child: Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -48,9 +48,10 @@ class _SortDropdownState extends State<SortDropdown> {
           setState(() {
             selectedSort = newValue!;
           });
-          _sortStocks(widget.stocks); // 정렬 함수 호출
+          _sortStocks(widget.stocks); // ?�렬 ?�수 ?�출
         },
       ),
     );
   }
 }
+

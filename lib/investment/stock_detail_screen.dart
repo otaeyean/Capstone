@@ -5,11 +5,10 @@ import 'chart/chart_main.dart';
 import './news/news.dart';
 import './investment_main/mock_investment_screen.dart';
 import './detail_widgets/description.dart';
-import 'package:stockapp/server/investment/stock_description_server.dart'; // API 요청 추가
-import 'package:stockapp/investment/detail_widgets/stock_info.dart'; // ✅ StockInfo 추가
+import 'package:stockapp/server/investment/stock_description_server.dart'; // API ?�청 추�?
+import 'package:stockapp/investment/detail_widgets/stock_info.dart'; // ??StockInfo 추�?
 import 'package:stockapp/investment/detail_widgets/info.dart';
-import 'package:http/http.dart' as http; // 추가: HTTP 요청을 위한 라이브러리
-
+import 'package:http/http.dart' as http; // 추�?: HTTP ?�청???�한 ?�이브러�?
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
 
@@ -33,7 +32,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   Future<void> _fetchCompanyDescription() async {
     if (widget.stock['stockName'] == null || widget.stock['stockName'] ==  'N/A') {
       setState(() {
-        companyDescription = '주식 이름이 없습니다.';
+        companyDescription = '주식 ?�름???�습?�다.';
         isLoading = false;
       });
       return;
@@ -47,22 +46,21 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       });
     } catch (e) {
       setState(() {
-        companyDescription = '회사 소개를 불러오는 데 실패했습니다.';
+        companyDescription = '?�사 ?�개�?불러?�는 ???�패?�습?�다.';
         isLoading = false;
       });
     }
   }
 
-  // 관심 추가/삭제 API 호출
+  // 관??추�?/??�� API ?�출
   Future<void> _toggleFavorite() async {
     setState(() {
       isFavorite = !isFavorite;
     });
 
-    // 저장된 userId (nickname) 가져오기
-    final userId = await AuthService.getUserId(); // AuthService에서 nickname을 가져옴
+    // ?�?�된 userId (nickname) 가?�오�?    final userId = await AuthService.getUserId(); // AuthService?�서 nickname??가?�옴
     if (userId == null) {
-      final snackBar = SnackBar(content: Text('로그인이 필요합니다.'));
+      final snackBar = SnackBar(content: Text('로그?�이 ?�요?�니??'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
     }
@@ -79,26 +77,26 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
       if (response.statusCode == 200) {
         final snackBar = SnackBar(
-          content: Text(isFavorite ? '관심 항목으로 등록되었습니다' : '관심 항목에서 삭제되었습니다'),
+          content: Text(isFavorite ? '관????��?�로 ?�록?�었?�니?? : '관????��?�서 ??��?�었?�니??),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       } else {
-        final errorMessage = 'API 요청 실패: ${response.statusCode}';
+        final errorMessage = 'API ?�청 ?�패: ${response.statusCode}';
         final snackBar = SnackBar(content: Text(errorMessage));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        print('API 호출 실패: $errorMessage');
+        print('API ?�출 ?�패: $errorMessage');
       }
     } catch (e) {
       setState(() {
-        isFavorite = !isFavorite; // API 실패 시 상태 되돌리기
+        isFavorite = !isFavorite; // API ?�패 ???�태 ?�돌리기
       });
-      final snackBar = SnackBar(content: Text('관심 항목 추가/삭제에 실패했습니다.'));
+      final snackBar = SnackBar(content: Text('관????�� 추�?/??��???�패?�습?�다.'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      print('에러 발생: $e');
+      print('?�러 발생: $e');
     }
   }
 
-  // ✅ 안전한 문자열 -> double 변환 함수
+  // ???�전??문자??-> double 변???�수
   double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is double) return value;
@@ -110,10 +108,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final stock = {
-      'name': widget.stock['stockName'] ?? '이름 없음',
+      'name': widget.stock['stockName'] ?? '?�름 ?�음',
       'price': widget.stock['currentPrice'].toString(),
-      'rise_percent': _parseDouble(widget.stock['changeRate']), // ✅ 수정
-      'fall_percent': _parseDouble(widget.stock['changeRate']), // ✅ 수정
+      'rise_percent': _parseDouble(widget.stock['changeRate']), // ???�정
+      'fall_percent': _parseDouble(widget.stock['changeRate']), // ???�정
       'quantity': widget.stock['tradeVolume'] ?? 0,
       'stockCode': widget.stock['stockCode'] ?? '',
     };
@@ -143,7 +141,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   children: [
                     SizedBox(height: 5),
                     StockInfo(stock: stock),
-                    StockChangeInfo(stock: stock), // ✅ StockInfo 제거
+                    StockChangeInfo(stock: stock), // ??StockInfo ?�거
                   ],
                 ),
                 Row(
@@ -153,7 +151,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                         isFavorite ? Icons.star : Icons.star_border,
                         color: isFavorite ? Colors.yellow : Colors.grey,
                       ),
-                      onPressed: _toggleFavorite, // 관심 추가/삭제 함수 호출
+                      onPressed: _toggleFavorite, // 관??추�?/??�� ?�수 ?�출
                     ),
                     Icon(
                       Icons.notifications_none,
@@ -173,25 +171,25 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   TabBar(
                     tabs: [
                       Tab(text: '차트'),
-                      Tab(text: '모의 투자'),
-                      Tab(text: '뉴스'),
-                      Tab(text: '상세 정보'),
+                      Tab(text: '모의 ?�자'),
+                      Tab(text: '?�스'),
+                      Tab(text: '?�세 ?�보'),
                     ],
                   ),
                   Expanded(
                     child: TabBarView(
                       children: [
-                        // 차트의 크기 동적으로 설정
+                        // 차트???�기 ?�적?�로 ?�정
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            double chartHeight = constraints.maxHeight * 0.5; // 화면 높이에 비례하여 차트 크기 설정
+                            double chartHeight = constraints.maxHeight * 0.5; // ?�면 ?�이??비�??�여 차트 ?�기 ?�정
                             return SizedBox(
                               height: chartHeight,
-                              child: StockChartMain(stockCode: widget.stock['stockCode']), // 차트 적용
+                              child: StockChartMain(stockCode: widget.stock['stockCode']), // 차트 ?�용
                             );
                           },
                         ),
-                        MockInvestmentScreen(stockCode: stockCode), // stockCode 전달
+                        MockInvestmentScreen(stockCode: stockCode), // stockCode ?�달
                         NewsScreen(stockName: stockName),
                         SingleChildScrollView(
                           child: Column(
@@ -200,7 +198,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                   ? Center(child: CircularProgressIndicator())
                                   : companyDescription != null
                                       ? StockDescription(stock: stock, description: companyDescription!)
-                                      : Text('회사 소개 정보를 불러올 수 없습니다.', style: TextStyle(color: Colors.red)),
+                                      : Text('?�사 ?�개 ?�보�?불러?????�습?�다.', style: TextStyle(color: Colors.red)),
                               if (stockCode.isNotEmpty) StockInfoDetail(stockCode: stockCode), // stockCode 체크
                             ],
                           ),
@@ -217,3 +215,4 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
   }
 }
+

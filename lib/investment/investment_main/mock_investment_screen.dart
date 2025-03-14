@@ -24,7 +24,7 @@ class _MockInvestmentScreenState extends State<MockInvestmentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(  // 전체 스크롤을 가능하게 만듦
+      body: SingleChildScrollView(  // ?�체 ?�크롤을 가?�하�?만듦
         child: Column(
           children: [
             Row(
@@ -61,7 +61,7 @@ class _MockInvestmentScreenState extends State<MockInvestmentScreen> {
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),
                     child: Text(
-                      '주문 내역',
+                      '주문 ?�역',
                       style: TextStyle(
                         color: _selectedTabIndex == 2 ? Colors.black : Colors.grey,
                         fontWeight: FontWeight.bold,
@@ -71,14 +71,13 @@ class _MockInvestmentScreenState extends State<MockInvestmentScreen> {
                 ),
               ],
             ),
-            // 탭에 맞는 화면을 표시하고, 스크롤이 가능하도록 함
-            Container(
-              // 탭에 맞는 화면 표시
-              height: MediaQuery.of(context).size.height * 0.7, // 화면 높이에 맞게 비율을 설정
+            // ??�� 맞는 ?�면???�시?�고, ?�크롤이 가?�하?�록 ??            Container(
+              // ??�� 맞는 ?�면 ?�시
+              height: MediaQuery.of(context).size.height * 0.7, // ?�면 ?�이??맞게 비율???�정
               child: _selectedTabIndex == 0
-                  ? MockBuyScreen(stockCode: widget.stockCode) // stockCode 전달
+                  ? MockBuyScreen(stockCode: widget.stockCode) // stockCode ?�달
                   : _selectedTabIndex == 1
-                      ? MockSellScreen(stockCode: widget.stockCode) // stockCode 전달
+                      ? MockSellScreen(stockCode: widget.stockCode) // stockCode ?�달
                       : OrderHistoryScreen(stockCode: widget.stockCode),
             ),
           ],
@@ -87,3 +86,4 @@ class _MockInvestmentScreenState extends State<MockInvestmentScreen> {
     );
   }
 }
+

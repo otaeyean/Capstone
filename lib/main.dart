@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';  // ✅ Provider 패키지 추가
+import 'package:provider/provider.dart';  // ??Provider ?�키지 추�?
 import 'home/home_screen.dart';
 import 'investment/investment_screen.dart';
 import 'chatbot/chatbot_main_screen.dart';
 import 'user_info/user_info_screen.dart';
-import 'investment/chart/stock_provider.dart';  // ✅ StockProvider import
+import 'investment/chart/stock_provider.dart';  // ??StockProvider import
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => StockProvider()),  // ✅ Provider 등록
+        ChangeNotifierProvider(create: (_) => StockProvider()),  // ??Provider ?�록
       ],
       child: MyApp(),
     ),
@@ -25,9 +25,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'NotoSans',
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.white, // 전체 배경을 흰색으로 설정
+        scaffoldBackgroundColor: Colors.white, // ?�체 배경???�색?�로 ?�정
       ),
-      debugShowCheckedModeBanner: false, // 디버그 배너 제거
+      debugShowCheckedModeBanner: false, // ?�버�?배너 ?�거
       home: MainScreen(),
     );
   }
@@ -39,19 +39,17 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0; // 현재 선택된 탭의 인덱스
-
-  // 각 페이지에 해당하는 위젯들을 준비합니다.
+  int _currentIndex = 0; // ?�재 ?�택????�� ?�덱??
+  // �??�이지???�당?�는 ?�젯?�을 준비합?�다.
   final List<Widget> _pages = [
-    HomeScreen(),      // 홈
-    InvestmentScreen(), // 모의 투자
+    HomeScreen(),      // ??    InvestmentScreen(), // 모의 ?�자
     ChatbotScreen(),   // 챗봇
-    UserInfoScreen(),   // 내 정보
+    UserInfoScreen(),   // ???�보
   ];
 
   void _onItemTapped(int index) {
     setState(() {
-      _currentIndex = index; // 탭 변경 시 현재 탭 인덱스 업데이트
+      _currentIndex = index; // ??변�????�재 ???�덱???�데?�트
     });
   }
 
@@ -59,24 +57,21 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex, // 현재 선택된 탭에 맞는 화면을 보여줌
-        children: _pages, // 각 페이지 위젯 리스트
-      ),
+        index: _currentIndex, // ?�재 ?�택????�� 맞는 ?�면??보여�?        children: _pages, // �??�이지 ?�젯 리스??      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex, // 현재 탭을 표시
-        onTap: _onItemTapped, // 탭을 누르면 호출되는 함수
-        backgroundColor: Colors.white, // 하단 바 색상 흰색
-        selectedItemColor: Colors.black, // 선택된 아이템 색상
-        unselectedItemColor: Colors.grey, // 선택되지 않은 아이템 색상 회색
-        elevation: 0, // 그림자 없애기
-        items: const <BottomNavigationBarItem>[
+        currentIndex: _currentIndex, // ?�재 ??�� ?�시
+        onTap: _onItemTapped, // ??�� ?�르�??�출?�는 ?�수
+        backgroundColor: Colors.white, // ?�단 �??�상 ?�색
+        selectedItemColor: Colors.black, // ?�택???�이???�상
+        unselectedItemColor: Colors.grey, // ?�택?��? ?��? ?�이???�상 ?�색
+        elevation: 0, // 그림???�애�?        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: '홈',
+            label: '??,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.monetization_on),
-            label: '모의투자',
+            label: '모의?�자',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
@@ -84,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: '내 정보',
+            label: '???�보',
           ),
         ],
       ),
@@ -92,3 +87,4 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+

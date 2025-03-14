@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stockapp/data/user_stock_model.dart';
-import 'package:stockapp/investment/stock_detail_screen.dart'; // 수정된 모델 파일 사용
+import 'package:stockapp/investment/stock_detail_screen.dart'; // ?�정??모델 ?�일 ?�용
 
 class MyStockList extends StatelessWidget {
   final List<UserStockModel> stocks;
@@ -10,7 +10,7 @@ class MyStockList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return stocks.isEmpty
-        ? Center(child: Text("보유한 주식이 없습니다."))
+        ? Center(child: Text("보유??주식???�습?�다."))
         : ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -18,41 +18,40 @@ class MyStockList extends StatelessWidget {
             itemBuilder: (context, index) {
               var stock = stocks[index];
 
-              // ✅ null 방어 로직 추가
-              String stockName = stock.name ?? '이름 없음';
+              // ??null 방어 로직 추�?
+              String stockName = stock.name ?? '?�름 ?�음';
               double stockPrice = stock.price ?? 0.0;
               double stockProfitRate = stock.profitRate ?? 0.0;
               int stockQuantity = stock.quantity ?? 0;
               double totalValue = stock.totalValue ?? 0.0;
-              String stockCode = stock.stockCode ?? ''; // ✅ 종목 코드 추가
+              String stockCode = stock.stockCode ?? ''; // ??종목 코드 추�?
 
               return Card(
                 margin: EdgeInsets.symmetric(vertical: 4),
-                color: Color(0xFFF9F7F0),  // 아이보리 색상
+                color: Color(0xFFF9F7F0),  // ?�이보리 ?�상
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 child: ListTile(
                   title: Text(stockName, style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('$stockQuantity 주 | 총 보유액: ${totalValue.toStringAsFixed(0)} 원'),
+                  subtitle: Text('$stockQuantity �?| �?보유?? ${totalValue.toStringAsFixed(0)} ??),
                   trailing: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('${stockPrice.toStringAsFixed(0)} 원', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('${stockPrice.toStringAsFixed(0)} ??, style: TextStyle(fontWeight: FontWeight.bold)),
                       Text('${stockProfitRate.toStringAsFixed(2)} %',
                           style: TextStyle(color: stockProfitRate >= 0 ? Colors.red : Colors.blue)),
                     ],
                   ),
                   onTap: () {
-                    // ✅ 데이터 전달 시 `null` 방어 및 String 변환 처리
+                    // ???�이???�달 ??`null` 방어 �?String 변??처리
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => StockDetailScreen(
                           stock: {
-                            'stockName': stockName,  // ✅ `null` 방어 기본값
-                            'currentPrice': stockPrice.toString(),  // ✅ `double` → `String`
-                            'changeRate': stockProfitRate.toString(),  // ✅ `double` → `String`
-                            'tradeVolume': stockQuantity.toString(),  // ✅ `int` → `String`
-                            'stockCode': stockCode,  // ✅ 종목 코드 추가
+                            'stockName': stockName,  // ??`null` 방어 기본�?                            'currentPrice': stockPrice.toString(),  // ??`double` ??`String`
+                            'changeRate': stockProfitRate.toString(),  // ??`double` ??`String`
+                            'tradeVolume': stockQuantity.toString(),  // ??`int` ??`String`
+                            'stockCode': stockCode,  // ??종목 코드 추�?
                           },
                         ),
                       ),
@@ -64,3 +63,4 @@ class MyStockList extends StatelessWidget {
           );
   }
 }
+

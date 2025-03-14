@@ -6,7 +6,7 @@ class WatchListController {
 
   WatchListController({required this.baseUrl});
 
-  // 관심 목록 추가
+  // 관??목록 추�?
   Future<void> addStockToWatchlist(String userId, String stockCode) async {
     final url = Uri.parse('$baseUrl/watchlist/add');
     final response = await http.post(
@@ -22,7 +22,7 @@ class WatchListController {
     }
   }
 
-  // 관심 목록에서 삭제
+  // 관??목록?�서 ??��
   Future<void> removeStockFromWatchlist(String userId, String stockCode) async {
     final url = Uri.parse('$baseUrl/watchlist/remove');
     final response = await http.post(
@@ -38,7 +38,7 @@ class WatchListController {
     }
   }
 
-  // 관심 목록 조회
+  // 관??목록 조회
   Future<List<Map<String, dynamic>>> getWatchlist(String userId) async {
     final url = Uri.parse('http://withyou.me:8080/watchlist/$userId');
     final response = await http.get(url);
@@ -51,3 +51,4 @@ class WatchListController {
     }
   }
 }
+

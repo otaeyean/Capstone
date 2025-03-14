@@ -19,7 +19,7 @@ class UserStockModel {
     required this.quantity,
   });
 
-  // JSON 데이터를 객체로 변환
+  // JSON ?�이?��? 객체�?변?�dd
   factory UserStockModel.fromJson(Map<String, dynamic> json) {
     return UserStockModel(
       stockCode: json['stockCode'],
@@ -33,3 +33,4 @@ class UserStockModel {
     );
   }
 }
+
