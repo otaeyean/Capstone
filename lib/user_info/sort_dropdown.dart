@@ -1,30 +1,57 @@
 import 'package:flutter/material.dart';
-
+import 'package:stockapp/data/user_stock_model.dart';  // ?˜ì •??ëª¨ë¸ ?Œì¼ ?¬ìš©
 class SortDropdown extends StatefulWidget {
+  final List<UserStockModel> stocks;
+  final Function(List<UserStockModel>) onSortChanged;
+
+  SortDropdown({required this.stocks, required this.onSortChanged});
+
   @override
   _SortDropdownState createState() => _SortDropdownState();
 }
 
 class _SortDropdownState extends State<SortDropdown> {
-  String selectedSort = "ìˆ˜ìµë¥  ìˆœ";
+  String selectedSort = "?˜ìµë¥???;
+
+  void _sortStocks(List<UserStockModel> stocks) {
+    if (selectedSort == "?˜ìµë¥???) {
+      stocks.sort((a, b) => b.profitRate.compareTo(a.profitRate)); // ?´ë¦¼ì°¨ìˆœ?¼ë¡œ ?•ë ¬
+    } else if (selectedSort == "ë³´ìœ  ?ì‚° ??) {
+      stocks.sort((a, b) => b.totalValue.compareTo(a.totalValue)); // ?´ë¦¼ì°¨ìˆœ?¼ë¡œ ?•ë ¬
+    }
+
+    widget.onSortChanged(stocks); // ?•ë ¬??ë¦¬ìŠ¤?¸ë? ?„ë‹¬
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      value: selectedSort,
-      icon: Icon(Icons.arrow_drop_down),
-      isExpanded: true,
-      items: ["ìˆ˜ìµë¥  ìˆœ", "ë³´ìœ  ìì‚° ìˆœ"].map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        );
-      }).toList(),
-      onChanged: (newValue) {
-        setState(() {
-          selectedSort = newValue!;
-        });
-      },
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],  // ë°°ê²½ ?‰ìƒ
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey, width: 1),
+      ),
+      child: DropdownButton<String>(
+        value: selectedSort,
+        icon: Icon(Icons.arrow_drop_down, color: Colors.black),
+        isExpanded: true,
+        dropdownColor: Colors.white,
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        items: ["?˜ìµë¥???, "ë³´ìœ  ?ì‚° ??].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          );
+        }).toList(),
+        onChanged: (newValue) {
+          setState(() {
+            selectedSort = newValue!;
+          });
+          _sortStocks(widget.stocks); // ?•ë ¬ ?¨ìˆ˜ ?¸ì¶œ
+        },
+      ),
     );
   }
 }
+

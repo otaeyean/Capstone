@@ -42,12 +42,15 @@ class _StockChartMainState extends State<StockChartMain> {
           return const Center(child: Text("No stock data available"));
         }
 
-        return Column(
-          children: [
-            StockChartView(stockProvider: stockProvider),
-          ],
+        return SingleChildScrollView( // ?¸ë¡œ ?¤í¬ë¡¤ì„ ê°€?¥í•˜ê²?ë§Œë“¦
+          child: Column(
+            children: [
+              StockChartView(stockProvider: stockProvider, stockCode: widget.stockCode), // stockCode ?„ë‹¬
+            ],
+          ),
         );
       },
     );
   }
 }
+
