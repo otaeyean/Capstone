@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'stock_detail_screen.dart'; // ???�세 ?�면 import
+import 'stock_detail_screen.dart'; // ✅ 상세 화면 import
 
 class StockList extends StatelessWidget {
   final List<Map<String, dynamic>> stocks;
-  final bool isTradeVolumeSelected; // ??거래??버튼???�택?�었?��? ?��? 추�?
+  final bool isTradeVolumeSelected; // ✅ 거래량 버튼이 선택되었는지 여부 추가
 
   const StockList({required this.stocks, required this.isTradeVolumeSelected});
 
@@ -25,16 +25,16 @@ class StockList extends StatelessWidget {
       itemBuilder: (context, index) {
         var stock = stocks[index];
 
-        // ??관??목록�??�반 목록???�이???�드 ?�합
+        // ✅ 관심 목록과 일반 목록의 데이터 필드 통합
         double percent = (stock['stockChangePercent'] ?? stock['changeRate'] ?? 0).toDouble();
         double changePrice = (stock['stockChange'] ?? stock['changePrice'] ?? 0).toDouble();
         double currentPrice = (stock['stockCurrentPrice'] ?? stock['currentPrice'] ?? 0).toDouble();
         int tradeVolume = (stock['acml_vol'] ?? stock['tradeVolume'] ?? 0).toInt();
 
-        // ???�외 주식 ?��? ?�인
+        // ✅ 해외 주식 여부 확인
         bool isOverseas = stock.containsKey("excd");
 
-        // ???�외 주식????changePrice 부??조정
+        // ✅ 해외 주식일 때 changePrice 부호 조정
         if (isOverseas && percent < 0) {
           changePrice = -changePrice;
         }
@@ -47,13 +47,13 @@ class StockList extends StatelessWidget {
             ? "+${changePrice.toStringAsFixed(2)}"
             : changePrice.toStringAsFixed(2);
 
-        Color priceColor = isTradeVolumeSelected ? Colors.black : changeColor; // ??거래???�택 ??검?�???��?
+        Color priceColor = isTradeVolumeSelected ? Colors.black : changeColor; // ✅ 거래량 선택 시 검은색 유지
 
         String priceText;
         if (isOverseas) {
-          priceText = "\$${currentPrice.toStringAsFixed(4)}"; // ???�외 주식 ?�수???��?
+          priceText = "\$${currentPrice.toStringAsFixed(4)}"; // ✅ 해외 주식 소수점 유지
         } else {
-          priceText = "${formatKoreanPrice(currentPrice)} ??; // ??�?�� 주식 ?�표 추�?
+          priceText = "${formatKoreanPrice(currentPrice)} 원"; // ✅ 국내 주식 쉼표 추가
         }
 
         return GestureDetector(
@@ -61,7 +61,7 @@ class StockList extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => StockDetailScreen(stock: stock), // ???�릭 ???�세 ?�면?�로 ?�동
+                builder: (context) => StockDetailScreen(stock: stock), // ✅ 클릭 시 상세 화면으로 이동
               ),
             );
           },
@@ -79,7 +79,7 @@ class StockList extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      stock['stockName'] ?? '?????�음',
+                      stock['stockName'] ?? '알 수 없음',
                       style: TextStyle(
                           fontFamily: 'MinSans',
                           fontSize: 17,
@@ -97,7 +97,7 @@ class StockList extends StatelessWidget {
                             fontFamily: 'MinSans',
                             fontSize: 16,
                             fontWeight: FontWeight.w900,
-                            color: priceColor, // ??거래???�택 ??검?�?? ?�승/?�락 ?�택 ??변?�률 ?�상
+                            color: priceColor, // ✅ 거래량 선택 시 검은색, 상승/하락 선택 시 변동률 색상
                           ),
                         ),
                       ],
@@ -149,4 +149,3 @@ class StockList extends StatelessWidget {
     );
   }
 }
-

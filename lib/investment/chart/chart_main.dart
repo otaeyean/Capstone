@@ -42,10 +42,10 @@ class _StockChartMainState extends State<StockChartMain> {
           return const Center(child: Text("No stock data available"));
         }
 
-        return SingleChildScrollView( // ?�로 ?�크롤을 가?�하�?만듦
+        return SingleChildScrollView( // 세로 스크롤을 가능하게 만듦
           child: Column(
             children: [
-              StockChartView(stockProvider: stockProvider, stockCode: widget.stockCode), // stockCode ?�달
+              StockChartView(stockProvider: stockProvider, stockCode: widget.stockCode), // stockCode 전달
             ],
           ),
         );
@@ -53,4 +53,3 @@ class _StockChartMainState extends State<StockChartMain> {
     );
   }
 }
-

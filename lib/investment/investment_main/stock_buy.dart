@@ -18,7 +18,7 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
   TextEditingController _quantityController = TextEditingController();
   final UserBalanceService _balanceService = UserBalanceService();
   double? _balance;
-  double _price = 10; // 가격을 10?�으�??�드코딩
+  double _price = 10; // 가격을 10원으로 하드코딩
   String? userId;
   int? confirmedQuantity;
 
@@ -52,14 +52,14 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
 
     bool success = await StockServer.buyStock(userId!, widget.stockCode, confirmedQuantity!);
     if (success) {
-      print("구매 ?�공");
+      print("구매 성공");
       _loadBalance(userId!);
       setState(() {
         confirmedQuantity = null; 
       });
       _showSuccessDialog();
     } else {
-      print("구매 ?�패");
+      print("구매 실패");
     }
   }
   void _showSuccessDialog() {
@@ -96,13 +96,13 @@ void _showConfirmationDialog() {
         backgroundColor: Colors.white, 
         title: Row(
           children: [
-            Text("매수 ?�인"),
+            Text("매수 확인"),
             SizedBox(width: 8), 
             Icon(Icons.help_outline, color: Colors.black), 
           ],
         ),
         content: Text(
-          "체결 가�? ${_price.toStringAsFixed(0)}??n구매 ?�량: $confirmedQuantity�?n\n진행?�시겠습?�까?",
+          "체결 가격: ${_price.toStringAsFixed(0)}원\n구매 수량: $confirmedQuantity주\n\n진행하시겠습니까?",
           style: TextStyle(color: Colors.black), 
         ),
         actions: [
@@ -117,7 +117,7 @@ void _showConfirmationDialog() {
               _buyStock(); 
             },
             child: Text(
-              "?�인",
+              "확인",
               style: TextStyle(color: Colors.red), 
             ),
           ),
@@ -153,7 +153,7 @@ void _showConfirmationDialog() {
   Widget _buildBalanceWidget() {
     return _balance != null
         ? Text(
-            '보유 금액 ${_balance!.toStringAsFixed(0)}??,
+            '보유 금액 ${_balance!.toStringAsFixed(0)}원',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           )
         : Shimmer.fromColors(
@@ -174,10 +174,10 @@ void _showConfirmationDialog() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('?�재가', style: TextStyle(color: Colors.black, fontSize: 16)),
+          Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
           SizedBox(height: 8),
           Text(
-            '${_price.toStringAsFixed(0)}??,
+            '${_price.toStringAsFixed(0)}원',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
@@ -196,12 +196,12 @@ void _showConfirmationDialog() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('?�량', style: TextStyle(color: Colors.black, fontSize: 16)),
+          Text('수량', style: TextStyle(color: Colors.black, fontSize: 16)),
           SizedBox(height: 8),
           TextField(
             controller: _quantityController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(hintText: '�?�?매수?�까??', border: InputBorder.none),
+            decoration: InputDecoration(hintText: '몇 주 매수할까요?', border: InputBorder.none),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             onChanged: (value) => _confirmQuantity(),
           ),
@@ -222,9 +222,9 @@ void _showConfirmationDialog() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('매수 ?�인', style: TextStyle(fontFamily: 'MinSans', color: Colors.red, fontSize: 20,fontWeight: FontWeight.w800)),
+          Text('매수 확인', style: TextStyle(fontFamily: 'MinSans', color: Colors.red, fontSize: 20,fontWeight: FontWeight.w800)),
           SizedBox(height: 8),
-          Text('체결 가�? ${_price.toStringAsFixed(0)}??n구매 ?�량: $confirmedQuantity�?),
+          Text('체결 가격: ${_price.toStringAsFixed(0)}원\n구매 수량: $confirmedQuantity주'),
         ],
       ),
     );
@@ -240,9 +240,8 @@ void _showConfirmationDialog() {
           padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: Text('매수?�기', style: TextStyle(color: Colors.white, fontSize: 18)),
+        child: Text('매수하기', style: TextStyle(color: Colors.white, fontSize: 18)),
       ),
     );
   }
 }
-

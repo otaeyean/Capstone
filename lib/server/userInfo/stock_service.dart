@@ -14,8 +14,8 @@ class StockService {
       final response = await http.get(url, headers: {'accept': '*/*'});
 
       if (response.statusCode == 200) {
-        final data = utf8.decode(response.bodyBytes);  // ?‘ë‹µ??UTF-8ë¡??”ì½”??
-        final decodedData = jsonDecode(data);  // JSON?¼ë¡œ ?”ì½”??
+        final data = utf8.decode(response.bodyBytes);  // ?ï¿½ë‹µ??UTF-8ï¿½??ï¿½ì½”??
+        final decodedData = jsonDecode(data);  // JSON?ï¿½ë¡œ ?ï¿½ì½”??
         List<UserStockModel> stocks = (decodedData['stocks'] as List)
             .map((stock) => UserStockModel.fromJson(stock))
             .toList();
