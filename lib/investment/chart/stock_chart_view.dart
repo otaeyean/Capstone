@@ -8,7 +8,7 @@ import 'stock_chart_controls.dart';
 
 class StockChartView extends StatefulWidget {
   final StockProvider stockProvider;
-  final String stockCode;  // 종목 코드 추�?
+  final String stockCode;  // 종목 코드 추가
 
   const StockChartView({Key? key, required this.stockProvider, required this.stockCode}) : super(key: key);
 
@@ -37,7 +37,7 @@ class _StockChartViewState extends State<StockChartView> {
   @override
   void initState() {
     super.initState();
-    // 초기 차트 ?�이??로드
+    // 초기 차트 데이터 로드
     widget.stockProvider.loadStockData(widget.stockCode, period: widget.stockProvider.selectedPeriod);
   }
 
@@ -57,8 +57,9 @@ class _StockChartViewState extends State<StockChartView> {
         double maxVolume = filteredData.map((s) => s.volume.toDouble()).reduce((a, b) => a > b ? a : b);
 
         bool isMinuteChart = widget.stockProvider.selectedPeriod == "1m";
-        String dateFormatPattern = "MM-dd";  // 기본�?        if (isMinuteChart) {
-          dateFormatPattern = 'HH:mm';  // ??1분봉??경우 "HH:mm" ?�식 ?�용
+        String dateFormatPattern = "MM-dd";  // 기본값
+        if (isMinuteChart) {
+          dateFormatPattern = 'HH:mm';  // ✅ 1분봉일 경우 "HH:mm" 형식 적용
         } else if (widget.stockProvider.selectedPeriod == "M") {
           dateFormatPattern = 'yyyy-MM';
         }
@@ -74,13 +75,13 @@ class _StockChartViewState extends State<StockChartView> {
         return Column(
           children: [
             Container(
-              height: 60, // ?�색 배경 ?�이
-              color: Colors.grey[100], // ???�색 배경 추�?
-              child: Center( // ??버튼??중앙??배치
+              height: 60, // 회색 배경 높이
+              color: Colors.grey[100], // ✅ 회색 배경 추가
+              child: Center( // ✅ 버튼을 중앙에 배치
                 child: StockChartControls(
                   selectedPeriod: widget.stockProvider.selectedPeriod,
                   onPeriodSelected: (period) {
-                    // ?�용?��? 주기�??�택?�면 ?�당 주식 ?�이?��? 로드
+                    // 사용자가 주기를 선택하면 해당 주식 데이터를 로드
                     widget.stockProvider.loadStockData(widget.stockCode, period: period);
                   },
                   onZoom: _updateZoom,
@@ -162,10 +163,10 @@ class _StockChartViewState extends State<StockChartView> {
                       ),
 
 
-           // ??거래??차트 ?�래 ?�백???�색?�로 채우�??�해 Container 추�?
+           // ✅ 거래량 차트 아래 여백을 회색으로 채우기 위해 Container 추가
 Column(
   children: [
-    // ??거래??차트
+    // ✅ 거래량 차트
     SizedBox(
       width: chartWidth,
       height: 100 * _zoomLevel,
@@ -207,12 +208,12 @@ Column(
       ),
     ),
 
-    // ??거래??차트 ?�래???�색 ?�백 추�?
+    // ✅ 거래량 차트 아래에 회색 여백 추가
    SizedBox(
-  height: MediaQuery.of(context).size.height * 0.1, // ?�면 ?�이 20% 차�?
+  height: MediaQuery.of(context).size.height * 0.1, // 화면 높이 20% 차지
   width: chartWidth,
   child: Container(
-    color: Colors.grey[100],  // ??바닥 ?�까지 ?�색 ?�용
+    color: Colors.grey[100],  // ✅ 바닥 끝까지 회색 적용
   ),
 ),
 
@@ -223,7 +224,7 @@ Column(
           ),
         ),
 
-        // ???�동?�균??범�? (버튼 ?�인?�로 ?�동)
+        // ✅ 이동평균선 범례 (버튼 라인으로 이동)
         Positioned(
           top: 10,
           left: 10,
@@ -255,4 +256,3 @@ Column(
     );
   }
 }
-
