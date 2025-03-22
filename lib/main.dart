@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'WithYou',
       theme: ThemeData(
+        fontFamily: 'NotoSans',
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white, // 전체 배경을 흰색으로 설정
       ),

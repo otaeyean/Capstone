@@ -9,10 +9,12 @@ class StockList extends StatelessWidget {
   const StockList({required this.stocks, required this.isTradeVolumeSelected});
 
   String formatTradeVolume(int volume) {
-    return volume >= 1000000 ? "${(volume / 1000000).toStringAsFixed(1)}M" : NumberFormat("#,###").format(volume);
+    return volume >= 1000000
+        ? "${(volume / 1000000).toStringAsFixed(1)}M"
+        : NumberFormat("#,###").format(volume);
   }
 
-  String formatKoreanPrice(double price) { // ✅ 가격도 double 변환
+  String formatKoreanPrice(double price) {
     return NumberFormat("#,###").format(price);
   }
 
@@ -23,11 +25,13 @@ class StockList extends StatelessWidget {
       itemBuilder: (context, index) {
         var stock = stocks[index];
 
-        // ✅ `double` 변환하여 오류 방지
-        double percent = (stock['changeRate'] ?? 0).toDouble();
-        double changePrice = (stock['changePrice'] ?? 0).toDouble();
-        double currentPrice = (stock['currentPrice'] ?? 0).toDouble();
+        // ✅ 관심 목록과 일반 목록의 데이터 필드 통합
+        double percent = (stock['stockChangePercent'] ?? stock['changeRate'] ?? 0).toDouble();
+        double changePrice = (stock['stockChange'] ?? stock['changePrice'] ?? 0).toDouble();
+        double currentPrice = (stock['stockCurrentPrice'] ?? stock['currentPrice'] ?? 0).toDouble();
+        int tradeVolume = (stock['acml_vol'] ?? stock['tradeVolume'] ?? 0).toInt();
 
+        // ✅ 해외 주식 여부 확인
         bool isOverseas = stock.containsKey("excd");
 
         // ✅ 해외 주식일 때 changePrice 부호 조정
@@ -35,7 +39,9 @@ class StockList extends StatelessWidget {
           changePrice = -changePrice;
         }
 
-        String changeText = percent >= 0 ? "+${percent.toStringAsFixed(2)}%" : "${percent.toStringAsFixed(2)}%";
+        String changeText = percent >= 0
+            ? "+${percent.toStringAsFixed(2)}%"
+            : "${percent.toStringAsFixed(2)}%";
         Color changeColor = percent >= 0 ? Colors.red : Colors.blue;
         String changePriceText = changePrice >= 0
             ? "+${changePrice.toStringAsFixed(2)}"
@@ -74,7 +80,10 @@ class StockList extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       stock['stockName'] ?? '알 수 없음',
-                      style: TextStyle(fontFamily: 'MinSans', fontSize: 17, fontWeight: FontWeight.w900),
+                      style: TextStyle(
+                          fontFamily: 'MinSans',
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900),
                     ),
                   ),
                   Expanded(
@@ -101,12 +110,20 @@ class StockList extends StatelessWidget {
                       children: [
                         Text(
                           changeText,
-                          style: TextStyle(fontFamily: 'MinSans', fontSize: 16, fontWeight: FontWeight.w900, color: changeColor),
+                          style: TextStyle(
+                              fontFamily: 'MinSans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: changeColor),
                         ),
                         SizedBox(height: 2),
                         Text(
                           changePriceText,
-                          style: TextStyle(fontFamily: 'MinSans', fontSize: 15, fontWeight: FontWeight.w900, color: changeColor),
+                          style: TextStyle(
+                              fontFamily: 'MinSans',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: changeColor),
                         ),
                       ],
                     ),
@@ -114,8 +131,12 @@ class StockList extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: Text(
-                      formatTradeVolume(stock['tradeVolume'] ?? 0),
-                      style: TextStyle(fontFamily: 'MinSans',fontSize: 16, fontWeight: FontWeight.w400, color: Colors.amber),
+                      formatTradeVolume(tradeVolume),
+                      style: TextStyle(
+                          fontFamily: 'MinSans',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.amber),
                       textAlign: TextAlign.right,
                     ),
                   ),
