@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:stockapp/home/searchable_stock_list.dart';
 import 'package:stockapp/investment/sortable_header.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import 'package:stockapp/stock_api_service.dart';
@@ -17,17 +18,19 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   List<Map<String, dynamic>> stocks = [];
   List<Map<String, dynamic>> allStocks = [];
   List<Map<String, dynamic>> watchlistStocks = []; // ✅ 관심 목록 저장
-  List<Map<String, dynamic>> searchResults = []; // ✅ 검색 결과 따로 저장
   bool isDropdownVisible = false;
   bool isLoading = true;
+  bool isSearchLoading = false; // 검색 데이터 로딩 상태
   String selectedSort = "상승률순";
   String selectedCategory = "전체";
-  TextEditingController _searchController = TextEditingController();
+
+  List<Map<String, dynamic>> searchStockList = []; // 새로 받아올 주식 리스트 검색용
 
   @override
   void initState() {
     super.initState();
-    _loadStockData();
+    _loadStockData(); // 기본 주식 데이터 로드
+    _loadSearchStockData();
   }
 
   Future<void> _loadStockData() async {
@@ -40,7 +43,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     List<Map<String, dynamic>> watchlistData = [];
 
     try {
-       final userId = await AuthService.getUserId(); // ✅ 사용자 ID 가져오기
+      final userId = await AuthService.getUserId(); // ✅ 사용자 ID 가져오기
       if (selectedSort == "상승률순") {
         stockData = await fetchStockData("rise");
         overseasData = await fetchStockData("rise/overseas", period: "DAILY");
@@ -52,7 +55,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
         overseasData = await fetchStockData("trade-volume/overseas");
       }
 
-// ✅ 관심 목록 가져오기
+      // ✅ 관심 목록 가져오기
       if (userId != null) {
         watchlistData = await fetchWatchlistData(userId);
       }
@@ -72,9 +75,66 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     }
   }
 
+  // 관심 목록 가져오는 부분 (UTF-8 디코딩 적용)
+  Future<List<Map<String, dynamic>>> fetchWatchlistData(String userId) async {
+    final url = Uri.parse('http://withyou.me:8080/watchlist/$userId');
+    final response = await http.get(url, headers: {'accept': '*/*'});
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(utf8.decode(response.bodyBytes)); // ✅ UTF-8 디코딩 적용
+
+      // 디버깅용: API에서 받은 데이터 출력
+      print("🔹 관심 목록 데이터 수신: ${json.encode(data)}");
+
+      return data.map((item) {
+        return {
+          "stockCode": item["stockCode"] ?? "",
+          "stockName": item["stockName"] ?? "이름 없음",
+          "stockCurrentPrice": _toDouble(item["stockCurrentPrice"]),
+          "stockChange": _toDouble(item["stockChange"]),
+          "stockChangePercent": _toDouble(item["stockChangePercent"]),
+          "acml_vol": _toInt(item["acml_vol"]),
+          "acml_tr_pbmn": _toDouble(item["acml_tr_pbmn"]),
+        };
+      }).toList();
+    } else {
+      print("❌ 관심 목록 불러오기 실패: ${response.statusCode}");
+      return [];
+    }
+  }
+
+  // 주식 리스트 가져오는 부분 (UTF-8 디코딩 적용)
+  Future<void> _loadSearchStockData() async {
+    setState(() {
+      isSearchLoading = true; // 검색 데이터 로딩 시작
+    });
+
+    try {
+      final response = await http.get(Uri.parse('http://withyou.me:8080/stock-list'));
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(utf8.decode(response.bodyBytes)); // ✅ UTF-8 디코딩 적용
+        setState(() {
+          searchStockList = data.map((item) => {
+            'stockCode': item['stockCode'],
+            'stockName': item['stockName'],
+          }).toList();
+          isSearchLoading = false; // 검색 데이터 로딩 완료
+        });
+      } else {
+        throw Exception('주식 리스트를 가져오는 데 실패했습니다.');
+      }
+    } catch (e) {
+      setState(() {
+        isSearchLoading = false; // 로딩 실패시에도 false로 설정
+      });
+      print("Error fetching stock data: $e");
+    }
+  }
+
   void _filterStocksByCategory(String category) {
     setState(() {
       selectedCategory = category;
+       isLoading = true; // 로딩 상태로 설정
       if (category == "전체") {
         stocks = allStocks;
       } else if (category == "국내") {
@@ -82,109 +142,53 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       } else if (category == "해외") {
         stocks = allStocks.where((stock) => stock.containsKey("excd")).toList();
       } else if (category == "관심") {
+         _loadStockData(); 
         stocks = watchlistStocks; // ✅ 관심 목록 표시
       } else {
         stocks = [];
       }
       _sortStocks();
+        isLoading = false; // 로딩 완료
     });
   }
 
-// ✅ null 방어를 추가한 숫자 변환 함수
-double _toDouble(dynamic value) {
-  if (value == null) return 0.0;
-  if (value is double) return value;
-  if (value is int) return value.toDouble();
-  if (value is String) {
-    return double.tryParse(value.replaceAll(',', '')) ?? 0.0; // ✅ 숫자 쉼표 제거 후 변환
-  }
-  return 0.0;
-}
-
-int _toInt(dynamic value) {
-  if (value == null) return 0;
-  if (value is int) return value;
-  if (value is String) {
-    return int.tryParse(value.replaceAll(',', '')) ?? 0; // ✅ 숫자 쉼표 제거 후 변환
-  }
-  return 0;
-}
-
-// ✅ 관심 목록 가져오기 (UTF-8 디코딩 + 숫자로 변환 + null 방어)
-Future<List<Map<String, dynamic>>> fetchWatchlistData(String userId) async {
-  final url = Uri.parse('http://withyou.me:8080/watchlist/$userId');
-  final response = await http.get(url, headers: {'accept': '*/*'});
-
-  if (response.statusCode == 200) {
-    List<dynamic> data = json.decode(utf8.decode(response.bodyBytes)); // ✅ UTF-8 디코딩 적용
-
-    // 디버깅용: API에서 받은 데이터 출력
-    print("🔹 관심 목록 데이터 수신: ${json.encode(data)}");
-
-    return data.map((item) {
-      return {
-        "stockCode": item["stockCode"] ?? "",
-        "stockName": item["stockName"] ?? "이름 없음",
-        "stockCurrentPrice": _toDouble(item["stockCurrentPrice"]),
-        "stockChange": _toDouble(item["stockChange"]),
-        "stockChangePercent": _toDouble(item["stockChangePercent"]),
-        "acml_vol": _toInt(item["acml_vol"]),
-        "acml_tr_pbmn": _toDouble(item["acml_tr_pbmn"]),
-      };
-    }).toList();
-  } else {
-    print("❌ 관심 목록 불러오기 실패: ${response.statusCode}");
-    return [];
-  }
-}
-
-// ✅ 관심 목록이 포함될 경우 정렬 처리 추가
-void _sortStocks() {
-  setState(() {
-    if (selectedCategory == "관심") {
-      // ✅ 관심 목록일 경우 별도 정렬 (기본적으로 API 데이터는 정렬 안 되어 있음)
-      if (selectedSort == "상승률순") {
-        stocks.sort((a, b) => (_toDouble(b['stockChangePercent'])).compareTo(_toDouble(a['stockChangePercent'])));
-      } else if (selectedSort == "하락률순") {
-        stocks.sort((a, b) => (_toDouble(a['stockChangePercent'])).compareTo(_toDouble(b['stockChangePercent'])));
-      } else if (selectedSort == "거래량순") {
-        stocks.sort((a, b) => (_toInt(b['acml_vol'])).compareTo(_toInt(a['acml_vol'])));
-      }
+  // ✅ null 방어를 추가한 숫자 변환 함수
+  double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value.replaceAll(',', '')) ?? 0.0; // ✅ 숫자 쉼표 제거 후 변환
     }
-  });
-}
+    return 0.0;
+  }
 
+  int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) {
+      return int.tryParse(value.replaceAll(',', '')) ?? 0; // ✅ 숫자 쉼표 제거 후 변환
+    }
+    return 0;
+  }
 
-
-  // 🔹 검색 기능 (리스트와 분리)
-  void _filterStocksByQuery(String query) {
+  // ✅ 관심 목록이 포함될 경우 정렬 처리 추가
+  void _sortStocks() {
     setState(() {
-      if (query.isEmpty) {
-        searchResults = [];
-        isDropdownVisible = false;
-      } else {
-        searchResults = allStocks
-            .where((stock) => stock['stockName'].toString().toLowerCase().startsWith(query.toLowerCase()))
-            .toList();
-        isDropdownVisible = searchResults.isNotEmpty;
+      if (selectedCategory == "관심") {
+        // ✅ 관심 목록일 경우 별도 정렬 (기본적으로 API 데이터는 정렬 안 되어 있음)
+        if (selectedSort == "상승률순") {
+          stocks.sort((a, b) => (_toDouble(b['stockChangePercent'])).compareTo(_toDouble(a['stockChangePercent'])));
+        } else if (selectedSort == "하락률순") {
+          stocks.sort((a, b) => (_toDouble(a['stockChangePercent'])).compareTo(_toDouble(b['stockChangePercent'])));
+        } else if (selectedSort == "거래량순") {
+          stocks.sort((a, b) => (_toInt(b['acml_vol'])).compareTo(_toInt(a['acml_vol'])));
+        }
       }
     });
   }
 
-  // 🔹 검색 결과 선택 시 상세 페이지 이동
-  void _goToStockDetail(Map<String, dynamic> stock) {
-    setState(() {
-      _searchController.text = stock['stockName'];
-      isDropdownVisible = false;
-    });
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => StockDetailScreen(stock: stock),
-      ),
-    );
-  }
-
+  // 🔹 정렬 및 필터 UI
   void _showSortOptions() {
     showModalBottomSheet(
       context: context,
@@ -240,46 +244,11 @@ void _sortStocks() {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // 🔹 검색창 (리스트와 완전히 독립)
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.search),
-                          hintText: "종목 검색",
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        onChanged: _filterStocksByQuery,
-                      ),
-                      if (isDropdownVisible)
-                        Container(
-                          margin: EdgeInsets.only(top: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
-                          ),
-                          child: Column(
-                            children: searchResults.map((stock) {
-                              return ListTile(
-                                title: Text(stock['stockName']),
-                                onTap: () => _goToStockDetail(stock),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                
+                // 🔹 검색 리스트 화면
+                isSearchLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : SearchableStockList(stockList: searchStockList), // 검색 위젯에 검색 데이터 전달
+
                 // 🔹 정렬 및 필터 UI
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -327,7 +296,7 @@ void _sortStocks() {
                 ),
                 StockSortHeader(),
 
-                // 🔹 주식 리스트 (검색과 완전 독립)
+                // 🔹 주식 리스트
                 Expanded(
                   child: stocks.isEmpty
                       ? Center(child: Text("데이터 없음", style: TextStyle(fontSize: 18, color: Colors.grey)))
