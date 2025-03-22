@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import './detail_widgets/stock_change_info.dart';
 import 'chart/chart_main.dart';
@@ -54,49 +57,68 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   // 관심 추가/삭제 API 호출
-  Future<void> _toggleFavorite() async {
-    setState(() {
-      isFavorite = !isFavorite;
-    });
-
-    // 저장된 userId (nickname) 가져오기
-    final userId = await AuthService.getUserId(); // AuthService에서 nickname을 가져옴
-    if (userId == null) {
-      final snackBar = SnackBar(content: Text('로그인이 필요합니다.'));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      return;
-    }
-
-    final stockCode = widget.stock['stockCode'];
-
-    try {
-      final url = Uri.parse('http://withyou.me:8080/watchlist/${isFavorite ? 'add' : 'remove'}');
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: '{"userId": "$userId", "stockCode": "$stockCode"}',
-      );
-
-      if (response.statusCode == 200) {
-        final snackBar = SnackBar(
-          content: Text(isFavorite ? '관심 항목으로 등록되었습니다' : '관심 항목에서 삭제되었습니다'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      } else {
-        final errorMessage = 'API 요청 실패: ${response.statusCode}';
-        final snackBar = SnackBar(content: Text(errorMessage));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        print('API 호출 실패: $errorMessage');
-      }
-    } catch (e) {
-      setState(() {
-        isFavorite = !isFavorite; // API 실패 시 상태 되돌리기
-      });
-      final snackBar = SnackBar(content: Text('관심 항목 추가/삭제에 실패했습니다.'));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      print('에러 발생: $e');
-    }
+// 관심 상태 토글 함수
+Future<void> _toggleFavorite() async {
+  final userId = await AuthService.getUserId(); // 로그인된 사용자 ID 가져오기
+  if (userId == null) {
+    final snackBar = SnackBar(content: Text('로그인이 필요합니다.'));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    return;
   }
+
+  final stockCode = widget.stock['stockCode'];
+
+  setState(() {
+    isFavorite = !isFavorite;
+  });
+
+  // 로컬 저장소에 관심 상태 저장
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setBool(stockCode, isFavorite);  // 관심 상태 저장
+
+  try {
+    final url = Uri.parse('http://withyou.me:8080/watchlist/${isFavorite ? 'add' : 'remove'}');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: '{"userId": "$userId", "stockCode": "$stockCode"}',
+    );
+
+    if (response.statusCode == 200) {
+      final snackBar = SnackBar(
+        content: Text(isFavorite ? '관심 항목으로 등록되었습니다' : '관심 항목에서 삭제되었습니다'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else {
+      final errorMessage = 'API 요청 실패: ${response.statusCode}';
+      final snackBar = SnackBar(content: Text(errorMessage));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  } catch (e) {
+    setState(() {
+      isFavorite = !isFavorite; // API 실패 시 상태 되돌리기
+    });
+    final snackBar = SnackBar(content: Text('관심 항목 추가/삭제에 실패했습니다.'));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    print('에러 발생: $e');
+  }
+}
+
+// 앱 로딩 시 관심 상태 불러오기
+Future<void> _loadFavoriteStatus() async {
+  final stockCode = widget.stock['stockCode'];
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool? savedFavorite = prefs.getBool(stockCode);  // 로컬 저장소에서 관심 상태 불러오기
+
+  if (savedFavorite != null) {
+    setState(() {
+      isFavorite = savedFavorite;  // 저장된 상태를 UI에 반영
+    });
+  }
+}
+
+
 
   // ✅ 안전한 문자열 -> double 변환 함수
   double _parseDouble(dynamic value) {

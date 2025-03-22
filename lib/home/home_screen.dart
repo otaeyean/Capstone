@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:animations/animations.dart';
 import 'package:http/http.dart' as http;
-import 'package:stockapp/investment/stock_detail_screen.dart';
 import 'dart:convert';
 import '../user_info/user_info_screen.dart';
 import 'stock_list_widget.dart';
 import 'stock_ranking.dart';
 import 'welcome_box.dart';
 import '/login/login.dart';
+import 'searchable_stock_list.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -18,7 +17,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoggedIn = false;
   List<Map<String, String>> stockList = [];
-  List<Map<String, String>> filteredStocks = [];
 
   @override
   void initState() {
@@ -47,14 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       throw Exception('Failed to load stock list');
     }
-  }
-
-  void _filterStocks(String query) {
-    setState(() {
-      filteredStocks = stockList
-          .where((stock) => stock['stockName']!.contains(query))
-          .toList();
-    });
   }
 
   _logout() async {
@@ -105,57 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                TextField(
-                  onChanged: _filterStocks,
-                  decoration: InputDecoration(
-                    hintText: '검색',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-                if (filteredStocks.isNotEmpty)
-                Container(
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(8),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black26,
-        blurRadius: 8,
-        offset: Offset(0, 4),
-      ),
-    ],
-  ),
-  constraints: BoxConstraints(
-    maxHeight: 250, // 최대 높이 설정
-  ),
-  child: ListView.builder(
-    padding: EdgeInsets.zero,
-    shrinkWrap: true,
-    itemCount: filteredStocks.length,
-    itemBuilder: (context, index) {
-      return ListTile(
-        title: Text(
-          filteredStocks[index]['stockName']!,
-          style: TextStyle(fontWeight: FontWeight.w500),
-        ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => StockDetailScreen(stock: filteredStocks[index]),
-            ),
-          );
-        },
-      );
-    },
-  ),
-)
-
-              ],
-            ),
+            child: SearchableStockList(stockList: stockList),  // 🔹 검색 기능을 별도 위젯으로 사용
           ),
           SizedBox(height: 20),
           Padding(
