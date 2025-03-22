@@ -3,7 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:stockapp/server/investment/news/news_server.dart';
 import 'package:stockapp/server/investment/news/news_prediction_server.dart';
 import './news_prediction.dart';
-import './news_loading_placeholder.dart'; // ✅ 로딩 애니메이션 추가
+import './news_loading_placeholder.dart'; 
 
 class NewsScreen extends StatefulWidget {
   final String stockName;
@@ -46,7 +46,7 @@ class _NewsScreenState extends State<NewsScreen> {
         if (newsSnapshot.connectionState == ConnectionState.waiting) {
           return Padding(
             padding: EdgeInsets.all(10),
-            child: NewsLoadingPlaceholder(), // ✅ 로딩 애니메이션 추가
+            child: NewsLoadingPlaceholder(), 
           );
         } else if (newsSnapshot.hasError ||
             !newsSnapshot.hasData ||
@@ -60,43 +60,48 @@ class _NewsScreenState extends State<NewsScreen> {
 
         List<Map<String, dynamic>> articles = newsSnapshot.data!;
 
-        return ListView(
-          padding: EdgeInsets.all(10),
-          children: [
-            if (predictionText != null)
-              NewsPredictionWidget(predictionText: predictionText!), // ✅ 예측 UI 적용
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (predictionText != null)
+                  NewsPredictionWidget(predictionText: predictionText!), 
 
-            ...articles.map((article) {
-              return Card(
-                color: Colors.white,
-                margin: EdgeInsets.symmetric(vertical: 8),
-                child: ListTile(
-                  contentPadding: EdgeInsets.all(10),
-                  leading: article['imageUrl'] != null && article['imageUrl'].isNotEmpty
-                      ? Image.network(
-                          article['imageUrl'],
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            width: 60,
-                            height: 60,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Container(
-                          width: 60,
-                          height: 60,
-                          color: Colors.white,
-                        ),
-                  title: Text(article['title'], style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(article['summary'] ?? '',
-                      maxLines: 2, overflow: TextOverflow.ellipsis),
-                  onTap: () => _launchURL(article['link']),
-                ),
-              );
-            }).toList(),
-          ],
+                ...articles.map((article) {
+                  return Card(
+                    color: Colors.white,
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.all(10),
+                      leading: article['imageUrl'] != null && article['imageUrl'].isNotEmpty
+                          ? Image.network(
+                              article['imageUrl'],
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                width: 60,
+                                height: 60,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Container(
+                              width: 60,
+                              height: 60,
+                              color: Colors.white,
+                            ),
+                      title: Text(article['title'], style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(article['summary'] ?? '',
+                          maxLines: 2, overflow: TextOverflow.ellipsis),
+                      onTap: () => _launchURL(article['link']),
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
         );
       },
     );

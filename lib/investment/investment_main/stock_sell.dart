@@ -4,6 +4,8 @@ import 'package:stockapp/server/investment/user_balance_server.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import 'package:stockapp/server/investment/stock_sell_server.dart';
 import 'package:stockapp/investment/investment_main/dialog/success_sell_dialog.dart'; 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MockSellScreen extends StatefulWidget {
   final String stockCode;
@@ -18,14 +20,16 @@ class _MockSellScreenState extends State<MockSellScreen> {
   TextEditingController _quantityController = TextEditingController();
   final UserBalanceService _balanceService = UserBalanceService();
   double? _balance;
-  double _price = 10; // 가격을 10원으로 하드코딩
+  double _price = 0;  
   String? userId;
   int? confirmedQuantity;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _loadUserId();
+    _fetchStockPrice();  
   }
 
   Future<void> _loadUserId() async {
@@ -47,6 +51,21 @@ class _MockSellScreenState extends State<MockSellScreen> {
     }
   }
 
+  Future<void> _fetchStockPrice() async {
+    final response = await http.get(Uri.parse('http://withyou.me:8080/current-price?stockCode=${widget.stockCode}'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        _price = data['stockPrice']?.toDouble() ?? 0;  
+      });
+    } else {
+      setState(() {
+        _errorMessage = "현재가를 가져오지 못했습니다."; 
+      });
+    }
+  }
+
   Future<void> _sellStock() async {
     if (userId == null || confirmedQuantity == null) return;
 
@@ -63,6 +82,44 @@ class _MockSellScreenState extends State<MockSellScreen> {
     }
   }
 
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white, 
+          title: Row(
+            children: [
+              Text("매도 확인"),
+              SizedBox(width: 8), 
+              Icon(Icons.help_outline, color: Colors.black), 
+            ],
+          ),
+          content: Text(
+            "체결 가격: ${_price.toStringAsFixed(0)}원\n매도 수량: $confirmedQuantity주\n\n진행하시겠습니까?",
+            style: TextStyle(color: Colors.black), 
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), 
+              child: Text("취소",style: TextStyle(color: Colors.black), 
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); 
+                _sellStock();
+              },
+              child: Text("확인", style: TextStyle(color: Colors.blue), 
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -72,9 +129,9 @@ class _MockSellScreenState extends State<MockSellScreen> {
       },
     );
 
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 2), () {
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); 
       }
     });
   }
@@ -98,7 +155,7 @@ class _MockSellScreenState extends State<MockSellScreen> {
           children: [
             _buildBalanceWidget(),
             SizedBox(height: 20),
-            _buildPriceWidget(),
+            _buildPriceWidget(),  
             SizedBox(height: 20),
             _buildQuantityWidget(),
             if (confirmedQuantity != null) _buildConfirmedBox(),
@@ -137,10 +194,16 @@ class _MockSellScreenState extends State<MockSellScreen> {
         children: [
           Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
           SizedBox(height: 8),
-          Text(
-            '${_price.toStringAsFixed(0)}원',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          _price > 0 
+            ? Text(
+                '${_price.toStringAsFixed(0)}원',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
+            : Shimmer.fromColors(  
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.white,
+                child: Container(width: 100, height: 24, color: Colors.grey[300]!),
+              ),
         ],
       ),
     );
@@ -183,7 +246,7 @@ class _MockSellScreenState extends State<MockSellScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('매도 확인', style: TextStyle(fontFamily: 'MinSans', color: Colors.blue, fontSize: 20,fontWeight: FontWeight.w800)),
+          Text('매도 확인', style: TextStyle(fontFamily: 'MinSans', color: Colors.blue, fontSize: 20, fontWeight: FontWeight.w800)),
           SizedBox(height: 8),
           Text('체결 가격: ${_price.toStringAsFixed(0)}원\n매도 수량: $confirmedQuantity주'),
         ],
@@ -195,7 +258,7 @@ class _MockSellScreenState extends State<MockSellScreen> {
     return Container(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: confirmedQuantity != null ? _sellStock : null,
+        onPressed: confirmedQuantity != null ? _showConfirmationDialog : null, 
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           padding: EdgeInsets.symmetric(vertical: 16),

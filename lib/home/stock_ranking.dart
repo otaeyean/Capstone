@@ -31,49 +31,61 @@ class _StockRankingState extends State<StockRanking> {
     super.dispose();
   }
 
-  Future<void> _loadStockData() async {
-    if (!mounted) return;
+Future<void> _loadStockData() async {
+  if (!mounted) return;
 
-    setState(() {
-      isLoading = true;
-      isError = false;
-    });
+  setState(() {
+    isLoading = true;
+    isError = false;
+  });
 
-    List<Map<String, dynamic>> stocks = [];
-    String category = categories[categoryIndex];
+  List<Map<String, dynamic>> stocks = [];
+  String selectedCategory = categories[categoryIndex];
 
-    try {
-      if (category == "상승률") {
-        stocks = await fetchStockData("rise");
-      } else if (category == "하락률") {
-        stocks = await fetchStockData("fall");
-      } else if (category == "거래량") {
-        stocks = await fetchStockData("trade-volume");
+  try {
+    String endpoint = "";
+    if (selectedMarket == "국내") {
+      if (selectedCategory == "상승률") {
+        endpoint = "rise";
+      } else if (selectedCategory == "하락률") {
+        endpoint = "fall";
+      } else if (selectedCategory == "거래량") {
+        endpoint = "trade-volume";
       }
-
-      if (stocks.isEmpty) throw Exception("데이터 없음");
-
-      if (mounted) {
-        setState(() {
-          stockData = stocks;
-          visibleRankings = stockData.sublist(0, 5);
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          isError = true;
-          isLoading = false;
-        });
+    } else {
+      if (selectedCategory == "상승률") {
+        endpoint = "rise/overseas";
+      } else if (selectedCategory == "하락률") {
+        endpoint = "fall/overseas";
+      } else if (selectedCategory == "거래량") {
+        endpoint = "trade-volume/overseas";
       }
     }
+
+    stocks = await fetchStockData(endpoint);
+    if (stocks.isEmpty) throw Exception("데이터 없음");
+
+    if (mounted) {
+      setState(() {
+        stockData = stocks;
+        visibleRankings = stockData.sublist(0, 5);
+        isLoading = false;
+      });
+    }
+  } catch (e) {
+    print("에러 발생: $e"); 
+    if (mounted) {
+      setState(() {
+        isError = true;
+        isLoading = false;
+      });
+    }
   }
+}
 
   void _startAutoSwitch() {
     _timer = Timer.periodic(Duration(seconds: 3), (_) {
       if (!mounted) return;
-
       setState(() {
         categoryIndex = (categoryIndex + 1) % categories.length;
       });
@@ -122,7 +134,36 @@ class _StockRankingState extends State<StockRanking> {
     );
   }
 
-  Widget _buildCategoryButton(String category) {
+  Widget _buildMarketButton(String market) {
+    bool isSelected = selectedMarket == market;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedMarket = market;
+          categoryIndex = 0; 
+          _loadStockData();
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: Colors.black),
+        ),
+        child: Text(
+          market,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+ Widget _buildCategoryButton(String category) {
     bool isSelected = categories[categoryIndex] == category;
     Color iconColor = isSelected
         ? (category == "상승률"
@@ -152,33 +193,6 @@ class _StockRankingState extends State<StockRanking> {
     );
   }
 
-  Widget _buildMarketButton(String market) {
-    bool isSelected = selectedMarket == market;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedMarket = market;
-          _loadStockData();
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.black : Colors.white,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: Colors.black),
-        ),
-        child: Text(
-          market,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildStockList() {
     return Column(

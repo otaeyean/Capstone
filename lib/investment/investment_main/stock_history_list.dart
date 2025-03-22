@@ -110,11 +110,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                       ],
                                     ),
                                     SizedBox(height: 4),
-                                    Text(
-                                      "${order['stockCode']} KRW",
-                                      style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(height: 4),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [

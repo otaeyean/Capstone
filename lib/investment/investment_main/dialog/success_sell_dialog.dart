@@ -5,8 +5,7 @@ class SuccessSellDialog extends StatefulWidget {
   _SuccessSellDialogState createState() => _SuccessSellDialogState();
 }
 
-class _SuccessSellDialogState extends State<SuccessSellDialog>
-    with SingleTickerProviderStateMixin {
+class _SuccessSellDialogState extends State<SuccessSellDialog> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _sizeAnimation;
 

@@ -1,59 +1,65 @@
-// chat_input.dart
 import 'package:flutter/material.dart';
 
 class ChatInput extends StatelessWidget {
   final TextEditingController messageController;
   final Function(String) onSendMessage;
-  final List<String> exampleQuestions;
-  final Function(String) onExampleSelected;
 
   ChatInput({
     required this.messageController,
     required this.onSendMessage,
-    required this.exampleQuestions,
-    required this.onExampleSelected,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Wrap(
-            spacing: 10.0,
-            runSpacing: 10.0,
-            children: exampleQuestions.map((question) {
-              return GestureDetector(
-                onTap: () => onExampleSelected(question),
-                child: Chip(
-                  label: Text(question),
-                  backgroundColor: Colors.grey[300],
-                ),
-              );
-            }).toList(),
-          ),
-        ),
+
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: messageController,
-                  onSubmitted: onSendMessage,
-                  decoration: InputDecoration(
-                    hintText: '메시지를 입력하세요...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: TextField(
+                    controller: messageController,
+                    onSubmitted: (text) => onSendMessage(text),
+                    decoration: InputDecoration(
+                      hintText: '메시지를 입력하세요...',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 16.0),
+                      hintStyle: TextStyle(fontSize: 16.0),
                     ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 8.0),
                   ),
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.send),
-                onPressed: () => onSendMessage(messageController.text),
+              SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => onSendMessage(messageController.text),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blueAccent,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.send,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
               ),
             ],
           ),

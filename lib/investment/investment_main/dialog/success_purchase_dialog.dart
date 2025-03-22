@@ -15,10 +15,21 @@ class _AnimatedSuccessDialogState extends State<AnimatedSuccessDialog> with Sing
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
-      reverseDuration: Duration(milliseconds: 500),
-    )..repeat(reverse: true);
+    );
 
-    _sizeAnimation = Tween<double>(begin: 50, end: 70).animate(_controller);
+    _sizeAnimation = Tween<double>(begin: 50, end: 70).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _controller.forward();
+
+    Future.delayed(Duration(seconds: 2), () {
+      if (mounted) {
+        _controller.reverse().whenComplete(() {
+          if (mounted) Navigator.of(context).pop();
+        });
+      }
+    });
   }
 
   @override

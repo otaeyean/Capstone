@@ -1,5 +1,6 @@
-// chat_messages.dart
 import 'package:flutter/material.dart';
+import './chatbot_message_ui.dart';  
+import './user_message_ui.dart';  
 
 class ChatMessages extends StatelessWidget {
   final List<Map<String, String>> chatMessages;
@@ -17,16 +18,9 @@ class ChatMessages extends StatelessWidget {
         bool isUser = chatMessages[index]['sender'] == 'user';
         return Align(
           alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isUser ? Colors.white : Colors.grey[200],
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: Text(chatMessages[index]['message']!),
-          ),
+          child: isUser
+              ? UserMessage(message: chatMessages[index]['message']!)  
+              : ChatbotMessage(message: chatMessages[index]['message']!), 
         );
       },
     );

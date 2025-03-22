@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../server/userInfo/user_balance_server.dart';
 import '../server/userInfo/portfolio_server.dart';
+
 class UserBalance extends StatefulWidget {
   final String userId; 
 
@@ -12,11 +14,13 @@ class UserBalance extends StatefulWidget {
 
 class _UserBalanceState extends State<UserBalance> {
   double balance = 0;
+  late Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    _fetchBalance(); // 화면이 로드될 때 balance 값 받아오기
+    _fetchBalance(); 
+    _startBalanceUpdateTimer(); 
   }
 
   // 서버에서 balance 값을 받아오는 함수
@@ -24,11 +28,24 @@ class _UserBalanceState extends State<UserBalance> {
     try {
       final data = await PortfolioService.fetchPortfolioData(widget.userId);
       setState(() {
-        balance = data['balance'].toDouble(); // balance 값을 가져와서 상태 업데이트
+        balance = data['balance'].toDouble(); 
       });
     } catch (e) {
       print("Balance fetch error: $e");
     }
+  }
+
+  // 10초마다 금액 갱신(타이머 설정)
+  void _startBalanceUpdateTimer() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      _fetchBalance(); 
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel(); 
+    super.dispose();
   }
 
   final TextEditingController _controller = TextEditingController();
@@ -49,49 +66,49 @@ class _UserBalanceState extends State<UserBalance> {
     bool success = await UserBalanceService().resetBalance(widget.userId);
     if (success) {
       setState(() {
-        balance = 0; // 서버에서 초기화가 완료되면 UI에도 반영
+        balance = 0; 
       });
     }
   }
 
   void _showBalanceInputDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white, 
-        title: Text(
-          "금액 입력",
-          style: TextStyle(color: Colors.black), 
-        ),
-        content: TextField(
-          controller: _controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: "금액을 입력하세요",
-            hintStyle: TextStyle(color: Colors.black45), 
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white, 
+          title: Text(
+            "금액 입력",
+            style: TextStyle(color: Colors.black), 
           ),
-          style: TextStyle(color: Colors.black), 
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("취소", style: TextStyle(color: Colors.black)),
+          content: TextField(
+            controller: _controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: "금액을 입력하세요",
+              hintStyle: TextStyle(color: Colors.black45), 
+            ),
+            style: TextStyle(color: Colors.black), 
           ),
-          TextButton(
-            onPressed: () {
-              _updateBalance(); // 서버로 전송
-              Navigator.pop(context);
-            },
-            child: Text("확인", style: TextStyle(color: Colors.blue)),
-          ),
-        ],
-      );
-    },
-  );
-}
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("취소", style: TextStyle(color: Colors.black)),
+            ),
+            TextButton(
+              onPressed: () {
+                _updateBalance();
+                Navigator.pop(context);
+              },
+              child: Text("확인", style: TextStyle(color: Colors.blue)),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-    void _confirmResetBalance(BuildContext context) {
+  void _confirmResetBalance(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -122,7 +139,6 @@ class _UserBalanceState extends State<UserBalance> {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

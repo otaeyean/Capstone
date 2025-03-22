@@ -1,7 +1,10 @@
+import 'dart:async'; 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '/login/login.dart'; // LoginPage import
-import 'package:stockapp/user_info/user_info_screen.dart'; // UserInfoScreen import
+import 'package:http/http.dart' as http;
+import '/login/login.dart';
+import 'package:stockapp/user_info/user_info_screen.dart';
 
 class WelcomeBox extends StatelessWidget {
   @override
@@ -10,21 +13,12 @@ class WelcomeBox extends StatelessWidget {
       future: _getUserId(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.black, // 검정색 배경
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Center(child: CircularProgressIndicator(color: Colors.white)),
-          );
-        } else if (snapshot.hasError) {
-          return _buildLoginRequiredBox(context); // 오류 발생 시 로그인 유도
-        } else if (snapshot.hasData) {
-          final userId = snapshot.data!;
-          return _buildUserInfoScreenButton(context, userId);
+          return _loadingWidget();
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          return _buildLoginRequiredBox(context);
         } else {
-          return _buildLoginRequiredBox(context); // 데이터 없을 시 로그인 유도
+          final userId = snapshot.data!;
+          return _buildUserInfoStream(context, userId); 
         }
       },
     );
@@ -32,52 +26,51 @@ class WelcomeBox extends StatelessWidget {
 
   Future<String?> _getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('nickname'); // SharedPreferences에서 닉네임 가져오기
+    return prefs.getString('nickname');
   }
 
-  // 로그인 필요 메시지 및 로그인 페이지 이동 버튼
-  Widget _buildLoginRequiredBox(BuildContext context) {
+  Widget _buildUserInfoStream(BuildContext context, String userId) {
+    return StreamBuilder<Map<String, dynamic>>(
+      stream: Stream.periodic(Duration(seconds: 5)).asyncMap((_) => _fetchPortfolioData(userId)),
+      builder: (context, snapshot) {
+        String balance = '로딩 중...';
+        String totalProfitRate = '로딩 중...';
+
+        if (snapshot.hasData) {
+          balance = '${snapshot.data!['balance']} 원';
+          totalProfitRate = '${snapshot.data!['totalProfitRate']} %';
+        } else if (snapshot.hasError) {
+          balance = '수익률 오류';
+          totalProfitRate = '수익률 오류';
+        }
+
+        return _buildUserInfoBox(context, userId, balance, totalProfitRate);
+      },
+    );
+  }
+
+  Widget _buildUserInfoBox(BuildContext context, String userId, String balance, String totalProfitRate) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => UserInfoScreen()));
       },
       child: Container(
         padding: EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Colors.black, // 검정색 배경
-          borderRadius: BorderRadius.circular(8.0),
-        ),
+        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '로그인을 진행해주세요!', // 변경된 텍스트
-              style: TextStyle(
-                fontFamily: 'MinSans',
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 10),
             Row(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.grey[800], // 프로필 사진 배경색 회색
-                  child: Icon(Icons.person, size: 30, color: Colors.white),
-                ),
+                CircleAvatar(radius: 30, backgroundColor: Colors.white, child: Icon(Icons.person, size: 30, color: Colors.grey)),
                 SizedBox(width: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('총 자산: -',
-                        style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, color: Colors.white)),
-                    Text('보유 주식: -',
-                        style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, color: Colors.white)),
+                    Text('$userId 님', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                    SizedBox(height: 5),
+                    Text('보유 금액: $balance', style: TextStyle(color: Colors.white)),
+                    Text('수익률: $totalProfitRate', style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ],
@@ -88,46 +81,49 @@ class WelcomeBox extends StatelessWidget {
     );
   }
 
-  // 로그인 되었을 때 UserInfoScreen으로 이동하는 버튼
-  Widget _buildUserInfoScreenButton(BuildContext context, String userId) {
+Future<Map<String, dynamic>> _fetchPortfolioData(String userId) async {
+  try {
+    final response = await http.get(Uri.parse('http://withyou.me:8080/user-info/$userId'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      int balance = (data['balance'] as double).toInt();
+
+      return {
+        'balance': balance, 
+        'totalProfitRate': data['totalProfitRate']
+      };
+    } else {
+      throw Exception('Failed to load portfolio data');
+    }
+  } catch (e) {
+    throw Exception('Error fetching portfolio data: $e');
+  }
+}
+
+  Widget _buildLoginRequiredBox(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserInfoScreen()),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
       },
       child: Container(
         padding: EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Colors.black, // 검정색 배경
-          borderRadius: BorderRadius.circular(8.0),
-        ),
+        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('로그인을 진행해주세요!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+            SizedBox(height: 10),
             Row(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 30, color: Colors.grey),
-                ),
+                CircleAvatar(radius: 30, backgroundColor: Colors.grey[800], child: Icon(Icons.person, size: 30, color: Colors.white)),
                 SizedBox(width: 20),
-
-                /// ✅ `da 님`을 프로필 옆으로 이동
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '$userId 님',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    SizedBox(height: 5), // 간격 추가
-
-                    /// ✅ `총 자산` & `보유 주식`을 프로필 네임 아래로 이동
-                    Text('총 자산: 5,000,000원', style: TextStyle(color: Colors.white)),
-                    Text('보유 주식: 500주', style: TextStyle(color: Colors.white)),
+                    Text('총 자산: -', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+                    Text('보유 주식: -', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
                   ],
                 ),
               ],
@@ -135,6 +131,14 @@ class WelcomeBox extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _loadingWidget() {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+      child: Center(child: CircularProgressIndicator(color: Colors.white)),
     );
   }
 }

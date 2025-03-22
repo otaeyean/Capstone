@@ -27,7 +27,7 @@ class _StockInfoState extends State<StockInfoDetail> {
     );
 
     if (response.statusCode == 200) {
-      await Future.delayed(Duration(milliseconds: 500)); // 애니메이션 효과
+      await Future.delayed(Duration(milliseconds: 500)); 
       setState(() {
         _isLoaded = true;
       });
@@ -76,31 +76,38 @@ class _StockInfoState extends State<StockInfoDetail> {
               return AnimatedOpacity(
                 opacity: _isLoaded ? 1.0 : 0.0,
                 duration: Duration(milliseconds: 500),
-                child: Column(
-                  children: stockInfoMap.entries.map((entry) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6.0),
-                      child: Row(
-                        children: [
-                          Text(
-                            '${entry.key}: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                child: Container(
+                  padding: EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200], 
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: stockInfoMap.entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6.0),
+                        child: Row(
+                          children: [
+                            Text(
+                              '${entry.key}: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                          Text(
-                            entry.value.toString(),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                            Text(
+                              entry.value.toString(),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               );
             },
