@@ -90,73 +90,75 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       resizeToAvoidBottomInset: false,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: SearchableStockList(stockList: stockList),  // 🔹 검색 기능을 별도 위젯으로 사용
-          ),
-          SizedBox(height: 20),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: WelcomeBox(),
-          ),
-          SizedBox(height: 20),
-          if (isLoggedIn) ...[
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => UserInfoScreen()),
-                  );
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.bar_chart, color: Colors.black),
-                        SizedBox(width: 8),
-                        Text("내 종목보기", style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, fontSize: 18)),
-                      ],
-                    ),
-                    Icon(Icons.arrow_forward_ios, size: 18, color: Colors.black),
-                  ],
+              child: SearchableStockList(stockList: stockList), 
+            ),
+            SizedBox(height: 20),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: WelcomeBox(),
+            ),
+            SizedBox(height: 20),
+            if (isLoggedIn) ...[
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => UserInfoScreen()),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.bar_chart, color: Colors.black),
+                          SizedBox(width: 8),
+                          Text("내 종목보기", style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, fontSize: 18)),
+                        ],
+                      ),
+                      Icon(Icons.arrow_forward_ios, size: 18, color: Colors.black),
+                    ],
+                  ),
                 ),
+              ),
+              SizedBox(height: 10),
+              SizedBox(
+                height: 300, 
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: StockListWidget(),
+                ),
+              ),
+              SizedBox(height: 5),
+            ],
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Icon(Icons.emoji_events, color: Colors.amber),
+                  SizedBox(width: 8),
+                  Text("주식 랭킹", style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, fontSize: 18)),
+                ],
               ),
             ),
             SizedBox(height: 10),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              height: 450,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: StockListWidget(),
+                child: StockRanking(),
               ),
             ),
-            SizedBox(height: 5),
           ],
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Icon(Icons.emoji_events, color: Colors.amber),
-                SizedBox(width: 8),
-                Text("주식 랭킹", style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, fontSize: 18)),
-              ],
-            ),
-          ),
-          SizedBox(height: 10),
-          Expanded(
-            flex: 3,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: StockRanking(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

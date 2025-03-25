@@ -93,46 +93,44 @@ Future<void> _loadStockData() async {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildMarketButton("국내"),
-            SizedBox(width: 16),
-            _buildMarketButton("해외"),
-          ],
-        ),
-        SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: categories.map((c) => _buildCategoryButton(c)).toList(),
-        ),
-        SizedBox(height: 10),
-        if (isLoading)
-          Center(child: CircularProgressIndicator())
-        else if (isError)
-          Center(
-            child: Text(
-              "데이터를 불러올 수 없습니다.",
-              style: TextStyle(color: Colors.red, fontSize: 16),
-            ),
-          )
-        else
-          Expanded(
-            child: SingleChildScrollView(
-              child: AnimatedSwitcher(
-                duration: Duration(milliseconds: 800),
-                transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                child: _buildStockList(),
-              ),
-            ),
+@override
+Widget build(BuildContext context) {
+  return Column(
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildMarketButton("국내"),
+          SizedBox(width: 16),
+          _buildMarketButton("해외"),
+        ],
+      ),
+      SizedBox(height: 10),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: categories.map((c) => _buildCategoryButton(c)).toList(),
+      ),
+      SizedBox(height: 10),
+      if (isLoading)
+        Center(child: CircularProgressIndicator())
+      else if (isError)
+        Center(
+          child: Text(
+            "데이터를 불러올 수 없습니다.",
+            style: TextStyle(color: Colors.red, fontSize: 16),
           ),
-      ],
-    );
-  }
+        )
+      else
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: Duration(milliseconds: 800),
+            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+            child: _buildStockList(),
+          ),
+        ),
+    ],
+  );
+}
 
   Widget _buildMarketButton(String market) {
     bool isSelected = selectedMarket == market;
