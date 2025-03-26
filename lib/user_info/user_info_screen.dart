@@ -2,37 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import 'package:stockapp/server/userInfo/stock_service.dart';
 import 'package:stockapp/user_info/user_balance.dart';
-import 'package:stockapp/data/user_stock_model.dart';  // 수정된 모델 파일 사용
+import 'package:stockapp/data/user_stock_model.dart';
 import 'package:stockapp/user_info/mystock_list.dart';
 import 'package:stockapp/user_info/portfolio_summary.dart';
 import 'package:stockapp/user_info/sort_dropdown.dart';
 import 'package:stockapp/user_info/user_profile.dart';
 
 class UserInfoScreen extends StatefulWidget {
+  const UserInfoScreen({Key? key}) : super(key: key); // GlobalKey용 생성자
+
   @override
-  _UserInfoScreenState createState() => _UserInfoScreenState();
+  UserInfoScreenState createState() => UserInfoScreenState();
 }
 
-class _UserInfoScreenState extends State<UserInfoScreen> {
-  List<UserStockModel> _userStocks = [];  // UserStockModel을 사용
+class UserInfoScreenState extends State<UserInfoScreen> {
+  List<UserStockModel> _userStocks = [];
   String userId = '';
+
+  // ✅ 외부에서 호출 가능한 새로고침 함수
+  void refreshStock() {
+    if (userId.isNotEmpty) {
+      _loadStockData();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _loadUserId();
-    _loadStockData();
   }
 
   void _loadUserId() async {
-    String? savedUserId = await AuthService.getUserId(); // AuthService 사용
+    String? savedUserId = await AuthService.getUserId();
     if (savedUserId == null || savedUserId.isEmpty) {
       Navigator.pushReplacementNamed(context, '/login');
     } else {
       setState(() {
         userId = savedUserId;
       });
-      _loadStockData(); // userId가 설정된 후에 주식 데이터를 로드
+      _loadStockData();
     }
   }
 
@@ -43,12 +51,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         _userStocks = stocks;
       });
     } catch (e) {
-      // 오류 처리 (예: 서버 연결 실패 시)
       print("Error loading stock data: $e");
     }
   }
 
-  // 정렬된 주식 리스트를 받아오는 함수
   void _onSortChanged(List<UserStockModel> sortedStocks) {
     setState(() {
       _userStocks = sortedStocks;
@@ -57,7 +63,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return userId.isEmpty // userId가 없으면 로딩 표시
+    return userId.isEmpty
         ? Center(child: CircularProgressIndicator())
         : Scaffold(
             appBar: AppBar(
@@ -78,13 +84,12 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                     SizedBox(height: 16),
                     PortfolioSummary(userId: userId),
                     SizedBox(height: 16),
-                    // SortDropdown에 stocks와 onSortChanged 전달
                     SortDropdown(
                       stocks: _userStocks,
                       onSortChanged: _onSortChanged,
                     ),
                     SizedBox(height: 10),
-                    MyStockList(stocks: _userStocks), // 정렬된 주식 리스트 표시
+                    MyStockList(stocks: _userStocks),
                   ],
                 ),
               ),

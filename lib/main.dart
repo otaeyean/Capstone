@@ -37,58 +37,51 @@ class MainScreen extends StatefulWidget {
   @override
   _MainScreenState createState() => _MainScreenState();
 }
-
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0; // 현재 선택된 탭의 인덱스
+  int _currentIndex = 0;
 
-  // 각 페이지에 해당하는 위젯들을 준비합니다.
-  final List<Widget> _pages = [
-    HomeScreen(),      // 홈
-    InvestmentScreen(), // 모의 투자
-    ChatbotScreen(),   // 챗봇
-    UserInfoScreen(),   // 내 정보
+  // ✅ UserInfoScreen에 접근하기 위한 GlobalKey
+  final GlobalKey<UserInfoScreenState> _userInfoKey = GlobalKey<UserInfoScreenState>();
+
+  late final List<Widget> _pages = [
+    HomeScreen(),
+    InvestmentScreen(),
+    ChatbotScreen(),
+    UserInfoScreen(key: _userInfoKey), // ✅ Key 적용
   ];
 
   void _onItemTapped(int index) {
     setState(() {
-      _currentIndex = index; // 탭 변경 시 현재 탭 인덱스 업데이트
+      _currentIndex = index;
     });
+
+    // ✅ "내 정보" 탭 클릭 시 강제로 데이터 리로드
+    if (index == 3) {
+      _userInfoKey.currentState?.refreshStock();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex, // 현재 선택된 탭에 맞는 화면을 보여줌
-        children: _pages, // 각 페이지 위젯 리스트
+        index: _currentIndex,
+        children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex, // 현재 탭을 표시
-        onTap: _onItemTapped, // 탭을 누르면 호출되는 함수
-        backgroundColor: Colors.white, // 하단 바 색상 흰색
-        selectedItemColor: Colors.black, // 선택된 아이템 색상
-        unselectedItemColor: Colors.grey, // 선택되지 않은 아이템 색상 회색
-        elevation: 0, // 그림자 없애기
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        elevation: 0,
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.monetization_on),
-            label: '모의투자',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: '챗봇',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '내 정보',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.monetization_on), label: '모의투자'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: '챗봇'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '내 정보'),
         ],
       ),
-      backgroundColor: Colors.white,
     );
   }
 }
