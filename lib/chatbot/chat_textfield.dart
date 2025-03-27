@@ -44,7 +44,7 @@ class ChatInput extends StatelessWidget {
                   duration: Duration(milliseconds: 200),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blueAccent,
+                    color: Color(0xFF22B379),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black26,

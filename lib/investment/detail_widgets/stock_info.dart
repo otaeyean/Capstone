@@ -27,7 +27,7 @@ class _StockInfoState extends State<StockInfoDetail> {
     );
 
     if (response.statusCode == 200) {
-      await Future.delayed(Duration(milliseconds: 500)); 
+      await Future.delayed(Duration(milliseconds: 500));
       setState(() {
         _isLoaded = true;
       });
@@ -48,6 +48,7 @@ class _StockInfoState extends State<StockInfoDetail> {
             '상세 정보',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
+           SizedBox(height: 20),
           FutureBuilder<Map<String, dynamic>>(
             future: _stockInfo,
             builder: (context, snapshot) {
@@ -79,34 +80,58 @@ class _StockInfoState extends State<StockInfoDetail> {
                 child: Container(
                   padding: EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200], 
+                    color: Colors.white, // 배경은 흰색
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Color(0xFF22B379), width: 2), // 초록색 테두리
                   ),
                   child: Column(
-                    children: stockInfoMap.entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6.0),
-                        child: Row(
-                          children: [
-                            Text(
-                              '${entry.key}: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.trending_up, // 주식 관련 아이콘
+                            color: Color(0xFF22B379), // 초록색
+                            size: 24,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            '주식 정보',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF22B379),
                             ),
-                            Text(
-                              entry.value.toString(),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Column(
+                        children: stockInfoMap.entries.map((entry) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6.0),
+                            child: Row(
+                              children: [
+                                Text(
+                                  '${entry.key}: ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  entry.value.toString(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                   ),
                 ),
               );
