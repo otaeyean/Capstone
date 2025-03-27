@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'stock_buy.dart';
 import 'stock_sell.dart';
 import 'stock_history_list.dart';
+import '../investment_main/reservation/reservation_history_list.dart'; 
 
 class MockInvestmentScreen extends StatefulWidget {
   final String stockCode;
@@ -24,7 +25,7 @@ class _MockInvestmentScreenState extends State<MockInvestmentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(  // 전체 스크롤을 가능하게 만듦
+      body: SingleChildScrollView(
         child: Column(
           children: [
             Row(
@@ -69,17 +70,30 @@ class _MockInvestmentScreenState extends State<MockInvestmentScreen> {
                     ),
                   ),
                 ),
+                GestureDetector(
+                  onTap: () => _onTabSelected(3),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),
+                    child: Text(
+                      '예약 내역',
+                      style: TextStyle(
+                        color: _selectedTabIndex == 3 ? Colors.black : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            // 탭에 맞는 화면을 표시하고, 스크롤이 가능하도록 함
             Container(
-              // 탭에 맞는 화면 표시
-              height: MediaQuery.of(context).size.height * 0.7, // 화면 높이에 맞게 비율을 설정
+              height: MediaQuery.of(context).size.height * 0.7,
               child: _selectedTabIndex == 0
-                  ? MockBuyScreen(stockCode: widget.stockCode) // stockCode 전달
+                  ? MockBuyScreen(stockCode: widget.stockCode)
                   : _selectedTabIndex == 1
-                      ? MockSellScreen(stockCode: widget.stockCode) // stockCode 전달
-                      : OrderHistoryScreen(stockCode: widget.stockCode),
+                      ? MockSellScreen(stockCode: widget.stockCode)
+                      : _selectedTabIndex == 2
+                          ? OrderHistoryScreen(stockCode: widget.stockCode)
+                          : ReservationHistoryScreen(stockCode: widget.stockCode), 
             ),
           ],
         ),

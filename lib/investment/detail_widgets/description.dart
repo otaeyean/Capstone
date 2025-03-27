@@ -14,22 +14,46 @@ class StockDescription extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-     
             Text(
               '${stock['name']} 회사 소개',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
-
-           Container(
+          
+            SizedBox(height: 20),
+            Container(
               padding: EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.white, 
                 borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Color(0xFF22B379), width: 2), 
               ),
-              child: Text(
-                description,
-                style: TextStyle(fontSize: 14, color: Colors.black87),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.business, 
+                        color: Color(0xFF22B379), 
+                        size: 24,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        '회사 소개',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF22B379),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    description,
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                ],
               ),
             ),
           ],

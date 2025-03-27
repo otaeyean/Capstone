@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart'; 
+import 'package:shimmer/shimmer.dart';
 import 'package:stockapp/server/investment/user_balance_server.dart';
-import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import 'package:stockapp/server/investment/stock_sell_server.dart';
 import 'package:stockapp/investment/investment_main/dialog/success_sell_dialog.dart'; 
+import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import 'package:http/http.dart' as http;
+import './reservation/reservation_sell_settings.dart';
 import 'dart:convert';
 
 class MockSellScreen extends StatefulWidget {
@@ -155,13 +156,18 @@ class _MockSellScreenState extends State<MockSellScreen> {
           children: [
             _buildBalanceWidget(),
             SizedBox(height: 20),
-            _buildPriceWidget(),  
+            _buildPriceWidget(),
             SizedBox(height: 20),
             _buildQuantityWidget(),
-            if (confirmedQuantity != null) _buildConfirmedBox(),
+            SizedBox(height: 16),
+            Divider(color: Colors.grey, thickness: 1),
+
+            BuyReservationSettingsScreen(currentPrice: _price ?? 0.0,stockCode: widget.stockCode),
+
             SizedBox(height: 30),
             Spacer(),
             _buildSellButton(),
+            if (_errorMessage != null) _buildErrorMessageWidget(),
           ],
         ),
       ),
@@ -172,7 +178,7 @@ class _MockSellScreenState extends State<MockSellScreen> {
     return _balance != null
         ? Text(
             '보유 금액 ${_balance!.toStringAsFixed(0)}원',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromARGB(187, 0, 0, 0)),
           )
         : Shimmer.fromColors(
             baseColor: Colors.white,
@@ -184,26 +190,14 @@ class _MockSellScreenState extends State<MockSellScreen> {
   Widget _buildPriceWidget() {
     return Container(
       padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 241, 241, 241),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
           SizedBox(height: 8),
-          _price > 0 
-            ? Text(
-                '${_price.toStringAsFixed(0)}원',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              )
-            : Shimmer.fromColors(  
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.white,
-                child: Container(width: 100, height: 24, color: Colors.grey[300]!),
-              ),
+          Text(_price != null ? '${_price!.toStringAsFixed(0)}원' : '로딩 중...', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -212,10 +206,7 @@ class _MockSellScreenState extends State<MockSellScreen> {
   Widget _buildQuantityWidget() {
     return Container(
       padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 241, 241, 241),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,38 +225,22 @@ class _MockSellScreenState extends State<MockSellScreen> {
     );
   }
 
-  Widget _buildConfirmedBox() {
-    return Container(
-      margin: EdgeInsets.only(top: 16),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 241, 241, 241),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('매도 확인', style: TextStyle(fontFamily: 'MinSans', color: Colors.blue, fontSize: 20, fontWeight: FontWeight.w800)),
-          SizedBox(height: 8),
-          Text('체결 가격: ${_price.toStringAsFixed(0)}원\n매도 수량: $confirmedQuantity주'),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSellButton() {
     return Container(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: confirmedQuantity != null ? _showConfirmationDialog : null, 
+        onPressed: confirmedQuantity != null ? _showConfirmationDialog : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
+          backgroundColor: const Color(0xFF67CA98),
           padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: Text('매도하기', style: TextStyle(color: Colors.white, fontSize: 18)),
       ),
     );
+  }
+
+  Widget _buildErrorMessageWidget() {
+    return Text(_errorMessage ?? '', style: TextStyle(color: Colors.red, fontSize: 16));
   }
 }

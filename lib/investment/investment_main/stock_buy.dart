@@ -8,6 +8,7 @@ import 'dialog/buy_error_message_widget.dart';
 import 'dialog/buy_confirmation_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; 
+import '../investment_main/reservation/reservation_buy_settings.dart';
 
 class MockBuyScreen extends StatefulWidget {
   final String stockCode;
@@ -58,10 +59,9 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
     final response = await http.get(Uri.parse('http://withyou.me:8080/current-price?stockCode=${widget.stockCode}'));
 
     if (response.statusCode == 200) {
-      
       final data = json.decode(response.body);
       setState(() {
-        _price = data['stockPrice']?.toDouble();  
+        _price = data['stockPrice']?.toDouble() ?? 0.0;
       });
     } else {
       setState(() {
@@ -158,7 +158,18 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
             _buildPriceWidget(),
             SizedBox(height: 20),
             _buildQuantityWidget(),
-            if (confirmedQuantity != null) _buildConfirmedBox(),
+            SizedBox(height: 16),
+           Container(
+            width: double.infinity,
+            child: Divider(
+              color: Colors.grey,
+              thickness: 1,
+              height: 1, // 높이 조절
+            ),
+          ),
+
+            ReservationSettingsScreen(currentPrice: _price ?? 0.0,stockCode: widget.stockCode),
+
             SizedBox(height: 30),
             Spacer(),
             _buildBuyButton(),
@@ -173,7 +184,11 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
     return _balance != null
         ? Text(
             '보유 금액 ${_balance!.toStringAsFixed(0)}원',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20, 
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(187, 0, 0, 0),  // 보유 금액 텍스트 색
+            ),
           )
         : Shimmer.fromColors(
             baseColor: Colors.white,
@@ -186,7 +201,7 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color.fromARGB(255, 241, 241, 241),
+        color: Colors.white,  
         borderRadius: BorderRadius.circular(12),
       ),
       width: double.infinity,
@@ -196,7 +211,7 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
           Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
           SizedBox(height: 8),
           Text(
-            _price != null ? '${_price!.toStringAsFixed(0)}원' : '로딩 중...',
+            _price != null ? '${_price!.toStringAsFixed(0)}원' : '0원',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
@@ -207,10 +222,7 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
   Widget _buildQuantityWidget() {
     return Container(
       padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 241, 241, 241),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,35 +241,13 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
     );
   }
 
-Widget _buildConfirmedBox() {
-  return Container(
-    margin: EdgeInsets.only(top: 16),
-    padding: EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Color.fromARGB(255, 241, 241, 241),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    width: double.infinity,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('매수 확인', style: TextStyle(fontFamily: 'MinSans', color: Colors.red, fontSize: 20, fontWeight: FontWeight.w800)),
-        SizedBox(height: 8),
-        Text(
-          '체결 가격: ${( _price != null ? _price!.toStringAsFixed(0) : "정보 없음")}원\n구매 수량: $confirmedQuantity주',
-        ),
-      ],
-    ),
-  );
-}
-
   Widget _buildBuyButton() {
     return Container(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: confirmedQuantity != null ? _showConfirmationDialog : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
+          backgroundColor: const Color(0xFF67CA98),
           padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),

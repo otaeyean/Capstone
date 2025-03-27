@@ -18,6 +18,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final ChatbotService _chatbotService = ChatbotService();
   String userId = '';
 
+  final List<String> fixedQuestions = [
+    "주식 시작 방법은?",
+    "매수/매도?",
+    "투자금 설정은 어떻게 해야 적절할까?"
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -40,8 +46,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     try {
       final response = await http.get(url, headers: {'accept': 'application/json'});
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data =
-            json.decode(utf8.decode(response.bodyBytes));
+        final Map<String, dynamic> data = json.decode(utf8.decode(response.bodyBytes));
         List<dynamic> content = data['content'];
         content.sort((a, b) => (a['id'] as int).compareTo(b['id'] as int));
 
@@ -52,16 +57,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           loadedMessages.add({'sender': sender, 'message': chat['message']});
         }
 
-        if (loadedMessages.length % 2 != 0) {
-          loadedMessages.add({'sender': 'bot', 'message': ''});
+        if (loadedMessages.isEmpty) {
+          loadedMessages.add({'sender': 'bot', 'message': '무엇을 도와드릴까요?'});
         }
 
         setState(() {
           chatMessages = loadedMessages;
-          if (chatMessages.isEmpty) {
-            chatMessages.add({'sender': 'bot', 'message': '무엇을 도와드릴까요?'});
-          }
         });
+
         _scrollToBottom();
       } else {
         print('Failed to load chat history: ${response.statusCode}');
@@ -105,82 +108,81 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     }
   }
 
-  // 고정 질문 처리 함수
-  Future<void> _handleFixedQuestion(String question) async {
-    setState(() {
-      chatMessages.add({'sender': 'user', 'message': question});
-    });
-
-    // 서버에 질문 보내기
-    try {
-      String botResponse = await _chatbotService.sendMessage(question, userId);
-      setState(() {
-        chatMessages.add({'sender': 'bot', 'message': botResponse});
-      });
-      _scrollToBottom();
-    } catch (error) {
-      print('Error sending fixed question: $error');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('AI 챗봇'),
-        backgroundColor: Colors.white,
+        toolbarHeight: 80,
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF7CC993), Color(0xFF22B379)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '위드유 챗봇입니다!',
+              style: TextStyle(fontSize: 25, color: Colors.white),
+            ),
+            SizedBox(width: 10),
+            Icon(Icons.waving_hand, size: 30, color: Colors.white),
+          ],
+        ),
       ),
       body: Column(
         children: [
-          // 고정 질문 영역
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround, // 각 질문을 가로로 정렬
+          //고정질문부분
+                  Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF7CC993), Color(0xFF22B379)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
               children: [
-                GestureDetector(
-                  onTap: () => _handleFixedQuestion("주식 시작 방법은?"),
-                  child: Chip(
-                    backgroundColor: Colors.black,  // 배경색을 검정으로 설정
-                    label: Text(
-                      "주식 시작 방법?",
-                      style: TextStyle(color: Colors.white),  // 텍스트 색을 흰색으로 설정
-                    ),
-                  ),
+                Text(
+                  "자주 묻는 질문",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
-                GestureDetector(
-                  onTap: () => _handleFixedQuestion("매수/매도?"),
-                  child: Chip(
-                    backgroundColor: Colors.black,
-                    label: Text(
-                      "매수/매도?",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _handleFixedQuestion("투자금 설정은 어떻게 해야 적절할까?"),
-                  child: Chip(
-                    backgroundColor: Colors.black,
-                    label: Text(
-                      "투자금 설정은 어떻게 해야 적절할까?",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                SizedBox(height: 5),
+                ListView.builder(
+                  shrinkWrap: true, // 스크롤 설정
+                  itemCount: fixedQuestions.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      color: Colors.white, // 질문 카드 배경색
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      child: ListTile(
+                        title: Text(fixedQuestions[index]),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          _addUserMessage(fixedQuestions[index]);
+                        },
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
           ),
-
-          // 채팅 메시지 영역
           Expanded(
             child: ChatMessages(chatMessages: chatMessages, scrollController: _scrollController),
           ),
-          // 사용자 입력 필드
           ChatInput(
             messageController: _messageController,
-            onSendMessage: _addUserMessage,
+            onSendMessage: (message) {
+              _addUserMessage(message);
+            },
           ),
         ],
       ),

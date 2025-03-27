@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
@@ -8,10 +7,10 @@ import 'chart/chart_main.dart';
 import './news/news.dart';
 import './investment_main/mock_investment_screen.dart';
 import './detail_widgets/description.dart';
-import 'package:stockapp/server/investment/stock_description_server.dart'; // API 요청 추가
-import 'package:stockapp/investment/detail_widgets/stock_info.dart'; // ✅ StockInfo 추가
+import 'package:stockapp/server/investment/stock_description_server.dart'; 
+import 'package:stockapp/investment/detail_widgets/stock_info.dart'; 
 import 'package:stockapp/investment/detail_widgets/info.dart';
-import 'package:http/http.dart' as http; // 추가: HTTP 요청을 위한 라이브러리
+import 'package:http/http.dart' as http; 
 
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
@@ -134,8 +133,8 @@ Future<void> _loadFavoriteStatus() async {
     final stock = {
       'name': widget.stock['stockName'] ?? '이름 없음',
       'price': widget.stock['currentPrice'].toString(),
-      'rise_percent': _parseDouble(widget.stock['changeRate']), // ✅ 수정
-      'fall_percent': _parseDouble(widget.stock['changeRate']), // ✅ 수정
+      'rise_percent': _parseDouble(widget.stock['changeRate']), 
+      'fall_percent': _parseDouble(widget.stock['changeRate']), 
       'quantity': widget.stock['tradeVolume'] ?? 0,
       'stockCode': widget.stock['stockCode'] ?? '',
     };
@@ -193,13 +192,17 @@ Future<void> _loadFavoriteStatus() async {
               child: Column(
                 children: [
                   TabBar(
-                    tabs: [
-                      Tab(text: '차트'),
-                      Tab(text: '모의 투자'),
-                      Tab(text: '뉴스'),
-                      Tab(text: '상세 정보'),
-                    ],
-                  ),
+                  tabs: [
+                    Tab(text: '차트'),
+                    Tab(text: '모의 투자'),
+                    Tab(text: '뉴스'),
+                    Tab(text: '상세 정보'),
+                  ],
+                  labelColor: Colors.green, // 선택된 탭 텍스트 색상
+                  unselectedLabelColor: Colors.black, // 선택되지 않은 탭 텍스트 색상
+                  indicatorColor: Colors.green, // 선택된 탭 아래 선 색상
+                ),
+
                   Expanded(
                     child: TabBarView(
                       children: [
@@ -209,11 +212,11 @@ Future<void> _loadFavoriteStatus() async {
                             double chartHeight = constraints.maxHeight * 0.5; // 화면 높이에 비례하여 차트 크기 설정
                             return SizedBox(
                               height: chartHeight,
-                              child: StockChartMain(stockCode: widget.stock['stockCode']), // 차트 적용
+                              child: StockChartMain(stockCode: widget.stock['stockCode']), 
                             );
                           },
                         ),
-                        MockInvestmentScreen(stockCode: stockCode), // stockCode 전달
+                        MockInvestmentScreen(stockCode: stockCode), 
                         NewsScreen(stockName: stockName),
                         SingleChildScrollView(
                           child: Column(
@@ -223,7 +226,7 @@ Future<void> _loadFavoriteStatus() async {
                                   : companyDescription != null
                                       ? StockDescription(stock: stock, description: companyDescription!)
                                       : Text('회사 소개 정보를 불러올 수 없습니다.', style: TextStyle(color: Colors.red)),
-                              if (stockCode.isNotEmpty) StockInfoDetail(stockCode: stockCode), // stockCode 체크
+                              if (stockCode.isNotEmpty) StockInfoDetail(stockCode: stockCode), 
                             ],
                           ),
                         ),
