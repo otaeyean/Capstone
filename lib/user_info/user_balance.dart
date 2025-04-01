@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // intl 패키지 추가
 import '../server/userInfo/user_balance_server.dart';
 import '../server/userInfo/portfolio_server.dart';
 
 class UserBalance extends StatefulWidget {
-  final String userId; 
+  final String userId;
 
-  UserBalance({required this.userId}); 
+  UserBalance({required this.userId});
 
   @override
   _UserBalanceState createState() => _UserBalanceState();
@@ -15,6 +16,9 @@ class UserBalance extends StatefulWidget {
 class _UserBalanceState extends State<UserBalance> {
   double balance = 0;
   late Timer _timer;
+
+  // 포맷터 선언
+  final NumberFormat formatter = NumberFormat('#,###'); // 숫자 포맷터
 
   @override
   void initState() {
@@ -148,12 +152,12 @@ class _UserBalanceState extends State<UserBalance> {
         Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(color:Color.fromARGB(255, 2, 32, 50), borderRadius: BorderRadius.circular(12)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("보유 금액", style: TextStyle(color: Colors.white, fontSize: 16)),
-              Text("${balance.toStringAsFixed(0)} 원",
+              Text("${formatter.format(balance)} 원", // 쉼표 포맷 적용
                   style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             ],
           ),

@@ -27,28 +27,30 @@ class StockChartControls extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ToggleButtons(
-            isSelected: periods.map((period) => period == selectedPeriod).toList(),
-            onPressed: (int index) {
-              onPeriodSelected(periods[index]);
-            },
-            borderRadius: BorderRadius.circular(5),
-            selectedColor: Colors.white,
-            color: Colors.black,
-            fillColor: Colors.blue,
-            borderColor: Colors.grey,
-            selectedBorderColor: Colors.blue,
-            constraints: const BoxConstraints(minWidth: 60, minHeight: 35),
-            children: periods.map((period) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Text(
-                  periodLabels[period] ?? period,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-              );
-            }).toList(),
-          ),
+         ToggleButtons(
+  isSelected: periods.map((period) => period == selectedPeriod).toList(),
+  onPressed: (int index) {
+    onPeriodSelected(periods[index]);
+  },
+  borderRadius: BorderRadius.circular(5),
+  selectedColor: Colors.white,
+  color: Colors.black,
+  fillColor: const Color(0xFF67CA98), // 선택된 버튼 초록색
+  hoverColor: const Color(0xFFB5E8D0), // ✅ 마우스 hover 시 연한 초록색
+  borderColor: Colors.grey,
+  selectedBorderColor: const Color(0xFF67CA98),
+  constraints: const BoxConstraints(minWidth: 60, minHeight: 35),
+  children: periods.map((period) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: Text(
+        periodLabels[period] ?? period,
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+    );
+  }).toList(),
+),
+
           SizedBox(width: 20),
           Row(
             children: [

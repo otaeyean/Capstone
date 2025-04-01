@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                   TextSpan(
                     text: '로그인',
                     style: TextStyle(
-                      color: const Color.fromARGB(173, 13, 13, 14),
+                      color: Color(0xFF67CA98 ),
                       fontFamily: "GmarketBold",
                     ),
                   ),
@@ -119,12 +119,12 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            Text('닉네임', style: TextStyle(fontSize: 16, fontFamily: "GmarketBold")),
+            Text('아이디', style: TextStyle(fontSize: 16, fontFamily: "GmarketBold")),
             SizedBox(height: 8),
             TextField(
               controller: _nicknameController,
               decoration: InputDecoration(
-                hintText: '닉네임을 입력해주세요',
+                hintText: '아이디를 입력해주세요',
                 hintStyle: TextStyle(fontFamily: "GmarketMedium"),
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -165,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Color(0xFF67CA98 ),
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(

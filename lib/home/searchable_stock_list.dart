@@ -11,22 +11,24 @@ class SearchableStockList extends StatefulWidget {
 }
 
 class _SearchableStockListState extends State<SearchableStockList> {
-  List<Map<String, dynamic>> filteredStocks = [];  // 필터링된 주식 목록을 저장
+  List<Map<String, dynamic>> filteredStocks = [];
   TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    filteredStocks = [];  // 초기에는 빈 리스트로 설정하여 자동완성 목록을 숨깁니다.
+    filteredStocks = [];
   }
 
   void _filterStocks(String query) {
     setState(() {
       if (query.isEmpty) {
-        filteredStocks = [];  // 검색어가 없으면 빈 리스트로 설정하여 자동완성 목록을 숨깁니다.
+        filteredStocks = [];
       } else {
         filteredStocks = widget.stockList
-            .where((stock) => stock['stockName']!.toLowerCase().contains(query.toLowerCase()))
+            .where((stock) => stock['stockName']!
+                .toLowerCase()
+                .contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -36,18 +38,32 @@ class _SearchableStockListState extends State<SearchableStockList> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 검색 입력창
+        // ✅ 검색창
         TextField(
           controller: _controller,
-          onChanged: _filterStocks,  // 사용자가 입력할 때마다 _filterStocks 호출
+          onChanged: _filterStocks,
           decoration: InputDecoration(
-            hintText: '검색',
-            prefixIcon: Icon(Icons.search),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            hintText: '종목 검색', // ✅ 힌트 텍스트
+            hintStyle: TextStyle(color: Colors.grey),
+            prefixIcon: Icon(Icons.search, color: Colors.grey),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.green, width: 2), // ✅ 초록색 테두리
+              borderRadius: BorderRadius.circular(12),
+            ),
+            contentPadding:
+                EdgeInsets.symmetric(vertical: 18, horizontal: 16),
           ),
+          style: TextStyle(fontSize: 16),
         ),
-        // 자동완성 목록을 보여줄 때
-        if (filteredStocks.isNotEmpty)  // 필터링된 결과가 있을 때만 리스트 표시
+
+        SizedBox(height: 10),
+
+        // ✅ 자동완성 리스트
+        if (filteredStocks.isNotEmpty)
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -75,7 +91,8 @@ class _SearchableStockListState extends State<SearchableStockList> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => StockDetailScreen(stock: filteredStocks[index]),
+                        builder: (context) => StockDetailScreen(
+                            stock: filteredStocks[index]),
                       ),
                     );
                   },

@@ -76,7 +76,7 @@ class _StockChartViewState extends State<StockChartView> {
           children: [
             Container(
               height: 60, // 회색 배경 높이
-              color: Colors.grey[100], // ✅ 회색 배경 추가
+              color: Colors.white, // ✅ 회색 배경 추가
               child: Center( // ✅ 버튼을 중앙에 배치
                 child: StockChartControls(
                   selectedPeriod: widget.stockProvider.selectedPeriod,
@@ -90,6 +90,7 @@ class _StockChartViewState extends State<StockChartView> {
             ),
             Stack(
               children: [
+                Container(height: 3, width: chartWidth, color: Colors.grey[300]),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Column(
@@ -206,14 +207,15 @@ Column(
           ),
         ],
       ),
+      
     ),
-
+Container(height: 3, width: chartWidth, color: Colors.grey[300]),
     // ✅ 거래량 차트 아래에 회색 여백 추가
    SizedBox(
   height: MediaQuery.of(context).size.height * 0.1, // 화면 높이 20% 차지
   width: chartWidth,
   child: Container(
-    color: Colors.grey[100],  // ✅ 바닥 끝까지 회색 적용
+    color: Colors.white,  // ✅ 바닥 끝까지 흰색색 적용
   ),
 ),
 

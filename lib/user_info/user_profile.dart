@@ -16,7 +16,7 @@ class UserProfile extends StatelessWidget {
         ),
         SizedBox(width: 10),
         Text(
-          "$userId 님!\n즐거운 주식 되세요~", 
+          "$userId 님!\n즐거운 주식 되세요", 
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ],

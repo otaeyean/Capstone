@@ -56,7 +56,7 @@ class WelcomeBox extends StatelessWidget {
       },
       child: Container(
         padding: EdgeInsets.all(16.0),
-        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+        decoration: BoxDecoration(color: Color(0xFF67CA98 ), borderRadius: BorderRadius.circular(8.0)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -109,7 +109,7 @@ Future<Map<String, dynamic>> _fetchPortfolioData(String userId) async {
       },
       child: Container(
         padding: EdgeInsets.all(16.0),
-        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+        decoration: BoxDecoration(color: Color(0xFF67CA98), borderRadius: BorderRadius.circular(8.0)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -137,7 +137,7 @@ Future<Map<String, dynamic>> _fetchPortfolioData(String userId) async {
   Widget _loadingWidget() {
     return Container(
       padding: EdgeInsets.all(16.0),
-      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+      decoration: BoxDecoration(color: Color(0xFF75BEA9), borderRadius: BorderRadius.circular(8.0)),
       child: Center(child: CircularProgressIndicator(color: Colors.white)),
     );
   }
