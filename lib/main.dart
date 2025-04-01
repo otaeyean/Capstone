@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'NotoSans',
         primarySwatch: Colors.blue,
+        canvasColor: Colors.white ,
         scaffoldBackgroundColor: Colors.white, // 전체 배경을 흰색으로 설정
       ),
       debugShowCheckedModeBanner: false, // 디버그 배너 제거
@@ -71,9 +72,8 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: Color(0xFF67CA98 ),
+        unselectedItemColor: Colors.grey[300],
         elevation: 0,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),

@@ -9,8 +9,8 @@ class StockSortHeader extends StatelessWidget {
 
         // 🔹 테이블 헤더
         Container(
-          color: Colors.black,
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          color:Color(0xFF67CA98 ) ,
+          padding: EdgeInsets.symmetric(vertical: 13, horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

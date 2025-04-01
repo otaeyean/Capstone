@@ -218,8 +218,8 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
           style: TextStyle(
               fontSize: 14,
               fontWeight: selectedSort == option ? FontWeight.bold : FontWeight.normal,
-              color: selectedSort == option ? Colors.blue : Colors.black)),
-      trailing: selectedSort == option ? Icon(Icons.check, color: Colors.blue) : null,
+              color: selectedSort == option ? Color(0xFF67CA98 ) : Colors.black)),
+      trailing: selectedSort == option ? Icon(Icons.check, color: Color(0xFF67CA98 )) : null,
       onTap: () {
         Navigator.pop(context);
         setState(() {
@@ -248,7 +248,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                 isSearchLoading
                     ? Center(child: CircularProgressIndicator())
                     : SearchableStockList(stockList: searchStockList), // 검색 위젯에 검색 데이터 전달
-
+                 SizedBox(height: 30),
                 // 🔹 정렬 및 필터 UI
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -266,7 +266,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: selectedCategory == category ? Colors.red : Colors.black,
+                                  color: selectedCategory == category ? Color(0xFF67CA98 ): Colors.grey[350],
                                 ),
                               ),
                             ),
@@ -278,7 +278,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                       margin: EdgeInsets.only(right: 16),
                       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: Color.fromARGB(255, 116, 233, 174),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: TextButton(
@@ -286,8 +286,8 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(selectedSort, style: TextStyle(color: Colors.black, fontSize: 14)),
-                            Icon(Icons.arrow_drop_down, color: Colors.black, size: 18),
+                            Text(selectedSort, style: TextStyle(color: Colors.white, fontSize: 14)),
+                            Icon(Icons.arrow_drop_down, color: Colors.white, size: 18),
                           ],
                         ),
                       ),
@@ -297,14 +297,15 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                 StockSortHeader(),
 
                 // 🔹 주식 리스트
-                Expanded(
-                  child: stocks.isEmpty
-                      ? Center(child: Text("데이터 없음", style: TextStyle(fontSize: 18, color: Colors.grey)))
-                      : StockList(
-                          stocks: List<Map<String, dynamic>>.from(stocks),
-                          isTradeVolumeSelected: selectedSort == "거래량순",
-                        ),
-                ),
+               Flexible(
+  flex: 1,
+  child: stocks.isEmpty
+      ? Center(child: Text("데이터 없음", style: TextStyle(fontSize: 18, color: Colors.grey)))
+      : StockList(
+          stocks: List<Map<String, dynamic>>.from(stocks),
+          isTradeVolumeSelected: selectedSort == "거래량순",
+        ),
+),
               ],
             ),
     );

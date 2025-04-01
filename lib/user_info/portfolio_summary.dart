@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // intl 패키지 추가
 import 'package:stockapp/server/userInfo/portfolio_server.dart';
 
 class PortfolioSummary extends StatefulWidget {
@@ -18,10 +19,12 @@ class _PortfolioSummaryState extends State<PortfolioSummary> {
   String errorMessage = '';
   Timer? _timer;
 
+  final NumberFormat formatter = NumberFormat('#,###'); // 숫자 포맷터 선언
+
   @override
   void initState() {
     super.initState();
-    _fetchPortfolio(); 
+    _fetchPortfolio();
 
     _timer = Timer.periodic(Duration(seconds: 10), (timer) {
       _fetchPortfolio();
@@ -30,7 +33,7 @@ class _PortfolioSummaryState extends State<PortfolioSummary> {
 
   @override
   void dispose() {
-    _timer?.cancel(); 
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -51,13 +54,14 @@ class _PortfolioSummaryState extends State<PortfolioSummary> {
     }
   }
 
+  // 쉼표 추가: 금액 포맷
   String _formatInt(dynamic value) {
     if (value is double) {
-      return value.toInt().toString(); 
+      return formatter.format(value.toInt()); // 쉼표 추가
     } else if (value is int) {
-      return value.toString();
+      return formatter.format(value); // 쉼표 추가
     }
-    return "0"; 
+    return "0"; // 기본값 0
   }
 
   // 수익률을 double 형으로 처리하는 메소드
@@ -74,7 +78,7 @@ class _PortfolioSummaryState extends State<PortfolioSummary> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black),
+        border: Border.all(color: Color(0xFF67CA98)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

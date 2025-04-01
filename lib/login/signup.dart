@@ -97,18 +97,18 @@ class _SignupPageState extends State<SignupPage> {
                   TextSpan(text: ' 회원님의\n '),
                   TextSpan(
                     text: '계정',
-                    style: TextStyle(color: const Color.fromARGB(173, 13, 13, 14), fontFamily: "GmarketBold"),
+                    style: TextStyle(color: Color(0xFF67CA98 ), fontFamily: "GmarketBold"),
                   ),
                   TextSpan(text: '을 만들어주세요.\n\n', style: TextStyle(fontFamily: "GmarketBold")),
                 ],
               ),
             ),
-            Text('닉네임', style: TextStyle(fontSize: 16, fontFamily: "GmarketBold")),
+            Text('아이디', style: TextStyle(fontSize: 16, fontFamily: "GmarketBold")),
             SizedBox(height: 8),
             TextField(
               controller: _nicknameController,
               decoration: InputDecoration(
-                hintText: '닉네임',
+                hintText: '아이디',
                 hintStyle: TextStyle(fontFamily: "GmarketMedium"),
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -143,7 +143,7 @@ class _SignupPageState extends State<SignupPage> {
                   onPressed: _signUp,
                   child: Text('회원가입 하기', style: TextStyle(color: Colors.white, fontFamily: "GmarketBold")),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Color(0xFF67CA98 ),
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(

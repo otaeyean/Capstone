@@ -8,6 +8,9 @@ import 'stock_ranking.dart';
 import 'welcome_box.dart';
 import '/login/login.dart';
 import 'searchable_stock_list.dart';
+import 'package:stockapp/data/user_stock_model.dart';
+import 'package:stockapp/server/userInfo/stock_service.dart';
+import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -17,12 +20,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoggedIn = false;
   List<Map<String, String>> stockList = [];
+  List<UserStockModel> _userStocks = []; // ✅ 실제 보유 종목 리스트
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
     _fetchStockList();
+    _fetchUserStocks(); // ✅ 종목 불러오기 호출
   }
 
   _checkLoginStatus() async {
@@ -47,6 +52,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _fetchUserStocks() async {
+    final userId = await AuthService.getUserId();
+    if (userId != null && userId.isNotEmpty) {
+      final stocks = await StockService.fetchStockList(userId);
+      setState(() {
+        _userStocks = stocks;
+      });
+    }
+  }
+
   _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('nickname');
@@ -68,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: Color(0xFF67CA98 ),
         elevation: 0,
         actions: [
           TextButton(
@@ -96,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: SearchableStockList(stockList: stockList), 
+              child: SearchableStockList(stockList: stockList),
             ),
             SizedBox(height: 20),
             Padding(
@@ -104,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: WelcomeBox(),
             ),
             SizedBox(height: 20),
-            if (isLoggedIn) ...[
+            if (isLoggedIn && _userStocks.isNotEmpty) ...[
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: GestureDetector(
@@ -119,22 +134,30 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.bar_chart, color: Colors.black),
+                          Icon(Icons.bar_chart, color: Color(0xFF03314B ) ),
                           SizedBox(width: 8),
-                          Text("내 종목보기", style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, fontSize: 18)),
+                          Text(
+                            "내 종목보기",
+                            style: TextStyle(
+                              fontFamily: 'MinSans', 
+                              fontWeight: FontWeight.w900, 
+                              fontSize: 18, 
+                              color: Color(0xFF03314B)
+                            ),
+                          ),
                         ],
                       ),
-                      Icon(Icons.arrow_forward_ios, size: 18, color: Colors.black),
+                      Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFF03314B ) ),
                     ],
                   ),
                 ),
               ),
               SizedBox(height: 10),
               SizedBox(
-                height: 300, 
+                height: 300,
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: StockListWidget(),
+                  child: StockListWidget(stocks: _userStocks),
                 ),
               ),
               SizedBox(height: 5),
@@ -145,7 +168,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Icon(Icons.emoji_events, color: Colors.amber),
                   SizedBox(width: 8),
-                  Text("주식 랭킹", style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, fontSize: 18)),
+                  Text(
+                    "주식 랭킹", 
+                    style: TextStyle(
+                      fontFamily: 'MinSans', 
+                      fontWeight: FontWeight.w900, 
+                      fontSize: 18,
+                      color: Color(0xFF03314B) // 텍스트 색상 추가
+                    )
+                  ),
                 ],
               ),
             ),
