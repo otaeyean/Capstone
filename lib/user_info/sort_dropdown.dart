@@ -22,9 +22,9 @@ class _SortDropdownState extends State<SortDropdown> {
     List<UserStockModel> sorted = List.from(widget.stocks);
 
     if (sortType == "수익률 순") {
-      sorted.sort((a, b) => b.profitRate.compareTo(a.profitRate));
+      sorted.sort((a, b) => (b.profitRate ?? 0).compareTo(a.profitRate ?? 0));
     } else if (sortType == "보유 자산 순") {
-      sorted.sort((a, b) => b.totalValue.compareTo(a.totalValue));
+      sorted.sort((a, b) => (b.totalValue ?? 0).compareTo(a.totalValue ?? 0));
     }
 
     widget.onSortChanged(sorted);
