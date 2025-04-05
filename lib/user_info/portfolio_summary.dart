@@ -1,17 +1,62 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // intl 패키지 추가
-import 'package:stockapp/server/userInfo/portfolio_server.dart';
 
-class PortfolioSummary extends StatefulWidget {
-  final String userId;
-  PortfolioSummary({required this.userId});
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:stockapp/home/searchable_stock_list.dart';
+import 'package:stockapp/server/userInfo/portfolio_server.dart';
+import 'package:stockapp/server/userInfo/user_balance_server.dart';
+
+class StockSortHeader extends StatelessWidget {
+  final String title;
+  const StockSortHeader({this.title = '📄 전체 주식 리스트'});
 
   @override
-  _PortfolioSummaryState createState() => _PortfolioSummaryState();
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Color(0xFFEEF9F5),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            )
+          ],
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Icon(Icons.list_alt_rounded, color: Color(0xFF67CA98), size: 20),
+            SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A2E35),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _PortfolioSummaryState extends State<PortfolioSummary> {
+class CombinedBalanceSummary extends StatefulWidget {
+  final String userId;
+  const CombinedBalanceSummary({required this.userId});
+
+  @override
+  State<CombinedBalanceSummary> createState() => _CombinedBalanceSummaryState();
+}
+
+class _CombinedBalanceSummaryState extends State<CombinedBalanceSummary> {
+  double balance = 0;
   String totalPurchase = "0 원";
   String totalEvaluation = "0 원";
   String totalProfit = "0 원";
@@ -19,16 +64,14 @@ class _PortfolioSummaryState extends State<PortfolioSummary> {
   String errorMessage = '';
   Timer? _timer;
 
-  final NumberFormat formatter = NumberFormat('#,###'); // 숫자 포맷터 선언
+  final NumberFormat formatter = NumberFormat('#,###');
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _fetchPortfolio();
-
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      _fetchPortfolio();
-    });
+    _fetchData();
+    _timer = Timer.periodic(Duration(seconds: 10), (_) => _fetchData());
   }
 
   @override
@@ -37,89 +80,226 @@ class _PortfolioSummaryState extends State<PortfolioSummary> {
     super.dispose();
   }
 
-  void _fetchPortfolio() async {
+  Future<void> _fetchData() async {
     try {
       final data = await PortfolioService.fetchPortfolioData(widget.userId);
       setState(() {
+        balance = data['balance'].toDouble();
         totalPurchase = "${_formatInt(data['totalPurchase'])} 원";
         totalEvaluation = "${_formatInt(data['totalEvaluation'])} 원";
         totalProfit = "${_formatInt(data['totalProfit'])} 원";
-        totalProfitRate = _formatProfitRate(data['totalProfitRate']); // 수익률만 다르게 처리
+        totalProfitRate = _formatProfitRate(data['totalProfitRate']);
         errorMessage = '';
       });
-    } catch (error) {
+    } catch (e) {
       setState(() {
         errorMessage = '데이터를 불러오는 중 오류가 발생했습니다.';
       });
     }
   }
 
-  // 쉼표 추가: 금액 포맷
   String _formatInt(dynamic value) {
     if (value is double) {
-      return formatter.format(value.toInt()); // 쉼표 추가
+      return formatter.format(value.toInt());
     } else if (value is int) {
-      return formatter.format(value); // 쉼표 추가
+      return formatter.format(value);
     }
-    return "0"; // 기본값 0
+    return "0";
   }
 
-  // 수익률을 double 형으로 처리하는 메소드
   String _formatProfitRate(dynamic value) {
     if (value is double) {
-      return "${value.toStringAsFixed(2)} %"; // 소수점 2자리까지 출력
+      return "${value.toStringAsFixed(2)} %";
     } else if (value is int) {
       return "$value %";
     }
     return "0 %";
   }
 
+  void _updateBalance() async {
+    double? newBalance = double.tryParse(_controller.text);
+    if (newBalance != null) {
+      bool success = await UserBalanceService().updateBalance(widget.userId, newBalance);
+      if (success) {
+        setState(() {
+          balance = newBalance;
+        });
+      }
+    }
+  }
+
+  void _resetBalance() async {
+    bool success = await UserBalanceService().resetBalance(widget.userId);
+    if (success) {
+      setState(() {
+        balance = 0;
+      });
+    }
+  }
+
+  void _showBalanceInputDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text("금액 입력", style: TextStyle(color: Colors.black)),
+          content: TextField(
+            controller: _controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: "금액을 입력하세요",
+              hintStyle: TextStyle(color: Colors.black45),
+            ),
+            style: TextStyle(color: Colors.black),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("취소", style: TextStyle(color: Colors.black)),
+            ),
+            TextButton(
+              onPressed: () {
+                _updateBalance();
+                Navigator.pop(context);
+              },
+              child: Text("확인", style: TextStyle(color: Colors.blue)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmResetBalance(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text("금액 초기화", style: TextStyle(color: Colors.black)),
+          content: Text("설정해놓으신 금액이 초기화됩니다. 진행하시겠습니까?", style: TextStyle(color: Colors.black)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("취소", style: TextStyle(color: Colors.black)),
+            ),
+            TextButton(
+              onPressed: () {
+                _resetBalance();
+                Navigator.pop(context);
+              },
+              child: Text("확인", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF67CA98)),
-        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [Color(0xFF001F3F), Color(0xFF003366)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            offset: Offset(0, 6),
+            blurRadius: 12,
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Table(
-            columnWidths: {
-              0: FlexColumnWidth(2),
-              1: FlexColumnWidth(3),
-            },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildTableRow("총매입", totalPurchase),
-              _buildTableRow("총평가", totalEvaluation),
-              _buildTableRow("총손익", totalProfit),
-              _buildTableRow("수익률", totalProfitRate),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("보유 금액", style: TextStyle(color: Colors.white70, fontSize: 16)),
+                  SizedBox(height: 6),
+                  Text("${formatter.format(balance)} 원", style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              Row(
+                children: [
+                  _iconButton(FontAwesomeIcons.gear, "금액설정", Color(0xFF64C38C), () => _showBalanceInputDialog(context), true),
+                  SizedBox(width: 10),
+                  _iconButton(FontAwesomeIcons.arrowRotateLeft, "초기화", Colors.redAccent, () => _confirmResetBalance(context)),
+                ],
+              )
             ],
           ),
-          if (errorMessage.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Text(
-                errorMessage,
-                style: TextStyle(color: Colors.red, fontSize: 14),
-              ),
-            ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildInfoColumn(FontAwesomeIcons.cartShopping, "총매입", totalPurchase),
+              _buildInfoColumn(FontAwesomeIcons.chartLine, "총평가", totalEvaluation),
+              _buildInfoColumn(FontAwesomeIcons.coins, "총손익", totalProfit),
+              _buildInfoColumn(FontAwesomeIcons.percent, "수익률", totalProfitRate),
+            ],
+          )
         ],
       ),
     );
   }
 
-  TableRow _buildTableRow(String title, String value) {
-    return TableRow(
+  Widget _buildInfoColumn(IconData icon, String label, String value) {
+    return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: FaIcon(icon, color: Colors.white, size: 20),
+          ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(value, textAlign: TextAlign.right),
+        SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(color: Colors.white70, fontSize: 13),
         ),
+        SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+        )
       ],
+    );
+  }
+
+  Widget _iconButton(IconData icon, String label, Color color, VoidCallback onTap, [bool greenStyle = false]) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+        decoration: BoxDecoration(
+          color: greenStyle ? Color(0xFF64C38C).withOpacity(0.15) : Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(8),
+          border: greenStyle ? Border.all(color: Color(0xFF64C38C).withOpacity(0.5)) : null,
+        ),
+        child: Row(
+          children: [
+            FaIcon(icon, color: color, size: 14),
+            SizedBox(width: 4),
+            Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500)),
+          ],
+        ),
+      ),
     );
   }
 }
