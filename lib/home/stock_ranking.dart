@@ -10,92 +10,51 @@ class StockRanking extends StatefulWidget {
 
 class _StockRankingState extends State<StockRanking> {
   String selectedMarket = "국내";
-  List<String> categories = ["상승률", "하락률", "거래량"];
-  int categoryIndex = 0;
-  List<Map<String, dynamic>> stockData = [];
-  List<Map<String, dynamic>> visibleRankings = [];
+  List<Map<String, dynamic>> risingStocks = [];
+  List<Map<String, dynamic>> fallingStocks = [];
   bool isLoading = true;
   bool isError = false;
-  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _loadStockData();
-    _startAutoSwitch();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
   }
 
   Future<void> _loadStockData() async {
-    if (!mounted) return;
-
     setState(() {
       isLoading = true;
       isError = false;
     });
 
-    List<Map<String, dynamic>> stocks = [];
-    String selectedCategory = categories[categoryIndex];
-
     try {
-      String endpoint = "";
-      if (selectedMarket == "국내") {
-        if (selectedCategory == "상승률") {
-          endpoint = "rise";
-        } else if (selectedCategory == "하락률") {
-          endpoint = "fall";
-        } else if (selectedCategory == "거래량") {
-          endpoint = "trade-volume";
-        }
-      } else {
-        if (selectedCategory == "상승률") {
-          endpoint = "rise/overseas";
-        } else if (selectedCategory == "하락률") {
-          endpoint = "fall/overseas";
-        } else if (selectedCategory == "거래량") {
-          endpoint = "trade-volume/overseas";
-        }
-      }
+      List<Map<String, dynamic>> rise = await fetchStockData(
+        selectedMarket == "국내" ? "rise" : "rise/overseas",
+      );
+      List<Map<String, dynamic>> fall = await fetchStockData(
+        selectedMarket == "국내" ? "fall" : "fall/overseas",
+      );
 
-      stocks = await fetchStockData(endpoint);
-      if (stocks.isEmpty) throw Exception("데이터 없음");
-
-      if (mounted) {
-        setState(() {
-          stockData = stocks;
-          visibleRankings = stockData.sublist(0, 5);
-          isLoading = false;
-        });
-      }
+      setState(() {
+        risingStocks = rise.take(5).toList();
+        fallingStocks = fall.take(5).toList();
+        isLoading = false;
+      });
     } catch (e) {
-      print("에러 발생: $e");
-      if (mounted) {
-        setState(() {
-          isError = true;
-          isLoading = false;
-        });
-      }
+      print("에러: $e");
+      setState(() {
+        isError = true;
+        isLoading = false;
+      });
     }
   }
 
-  void _startAutoSwitch() {
-    _timer = Timer.periodic(Duration(seconds: 3), (_) {
-      if (!mounted) return;
-      setState(() {
-        categoryIndex = (categoryIndex + 1) % categories.length;
-      });
-      _loadStockData();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
+@override
+Widget build(BuildContext context) {
+  return Container(
+    color: Colors.white,
+    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+    child: Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -105,14 +64,9 @@ class _StockRankingState extends State<StockRanking> {
             _buildMarketButton("해외"),
           ],
         ),
-        SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: categories.map((c) => _buildCategoryButton(c)).toList(),
-        ),
-        SizedBox(height: 10),
+        SizedBox(height: 16),
         if (isLoading)
-          Center(child: CircularProgressIndicator())
+          Center(child: CircularProgressIndicator(color: Color(0xFF03314B)))
         else if (isError)
           Center(
             child: Text(
@@ -121,88 +75,78 @@ class _StockRankingState extends State<StockRanking> {
             ),
           )
         else
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: Duration(milliseconds: 800), // 부드럽게 0.8초 동안
-              transitionBuilder: (child, animation) {
-                // 애니메이션을 Fade로 처리
-                return FadeTransition(opacity: animation, child: child);
-              },
-              child: _buildStockList(),
+          _buildDualColumnList(), // <-- 여기서 Expanded나 ScrollView 없이 바로 배치
+      ],
+    ),
+  );
+}
+
+
+Widget _buildMarketButton(String market) {
+  bool isSelected = selectedMarket == market;
+
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        selectedMarket = market;
+      });
+      _loadStockData();
+    },
+    child: AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      margin: EdgeInsets.only(right: 10),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.white : Color(0xFFE9ECEF),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: isSelected ? Color(0xFF03314B) : Colors.transparent,
+          width: 1.5,
+        ),
+        boxShadow: isSelected
+            ? [
+                BoxShadow(color: Colors.black12,blurRadius: 6,offset: Offset(0, 2) )
+              ]
+            : [],
+      ),
+      child: Text(
+        market,
+        style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold,color: isSelected ? Color(0xFF03314B) : Colors.black54),
+      ),
+    ),
+  );
+}
+
+  Widget _buildDualColumnList() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _buildStockList(risingStocks, true)),
+        SizedBox(width: 12),
+        Expanded(child: _buildStockList(fallingStocks, false)),
+      ],
+    );
+  }
+
+Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          Text(isRising ? "상승률" : "하락률",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15,
+          color: isRising ? Colors.red : Colors.blue,
             ),
           ),
-      ],
-    );
-  }
-
-  Widget _buildMarketButton(String market) {
-    bool isSelected = selectedMarket == market;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedMarket = market;
-          categoryIndex = 0;
-          _loadStockData();
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFF03314B ) : Colors.white,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: Color(0xFF03314B )),
-        ),
-        child: Text(
-          market,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Color(0xFF03314B ),
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildCategoryButton(String category) {
-    bool isSelected = categories[categoryIndex] == category;
-    Color iconColor = isSelected
-        ? (category == "상승률"
-            ? Colors.red
-            : category == "하락률"
-                ? Colors.blue
-                : Colors.orange)
-        : Colors.grey;
-
-    IconData iconData = category == "상승률"
-        ? Icons.trending_up
-        : category == "하락률"
-            ? Icons.trending_down
-            : Icons.autorenew;
-
-    return Column(
-      children: [
-        Icon(iconData, color: iconColor, size: 20),
-        Text(
-          category,
-          style: TextStyle(
-            color: iconColor,
-            fontSize: 14,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStockList() {
-    return Column(
-      key: ValueKey(categoryIndex),
-      children: visibleRankings.map((stock) {
-        int rank = stockData.indexOf(stock) + 1;
+      SizedBox(height: 8),
+      ...stocks.asMap().entries.map((entry) {
+        int index = entry.key;
+        Map<String, dynamic> stock = entry.value;
         double changeRate = stock['changeRate'];
-        bool isRising = changeRate >= 0;
         Color textColor = isRising ? Colors.red : Colors.blue;
-        String arrow = isRising ? '▲' : '▼';
 
         return GestureDetector(
           onTap: () {
@@ -213,38 +157,52 @@ class _StockRankingState extends State<StockRanking> {
               ),
             );
           },
-          child: Card(
-            color: Colors.white,
-            elevation: 2,
-            margin: EdgeInsets.symmetric(vertical: 5),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "$rank. ${stock['stockName']}",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        "${stock['currentPrice']} 원",
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor),
+          child: Container(
+            margin: EdgeInsets.symmetric(vertical: 6),
+            padding: EdgeInsets.all(14),
+            decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(color: Colors.grey.withOpacity(0.05),blurRadius: 4,offset: Offset(0, 2)),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // 왼쪽: 이름 + 가격
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(stock['stockName'],style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),
+                    ),
+                    SizedBox(height: 4),
+                    Text("${stock['currentPrice']} 원",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 13,color: textColor,),
+                    ),
+                  ],
+                ),
+
+                // 오른쪽: 상승/하락률 + 거래량
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // 상승률/하락률 뱃지
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),decoration: BoxDecoration(color: isRising ? const Color.fromARGB(255, 254, 235, 237) : const Color.fromARGB(255, 229, 241, 252),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      Text(
-                        "$arrow ${changeRate.toStringAsFixed(2)}%",
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textColor),
+                      child: Text(
+                        "${changeRate.toStringAsFixed(2)}%",
+                        style: TextStyle(fontWeight: FontWeight.bold,color: textColor,fontSize: 15),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    SizedBox(height: 4),
+                  ],
+                ),
+              ],
             ),
           ),
         );
-      }).toList(),
-    );
-  }
+      }),
+    ],
+  );
+}
 }

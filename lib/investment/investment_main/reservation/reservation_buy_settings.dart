@@ -156,7 +156,7 @@ class _ReservationSettingsScreenState extends State<ReservationSettingsScreen> {
                     Icon(Icons.access_time, color: Colors.yellow),
                     SizedBox(width: 8),
                     Text(
-                      '매수 예약하기',
+                      '예약하기',
                       style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
