@@ -43,7 +43,7 @@ class _SearchableStockListState extends State<SearchableStockList> {
           controller: _controller,
           onChanged: _filterStocks,
           decoration: InputDecoration(
-            hintText: '종목 검색', // ✅ 힌트 텍스트
+            hintText: '원하는 종목을 검색해보세요', // ✅ 힌트 텍스트
             hintStyle: TextStyle(color: Colors.grey),
             prefixIcon: Icon(Icons.search, color: Colors.grey),
             enabledBorder: OutlineInputBorder(

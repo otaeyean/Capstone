@@ -14,8 +14,7 @@ class BuyReservationSettingsScreen extends StatefulWidget {
   });
 
   @override
-  _BuyReservationSettingsScreenState createState() =>
-      _BuyReservationSettingsScreenState();
+  _BuyReservationSettingsScreenState createState() =>_BuyReservationSettingsScreenState();
 }
 
 class _BuyReservationSettingsScreenState
