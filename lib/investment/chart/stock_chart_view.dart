@@ -46,7 +46,7 @@ class _StockChartViewState extends State<StockChartView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         double chartWidth = constraints.maxWidth * _zoomLevel;
-        double chartHeight = 260 * _zoomLevel;
+        double chartHeight = 500 * _zoomLevel;
 
         List<StockPrice> filteredData =
             widget.stockProvider.stockPrices.where((stock) => stock.volume > 0).toList();
@@ -170,7 +170,7 @@ Column(
     // ✅ 거래량 차트
     SizedBox(
       width: chartWidth,
-      height: 100 * _zoomLevel,
+      height: 180 * _zoomLevel,
       child: SfCartesianChart(
         margin: EdgeInsets.zero,
         plotAreaBorderWidth: 0,
@@ -227,28 +227,36 @@ Container(height: 3, width: chartWidth, color: Colors.grey[300]),
         ),
 
         // ✅ 이동평균선 범례 (버튼 라인으로 이동)
-        Positioned(
-          top: 10,
-          left: 10,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(children: [Container(width: 8, height: 8, color: Colors.yellow), SizedBox(width: 4), Text("5", style: TextStyle(fontSize: 10))]),
-                SizedBox(width: 10),
-                Row(children: [Container(width: 8, height: 8, color: Colors.purple), SizedBox(width: 4), Text("10", style: TextStyle(fontSize: 10))]),
-                SizedBox(width: 10),
-                Row(children: [Container(width: 8, height: 8, color: Colors.green), SizedBox(width: 4), Text("30", style: TextStyle(fontSize: 10))]),
-              ],
-            ),
-          ),
+     Positioned(
+  top: 10,
+  left: 10,
+  child: Container(
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black12,
+          blurRadius: 4,
+          offset: Offset(2, 2),
         ),
+      ],
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(children: [Container(width: 12, height: 12, color: Colors.yellow), SizedBox(width: 6), Text("5", style: TextStyle(fontSize: 14))]),
+        SizedBox(width: 14),
+        Row(children: [Container(width: 12, height: 12, color: Colors.purple), SizedBox(width: 6), Text("10", style: TextStyle(fontSize: 14))]),
+        SizedBox(width: 14),
+        Row(children: [Container(width: 12, height: 12, color: Colors.green), SizedBox(width: 6), Text("30", style: TextStyle(fontSize: 14))]),
+      ],
+    ),
+  ),
+),
+
       ],
     ),
   ],
