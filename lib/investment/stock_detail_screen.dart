@@ -7,7 +7,7 @@ import 'chart/chart_main.dart';
 import './news/news.dart';
 import './investment_main/mock_investment_screen.dart';
 import './detail_widgets/description.dart';
-import 'package:stockapp/server/investment/stock_description_server.dart'; 
+import 'package:stockapp/server/investment/info/stock_description_server.dart'; 
 import 'package:stockapp/investment/detail_widgets/stock_info.dart'; 
 import 'package:stockapp/investment/detail_widgets/info.dart';
 import 'package:http/http.dart' as http; 

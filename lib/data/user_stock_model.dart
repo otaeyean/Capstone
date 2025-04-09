@@ -19,7 +19,7 @@ class UserStockModel {
      required this.quantity,
    });
  
-   // JSON ╣╔юлем╦╕ ╟╢ц╪╥н ╨╞х╞
+   // JSON б╣б╔ц─ц▄ц┘ц█б╦б╕ б╟б╢ц┐б╪б╥ц▌ б╨б╞ц┬б╞
    factory UserStockModel.fromJson(Map<String, dynamic> json) {
      return UserStockModel(
        stockCode: json['stockCode'],

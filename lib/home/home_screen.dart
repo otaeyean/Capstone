@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: WelcomeBox(),
             ),
             SizedBox(height: 20),
-            if (isLoggedIn && _userStocks.isNotEmpty) ...[
+                     if (isLoggedIn && _userStocks.isNotEmpty) ...[
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: GestureDetector(
@@ -134,32 +134,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.bar_chart, color: Color(0xFF03314B ) ),
+                          Icon(Icons.bar_chart, color: Color(0xFF03314B)),
                           SizedBox(width: 8),
                           Text(
-                            "내 종목보기",
-                            style: TextStyle(
-                              fontFamily: 'MinSans', 
-                              fontWeight: FontWeight.w900, 
-                              fontSize: 18, 
-                              color: Color(0xFF03314B)
-                            ),
+                            "내 종목보기",style: TextStyle(fontFamily: 'MinSans',fontWeight: FontWeight.w900,fontSize: 18,color: Color(0xFF03314B)),
                           ),
                         ],
                       ),
-                      Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFF03314B ) ),
+                      Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFF03314B)),
                     ],
                   ),
                 ),
               ),
               SizedBox(height: 10),
               SizedBox(
-                height: 300,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                height: 150,
+                child: Padding(padding: EdgeInsets.symmetric(horizontal:16.0),
                   child: StockListWidget(stocks: _userStocks),
                 ),
               ),
+                  // 굵고 꽉 찬 구분선 추가
+              Divider(
+                color: const Color.fromARGB(255, 241, 241, 241), thickness:8, height: 20),
               SizedBox(height: 5),
             ],
             Padding(
@@ -170,23 +166,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(width: 8),
                   Text(
                     "주식 랭킹", 
-                    style: TextStyle(
-                      fontFamily: 'MinSans', 
-                      fontWeight: FontWeight.w900, 
-                      fontSize: 18,
-                      color: Color(0xFF03314B) // 텍스트 색상 추가
-                    )
+                    style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, fontSize: 18,color: Color(0xFF03314B))
                   ),
                 ],
               ),
             ),
             SizedBox(height: 10),
-            SizedBox(
-              height: 450,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: StockRanking(),
-              ),
+            SizedBox(height: 600,child: Padding(padding: EdgeInsets.symmetric(horizontal: 16.0),child: StockRanking(),), //랭킹리스트트 높이 
             ),
           ],
         ),
