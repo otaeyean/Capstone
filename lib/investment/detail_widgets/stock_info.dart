@@ -63,15 +63,12 @@ class _StockInfoState extends State<StockInfoDetail> {
               final stockData = snapshot.data!;
               final stockInfoMap = {
                 '거래량': stockData['tvol'],
-                '매수 가능': '100',
                 '고가': stockData['hypr'],
                 '저가': stockData['lopr'],
                 '52주 최고가': stockData['h52p'],
                 '52주 최저가': stockData['l52p'],
                 '시가 총액': stockData['tomv'],
-                '시가 총액 순위': '2,317',
                 'PER': stockData['per'],
-                '외인보유비중': '0.0',
               };
 
               return AnimatedOpacity(
