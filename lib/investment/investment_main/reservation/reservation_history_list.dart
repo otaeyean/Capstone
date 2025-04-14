@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import 'package:stockapp/server/investment/reservation/reserve_history_server.dart';
+import 'package:http/http.dart' as http;
 
 class ReservationHistoryScreen extends StatefulWidget {
   final String stockCode;
@@ -44,6 +45,31 @@ class _ReserveHistoryScreenState extends State<ReservationHistoryScreen> {
       _isLoading = false;
     });
   }
+
+Future<void> _deleteReserveHistory(String historyId) async {
+  if (_userId == null) return;
+
+  final url = Uri.parse('http://withyou.me:8080/stock/reserve/history/$_userId/remove/$historyId');
+  print('📤 요청 보냄: $url');
+
+  try {
+    final response = await http.post(url, headers: {'accept': '*/*'});
+    print('✅ 서버 응답 코드: ${response.statusCode}');
+    print('📥 서버 응답 내용: ${response.body}');
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _reserveHistory.removeWhere((item) => item["id"].toString() == historyId);
+      });
+      print('🗑️ 삭제 성공: historyId=$historyId');
+    } else {
+      print('❌ 삭제 실패: 상태 코드 ${response.statusCode}');
+    }
+  } catch (e) {
+    print('⚠️ 예외 발생: $e');
+  }
+}
+
 
   void _onTabSelected(int index) {
     setState(() {
@@ -130,6 +156,16 @@ class _ReserveHistoryScreenState extends State<ReservationHistoryScreen> {
                                         Text("${order['transactionStatus']}", style: TextStyle(color: Colors.black, fontSize: 14)),
                                       ],
                                     ),
+                                    if (order["transactionStatus"] == "WAITING")
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: IconButton(
+                                          icon: Icon(Icons.delete, color: Colors.red),
+                                          onPressed: () {
+                                            _deleteReserveHistory(order["id"].toString());
+                                          },
+                                        ),
+                                      ),
                                     Divider(color: Colors.grey),
                                   ],
                                 ),

@@ -11,7 +11,7 @@ import 'searchable_stock_list.dart';
 import 'package:stockapp/data/user_stock_model.dart';
 import 'package:stockapp/server/userInfo/stock_service.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
-//웹웹
+import './recommended_stocks.dart';
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -20,14 +20,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoggedIn = false;
   List<Map<String, String>> stockList = [];
-  List<UserStockModel> _userStocks = []; // ✅ 실제 보유 종목 리스트
+  List<UserStockModel> _userStocks = []; 
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
     _fetchStockList();
-    _fetchUserStocks(); // ✅ 종목 불러오기 호출
+    _fetchUserStocks(); 
   }
 
   _checkLoginStatus() async {
@@ -134,10 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.bar_chart, color: Color(0xFF03314B)),
                           SizedBox(width: 8),
                           Text(
-                            "내 종목보기",style: TextStyle(fontFamily: 'MinSans',fontWeight: FontWeight.w900,fontSize: 18,color: Color(0xFF03314B)),
+                            "내 종목보기",style: TextStyle(fontFamily: 'MinSans',fontWeight: FontWeight.w800,fontSize: 22,color: Color.fromARGB(255, 0, 0, 0)),
                           ),
                         ],
                       ),
@@ -153,26 +152,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: StockListWidget(stocks: _userStocks),
                 ),
               ),
-                  // 굵고 꽉 찬 구분선 추가
               Divider(
                 color: const Color.fromARGB(255, 241, 241, 241), thickness:8, height: 20),
               SizedBox(height: 5),
             ],
+            RecommendedStocks(),
+            Divider(
+                color: const Color.fromARGB(255, 241, 241, 241), thickness:8, height: 20),
+              SizedBox(height: 5),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 children: [
-                  Icon(Icons.emoji_events, color: Colors.amber),
                   SizedBox(width: 8),
                   Text(
                     "주식 랭킹", 
-                    style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, fontSize: 18,color: Color(0xFF03314B))
+                    style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w800, fontSize: 22,color: Color.fromARGB(255, 0, 0, 0))
                   ),
                 ],
               ),
             ),
             SizedBox(height: 10),
-            SizedBox(height: 600,child: Padding(padding: EdgeInsets.symmetric(horizontal: 16.0),child: StockRanking(),), //랭킹리스트트 높이 
+            SizedBox(height: 600,child: Padding(padding: EdgeInsets.symmetric(horizontal: 16.0),child: StockRanking(),), 
             ),
           ],
         ),
