@@ -135,8 +135,12 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
     children: [
       Row(
         children: [
-          Text(isRising ? "상승률" : "하락률",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15,
-          color: isRising ? Colors.red : Colors.blue,
+          Text(
+            isRising ? "상승률" : "하락률",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: isRising ? Colors.red : Colors.blue,
             ),
           ),
         ],
@@ -147,6 +151,11 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
         Map<String, dynamic> stock = entry.value;
         double changeRate = stock['changeRate'];
         Color textColor = isRising ? Colors.red : Colors.blue;
+
+        // 이름이 20자 이상이면 자르고 '...' 추가
+        String trimmedName = stock['stockName'].length > 20
+            ? stock['stockName'].substring(0, 18) + '...'
+            : stock['stockName'];
 
         return GestureDetector(
           onTap: () {
@@ -160,9 +169,15 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
           child: Container(
             margin: EdgeInsets.symmetric(vertical: 6),
             padding: EdgeInsets.all(14),
-            decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.circular(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
-                BoxShadow(color: Colors.grey.withOpacity(0.05),blurRadius: 4,offset: Offset(0, 2)),
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
               ],
             ),
             child: Row(
@@ -172,26 +187,43 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(stock['stockName'],style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),
+                    Text(
+                      trimmedName,
+                      style: TextStyle(fontWeight: FontWeight.w800, fontFamily: 'MinSans', fontSize: 16),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4),
-                    Text("${stock['currentPrice']} 원",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 13,color: textColor,),
+                    Text(
+                      "${stock['currentPrice']} 원",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: textColor,
+                      ),
                     ),
                   ],
                 ),
-
                 // 오른쪽: 상승/하락률 + 거래량
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     // 상승률/하락률 뱃지
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),decoration: BoxDecoration(color: isRising ? const Color.fromARGB(255, 254, 235, 237) : const Color.fromARGB(255, 229, 241, 252),
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isRising
+                            ? const Color.fromARGB(255, 254, 235, 237)
+                            : const Color.fromARGB(255, 229, 241, 252),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         "${changeRate.toStringAsFixed(2)}%",
-                        style: TextStyle(fontWeight: FontWeight.bold,color: textColor,fontSize: 15),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                     SizedBox(height: 4),
@@ -201,8 +233,9 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
             ),
           ),
         );
-      }),
+      }).toList(),
     ],
   );
 }
+
 }

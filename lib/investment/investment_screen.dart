@@ -6,6 +6,7 @@ import 'package:stockapp/investment/sortable_header.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import 'package:stockapp/stock_api_service.dart';
 import 'package:stockapp/investment/stock_list.dart';
+import './recommended_list.dart'; // 추가된 추천 탭 import
 import 'stock_detail_screen.dart';
 
 class InvestmentScreen extends StatefulWidget {
@@ -72,14 +73,14 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
       return data.map((item) => {
-        "stockCode": item["stockCode"] ?? "",
-        "stockName": item["stockName"] ?? "이름 없음",
-        "stockCurrentPrice": _toDouble(item["stockCurrentPrice"]),
-        "stockChange": _toDouble(item["stockChange"]),
-        "stockChangePercent": _toDouble(item["stockChangePercent"]),
-        "acml_vol": _toInt(item["acml_vol"]),
-        "acml_tr_pbmn": _toDouble(item["acml_tr_pbmn"]),
-      }).toList();
+            "stockCode": item["stockCode"] ?? "",
+            "stockName": item["stockName"] ?? "이름 없음",
+            "stockCurrentPrice": _toDouble(item["stockCurrentPrice"]),
+            "stockChange": _toDouble(item["stockChange"]),
+            "stockChangePercent": _toDouble(item["stockChangePercent"]),
+            "acml_vol": _toInt(item["acml_vol"]),
+            "acml_tr_pbmn": _toDouble(item["acml_tr_pbmn"]),
+          }).toList();
     } else {
       return [];
     }
@@ -93,9 +94,9 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
         List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
         setState(() {
           searchStockList = data.map((item) => {
-            'stockCode': item['stockCode'],
-            'stockName': item['stockName'],
-          }).toList();
+                'stockCode': item['stockCode'],
+                'stockName': item['stockName'],
+              }).toList();
           isSearchLoading = false;
         });
       } else {
@@ -117,8 +118,6 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
         stocks = allStocks.where((stock) => stock.containsKey("excd")).toList();
       } else if (category == "관심") {
         stocks = watchlistStocks;
-      } else {
-        stocks = [];
       }
       _sortStocks();
     });
@@ -208,32 +207,35 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                       Center(
-  child: Text(
-    "StockList",
-    style: TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-      color: Color(0xFF03314B),
-    ),
-  ),
-),
-
+                        Center(
+                          child: Text(
+                            "StockList",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF03314B),
+                            ),
+                          ),
+                        ),
                         SizedBox(height: 16),
-                        // 검색
                         isSearchLoading
                             ? Center(child: CircularProgressIndicator())
                             : SearchableStockList(stockList: searchStockList),
                         SizedBox(height: 20),
-                        // 카테고리 + 정렬
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
-                              children: ["전체", "국내", "해외", "관심"].map((category) {
+                              children: ["전체", "국내", "해외", "관심", "추천"].map((category) {
                                 bool isSelected = selectedCategory == category;
                                 return GestureDetector(
-                                  onTap: () => _filterStocksByCategory(category),
+                                  onTap: () {
+                                    if (category == "추천") {
+                                      setState(() => selectedCategory = "추천");
+                                    } else {
+                                      _filterStocksByCategory(category);
+                                    }
+                                  },
                                   child: AnimatedContainer(
                                     duration: Duration(milliseconds: 200),
                                     margin: EdgeInsets.only(right: 8),
@@ -254,29 +256,32 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                                 );
                               }).toList(),
                             ),
-                            TextButton.icon(
-                              style: TextButton.styleFrom(
-                                backgroundColor: Color(0xFF67CA98),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              ),
-                              onPressed: _showSortOptions,
-                              icon: Icon(Icons.sort, size: 16, color: Colors.white),
-                              label: Text(selectedSort, style: TextStyle(color: Colors.white, fontSize: 14)),
-                            )
+                            if (selectedCategory != "추천")
+                              TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Color(0xFF67CA98),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                ),
+                                onPressed: _showSortOptions,
+                                icon: Icon(Icons.sort, size: 16, color: Colors.white),
+                                label: Text(selectedSort, style: TextStyle(color: Colors.white, fontSize: 14)),
+                              )
                           ],
                         ),
                       ],
                     ),
                   ),
-                  StockSortHeader(),
+                  if (selectedCategory != "추천") StockSortHeader(),
                   Expanded(
-                    child: stocks.isEmpty
-                        ? Center(child: Text("데이터 없음", style: TextStyle(fontSize: 18, color: Colors.grey)))
-                        : StockList(
-                            stocks: List<Map<String, dynamic>>.from(stocks),
-                            isTradeVolumeSelected: selectedSort == "거래량순",
-                          ),
+                    child: selectedCategory == "추천"
+                        ? RecommendationTab()
+                        : stocks.isEmpty
+                            ? Center(child: Text("데이터 없음", style: TextStyle(fontSize: 18, color: Colors.grey)))
+                            : StockList(
+                                stocks: List<Map<String, dynamic>>.from(stocks),
+                                isTradeVolumeSelected: selectedSort == "거래량순",
+                              ),
                   ),
                 ],
               ),

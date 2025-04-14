@@ -36,10 +36,10 @@ class StockListWidget extends StatelessWidget {
             Text(
               stock.name ?? '이름 없음',
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w900,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
                 fontFamily: 'MinSans',
-                color: Color(0xFF03314B),
+                color: Color.fromARGB(255, 0, 0, 0),
               ),
               overflow: TextOverflow.ellipsis,
             ),

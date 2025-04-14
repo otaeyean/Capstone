@@ -96,7 +96,7 @@ class WelcomeBox extends StatelessWidget {
                   children: [
                     Text(
                       '$userId 님',
-                      style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white),
+                      style: TextStyle(fontFamily: 'MinSans', fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white),
                     ),
                     SizedBox(height: 8),
                     Row(
@@ -105,7 +105,7 @@ class WelcomeBox extends StatelessWidget {
                         SizedBox(width: 6),
                         Text(
                           '보유 금액: $balance',
-                          style: TextStyle(fontFamily: 'Paperlogy', fontSize: 17, fontWeight: FontWeight.w500, color: Colors.white),
+                          style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
                         ),
                       ],
                     ),
@@ -115,7 +115,7 @@ class WelcomeBox extends StatelessWidget {
                         SizedBox(width: 6),
                         Text(
                           '수익률: $totalProfitRate',
-                          style: TextStyle(fontFamily: 'Paperlogy', fontSize: 17, fontWeight: FontWeight.w500, color: Colors.white),
+                          style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
                         ),
                       ],
                     ),
