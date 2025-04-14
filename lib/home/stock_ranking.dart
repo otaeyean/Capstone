@@ -75,7 +75,7 @@ Widget build(BuildContext context) {
             ),
           )
         else
-          _buildDualColumnList(), // <-- 여기서 Expanded나 ScrollView 없이 바로 배치
+          _buildDualColumnList(),
       ],
     ),
   );
@@ -152,9 +152,8 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
         double changeRate = stock['changeRate'];
         Color textColor = isRising ? Colors.red : Colors.blue;
 
-        // 이름이 20자 이상이면 자르고 '...' 추가
         String trimmedName = stock['stockName'].length > 20
-            ? stock['stockName'].substring(0, 18) + '...'
+            ? stock['stockName'].substring(0, 18) + '...' 
             : stock['stockName'];
 
         return GestureDetector(
@@ -208,7 +207,7 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // 상승률/하락률 뱃지
+                    // 상승률/하락률 
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(

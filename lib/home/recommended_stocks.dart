@@ -51,16 +51,16 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
       children: [
         Container(
           width: 60,
-          height: 60,
+          height: 60, //아이콘 크기 
           decoration: BoxDecoration(
-            color: backgroundColor, // 단일 색상 적용
+            color: backgroundColor, 
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: Colors.white),
         ),
         const SizedBox(height: 6),
         SizedBox(
-          width: 80,
+          width: 80, 
           child: Text(
             name,
             style: const TextStyle(
@@ -83,7 +83,6 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
@@ -108,7 +107,6 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
         ),
         const SizedBox(height: 10),
 
-        // Loading
         if (isLoading)
           const Padding(
             padding: EdgeInsets.all(20),
@@ -119,7 +117,6 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                // Recommended
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10.0),
                   child: Align(
@@ -148,7 +145,6 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
 
                 const SizedBox(height: 15),
 
-                // Unrecommended
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10.0),
                   child: Align(

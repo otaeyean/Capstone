@@ -13,7 +13,7 @@ class _RecommendationTabState extends State<RecommendationTab> {
   List<String> allCategories = [];
   final RecommendListServer apiService = RecommendListServer();
 
-  final List<List<Color>> iconGradientPairs = [
+  final List<List<Color>> iconGradientPairs = [ 
     [Color(0xFF3EC8AC), Color(0xFFB2A5FF)],
     [Color(0xFF4CA1AF), Color(0xFFC4E0E5)],
     [Color(0xFF373B44), Color(0xFF4286f4)],
@@ -82,14 +82,14 @@ Widget build(BuildContext context) {
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 25,
+                  crossAxisSpacing: 25, //아래거랑 이거는 위아래 간격 조절 하는 거 
                   mainAxisSpacing: 25,
-                  childAspectRatio: 5.0,
+                  childAspectRatio: 5.0, //간격 조절 하는 거 이상하게 숫자가 커지면 더 좁아짐
                 ),
                 itemCount: allCategories.length,
                 itemBuilder: (context, index) {
                   String categoryName = allCategories[index];
-                  IconData? categoryIcon = categoryIconMap[categoryName] ?? Icons.disabled_by_default; // Use 'disabled_by_default' if null
+                  IconData? categoryIcon = categoryIconMap[categoryName] ?? Icons.disabled_by_default; 
                   return Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
@@ -100,9 +100,9 @@ Widget build(BuildContext context) {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(2.0),
-                          child: Container(
+                          child: Container( //아이콘 크기
                             width: 70,
-                            height: 70,
+                            height: 70, 
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: getGradientColors(),
@@ -114,13 +114,13 @@ Widget build(BuildContext context) {
                             child: Center(
                               child: Icon(
                                 categoryIcon,
-                                size: 40,
+                                size: 40, //아이콘 안에 이미지 크기 조절하는거
                                 color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(width: 10), // 텍스트 간격 추가
+                        SizedBox(width: 10), 
                         Expanded(
                           child: Text(
                             categoryName,
