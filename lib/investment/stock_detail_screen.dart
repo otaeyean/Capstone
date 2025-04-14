@@ -29,6 +29,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   @override
   void initState() {
     super.initState();
+     _loadFavoriteStatus();    
     _fetchCompanyDescription();
   }
 
@@ -169,17 +170,21 @@ Future<void> _loadFavoriteStatus() async {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.star : Icons.star_border,
-                        color: isFavorite ? Colors.yellow : Colors.grey,
-                      ),
-                      onPressed: _toggleFavorite, // 관심 추가/삭제 함수 호출
-                    ),
-                    Icon(
-                      Icons.notifications_none,
-                      color: Colors.grey,
-                    ),
+                  IconButton(
+  icon: Icon(
+    isFavorite ? Icons.star : Icons.star_border,
+    color: isFavorite ? Colors.yellow : Colors.grey,
+    size:  40, // ⭐ 예시: 30
+  ),
+  onPressed: _toggleFavorite,
+),
+SizedBox(width: 4), // 아이콘 간격 살짝
+Icon(
+  Icons.notifications_none,
+  color: Colors.grey,
+  size: 40, // 🔔 아이콘 크기도 같게
+),
+
                   ],
                 ),
               ],

@@ -37,7 +37,9 @@ class StockList extends StatelessWidget {
         double changePrice = (stock['stockChange'] ?? stock['changePrice'] ?? 0).toDouble();
         double currentPrice = (stock['stockCurrentPrice'] ?? stock['currentPrice'] ?? 0).toDouble();
         int tradeVolume = (stock['acml_vol'] ?? stock['tradeVolume'] ?? 0).toInt();
-        bool isOverseas = stock.containsKey("excd");
+    // 🔍 해외 여부 정확히 판단
+bool isOverseas = stock.containsKey("excd") ||
+    (stock['stockCode'] is String && RegExp(r'[A-Za-z]').hasMatch(stock['stockCode']));
 
         if (isOverseas && percent < 0) changePrice = -changePrice;
 
@@ -54,19 +56,26 @@ class StockList extends StatelessWidget {
 
         Color priceColor = isTradeVolumeSelected ? Colors.black : changeColor;
 
-        String priceText = isOverseas
-            ? "\$${currentPrice.toStringAsFixed(4)}"
-            : "${formatKoreanPrice(currentPrice)} 원";
-
+    // 💸 가격 표시 형식
+String priceText = isOverseas
+    ? "\$${currentPrice.toStringAsFixed(2)}"
+    : "${formatKoreanPrice(currentPrice)} 원";
         return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StockDetailScreen(stock: stock),
-              ),
-            );
-          },
+         onTap: () {
+  final enrichedStock = {
+    ...stock,
+    'currentPrice': stock['stockCurrentPrice'] ?? stock['currentPrice'] ?? stock['price'] ?? 0,
+    'changeRate': stock['stockChangePercent'] ?? stock['changeRate'] ?? stock['rise_percent'] ?? stock['fall_percent'] ?? 0,
+  };
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => StockDetailScreen(stock: enrichedStock),
+    ),
+  );
+},
+
           child: Container(
   decoration: BoxDecoration(
     color: Colors.white,

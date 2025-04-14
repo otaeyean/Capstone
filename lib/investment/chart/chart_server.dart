@@ -7,13 +7,11 @@ class ChartService {
 
   Future<List<StockPrice>> fetchChartData(String stockCode, {String period = "D"}) async {
     final url = Uri.parse("$baseUrl/prices/$stockCode?period=$period");
-    print("Fetching data from: $url");
+  
 
     try {
       final response = await http.get(url);
-      print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}");
-
+ 
       if (response.statusCode == 200) {
         List<dynamic> jsonData = json.decode(response.body);
         return jsonData.map((data) => StockPrice.fromJson(data)).toList();
@@ -21,7 +19,7 @@ class ChartService {
         throw Exception("Failed to load stock prices: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error fetching stock data: $e");
+  
       throw Exception("Error fetching stock data: $e");
     }
   }
@@ -29,12 +27,10 @@ class ChartService {
   // ✅ 1분봉 데이터 가져오는 함수 추가
   Future<List<StockPrice>> fetchMinuteChartData(String stockCode, {int time = 1}) async {
     final url = Uri.parse("$baseUrl/prices-today/$stockCode?time=$time");
-    print("Fetching 1-minute data from: $url");
+ 
 
     try {
       final response = await http.get(url);
-      print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}");
 
       if (response.statusCode == 200) {
         List<dynamic> jsonData = json.decode(response.body);
@@ -43,7 +39,7 @@ class ChartService {
         throw Exception("Failed to load minute stock prices: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error fetching 1-minute stock data: $e");
+
       throw Exception("Error fetching 1-minute stock data: $e");
     }
   }

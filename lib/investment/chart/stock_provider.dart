@@ -32,7 +32,7 @@ class StockProvider with ChangeNotifier {
         _stockPrices = await _chartService.fetchChartData(stockCode, period: period);
       }
     } catch (error) {
-      print("Error fetching stock data: $error");
+  
       _errorMessage = "주식 데이터를 불러오는 데 실패했습니다.";
     }
 

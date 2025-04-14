@@ -65,25 +65,35 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchWatchlistData(String userId) async {
-    final url = Uri.parse('http://withyou.me:8080/watchlist/$userId');
-    final response = await http.get(url);
+Future<List<Map<String, dynamic>>> fetchWatchlistData(String userId) async {
+  final url = Uri.parse('http://withyou.me:8080/watchlist/$userId');
+  final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
-      return data.map((item) => {
+  if (response.statusCode == 200) {
+    List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+    return data.map((item) {
+      final changePercent = _toDouble(item["stockChangePercent"]);
+      final isRise = changePercent >= 0;
+      return {
         "stockCode": item["stockCode"] ?? "",
         "stockName": item["stockName"] ?? "이름 없음",
         "stockCurrentPrice": _toDouble(item["stockCurrentPrice"]),
         "stockChange": _toDouble(item["stockChange"]),
-        "stockChangePercent": _toDouble(item["stockChangePercent"]),
+        "stockChangePercent": changePercent,
         "acml_vol": _toInt(item["acml_vol"]),
         "acml_tr_pbmn": _toDouble(item["acml_tr_pbmn"]),
-      }).toList();
-    } else {
-      return [];
-    }
+
+        // 👇 상세 화면에서 요구되는 필드 추가
+        "price": _toDouble(item["stockCurrentPrice"]),
+        "change_value": _toDouble(item["stockChange"]),
+        "rise_percent": isRise ? changePercent : 0.0,
+        "fall_percent": !isRise ? changePercent : 0.0,
+      };
+    }).toList();
+  } else {
+    return [];
   }
+}
 
   Future<void> _loadSearchStockData() async {
     setState(() => isSearchLoading = true);
@@ -106,23 +116,50 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     }
   }
 
-  void _filterStocksByCategory(String category) {
-    setState(() {
-      selectedCategory = category;
-      if (category == "전체") {
-        stocks = allStocks;
-      } else if (category == "국내") {
-        stocks = allStocks.where((stock) => !stock.containsKey("excd")).toList();
-      } else if (category == "해외") {
-        stocks = allStocks.where((stock) => stock.containsKey("excd")).toList();
-      } else if (category == "관심") {
-        stocks = watchlistStocks;
+  void _filterStocksByCategory(String category) async {
+  setState(() {
+    selectedCategory = category;
+    isLoading = true;
+  });
+
+  if (category == "관심") {
+    try {
+      final userId = await AuthService.getUserId();
+      if (userId != null) {
+        final updatedWatchlist = await fetchWatchlistData(userId);
+
+        setState(() {
+          watchlistStocks = updatedWatchlist;
+          stocks = watchlistStocks;
+          _sortStocks(); // 정렬 유지!
+          isLoading = false;
+        });
       } else {
-        stocks = [];
+        setState(() {
+          stocks = [];
+          isLoading = false;
+        });
       }
-      _sortStocks();
+    } catch (e) {
+      print("관심목록 갱신 실패: $e");
+      setState(() {
+        stocks = [];
+        isLoading = false;
+      });
+    }
+  } else {
+    setState(() {
+      stocks = category == "전체"
+          ? allStocks
+          : category == "국내"
+              ? allStocks.where((stock) => !stock.containsKey("excd")).toList()
+              : allStocks.where((stock) => stock.containsKey("excd")).toList();
+      _sortStocks(); // 정렬 유지!
+      isLoading = false;
     });
   }
+}
+
 
   double _toDouble(dynamic value) {
     if (value == null) return 0.0;

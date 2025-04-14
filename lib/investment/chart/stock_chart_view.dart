@@ -33,13 +33,85 @@ class _StockChartViewState extends State<StockChartView> {
       }
     });
   }
+late TrackballBehavior _trackballBehavior;@override
+void initState() {
+  super.initState();
+  widget.stockProvider.loadStockData(widget.stockCode, period: widget.stockProvider.selectedPeriod);
 
-  @override
-  void initState() {
-    super.initState();
-    // 초기 차트 데이터 로드
-    widget.stockProvider.loadStockData(widget.stockCode, period: widget.stockProvider.selectedPeriod);
-  }
+  _trackballBehavior = TrackballBehavior(
+  enable: true,
+  activationMode: ActivationMode.singleTap,
+  tooltipDisplayMode: TrackballDisplayMode.nearestPoint, // ✅ 버전 호환 안전
+  shouldAlwaysShow: false,
+  lineType: TrackballLineType.none, // ✅ 선 제거
+  markerSettings: TrackballMarkerSettings(
+    markerVisibility: TrackballVisibilityMode.hidden, // ✅ 점 제거
+  ),
+  builder: (BuildContext context, TrackballDetails details) {
+    // ✅ 이동평균선 제외 (0번: 캔들)
+    if (details.seriesIndex != 0) return const SizedBox.shrink();
+
+    final stock = widget.stockProvider.stockPrices.firstWhere(
+      (s) => s.date == details.point?.x,
+      orElse: () => widget.stockProvider.stockPrices.first,
+    );
+
+    final isMinute = widget.stockProvider.selectedPeriod == "1m";
+    final timeStr = isMinute
+        ? DateFormat('HH:mm').format(stock.date)
+        : DateFormat('yyyy-MM-dd').format(stock.date);
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Color(0xFF1E2A38),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Color(0xFF67CA98), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 8,
+            offset: Offset(2, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            timeStr,
+            style: TextStyle(
+              color: Color(0xFF67CA98),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          _infoText('시가', stock.open),
+          _infoText('고가', stock.high),
+          _infoText('저가', stock.low),
+          _infoText('종가', stock.close),
+        ],
+      ),
+    );
+  },
+);
+
+}
+
+// ✨ 툴팁용 텍스트 줄 빌더 함수
+Widget _infoText(String label, double value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Text(
+      '$label: ${value.toStringAsFixed(0)}',
+      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+    ),
+  );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +171,7 @@ class _StockChartViewState extends State<StockChartView> {
                         width: chartWidth,
                         height: chartHeight,
                         child: SfCartesianChart(
+                            trackballBehavior: _trackballBehavior,
                           zoomPanBehavior: _zoomPanBehavior,
                           margin: EdgeInsets.zero,
                           plotAreaBorderWidth: 0,
