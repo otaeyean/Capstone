@@ -33,20 +33,92 @@ class _StockChartViewState extends State<StockChartView> {
       }
     });
   }
+late TrackballBehavior _trackballBehavior;@override
+void initState() {
+  super.initState();
+  widget.stockProvider.loadStockData(widget.stockCode, period: widget.stockProvider.selectedPeriod);
 
-  @override
-  void initState() {
-    super.initState();
-    // 초기 차트 데이터 로드
-    widget.stockProvider.loadStockData(widget.stockCode, period: widget.stockProvider.selectedPeriod);
-  }
+  _trackballBehavior = TrackballBehavior(
+  enable: true,
+  activationMode: ActivationMode.singleTap,
+  tooltipDisplayMode: TrackballDisplayMode.nearestPoint, // ✅ 버전 호환 안전
+  shouldAlwaysShow: false,
+  lineType: TrackballLineType.none, // ✅ 선 제거
+  markerSettings: TrackballMarkerSettings(
+    markerVisibility: TrackballVisibilityMode.hidden, // ✅ 점 제거
+  ),
+  builder: (BuildContext context, TrackballDetails details) {
+    // ✅ 이동평균선 제외 (0번: 캔들)
+    if (details.seriesIndex != 0) return const SizedBox.shrink();
+
+    final stock = widget.stockProvider.stockPrices.firstWhere(
+      (s) => s.date == details.point?.x,
+      orElse: () => widget.stockProvider.stockPrices.first,
+    );
+
+    final isMinute = widget.stockProvider.selectedPeriod == "1m";
+    final timeStr = isMinute
+        ? DateFormat('HH:mm').format(stock.date)
+        : DateFormat('yyyy-MM-dd').format(stock.date);
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Color(0xFF1E2A38),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Color(0xFF67CA98), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 8,
+            offset: Offset(2, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            timeStr,
+            style: TextStyle(
+              color: Color(0xFF67CA98),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          _infoText('시가', stock.open),
+          _infoText('고가', stock.high),
+          _infoText('저가', stock.low),
+          _infoText('종가', stock.close),
+        ],
+      ),
+    );
+  },
+);
+
+}
+
+// ✨ 툴팁용 텍스트 줄 빌더 함수
+Widget _infoText(String label, double value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Text(
+      '$label: ${value.toStringAsFixed(0)}',
+      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+    ),
+  );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         double chartWidth = constraints.maxWidth * _zoomLevel;
-        double chartHeight = 260 * _zoomLevel;
+        double chartHeight = 500 * _zoomLevel;
 
         List<StockPrice> filteredData =
             widget.stockProvider.stockPrices.where((stock) => stock.volume > 0).toList();
@@ -99,6 +171,7 @@ class _StockChartViewState extends State<StockChartView> {
                         width: chartWidth,
                         height: chartHeight,
                         child: SfCartesianChart(
+                            trackballBehavior: _trackballBehavior,
                           zoomPanBehavior: _zoomPanBehavior,
                           margin: EdgeInsets.zero,
                           plotAreaBorderWidth: 0,
@@ -170,7 +243,7 @@ Column(
     // ✅ 거래량 차트
     SizedBox(
       width: chartWidth,
-      height: 100 * _zoomLevel,
+      height: 180 * _zoomLevel,
       child: SfCartesianChart(
         margin: EdgeInsets.zero,
         plotAreaBorderWidth: 0,
@@ -227,28 +300,36 @@ Container(height: 3, width: chartWidth, color: Colors.grey[300]),
         ),
 
         // ✅ 이동평균선 범례 (버튼 라인으로 이동)
-        Positioned(
-          top: 10,
-          left: 10,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(children: [Container(width: 8, height: 8, color: Colors.yellow), SizedBox(width: 4), Text("5", style: TextStyle(fontSize: 10))]),
-                SizedBox(width: 10),
-                Row(children: [Container(width: 8, height: 8, color: Colors.purple), SizedBox(width: 4), Text("10", style: TextStyle(fontSize: 10))]),
-                SizedBox(width: 10),
-                Row(children: [Container(width: 8, height: 8, color: Colors.green), SizedBox(width: 4), Text("30", style: TextStyle(fontSize: 10))]),
-              ],
-            ),
-          ),
+     Positioned(
+  top: 10,
+  left: 10,
+  child: Container(
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black12,
+          blurRadius: 4,
+          offset: Offset(2, 2),
         ),
+      ],
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(children: [Container(width: 12, height: 12, color: Colors.yellow), SizedBox(width: 6), Text("5", style: TextStyle(fontSize: 14))]),
+        SizedBox(width: 14),
+        Row(children: [Container(width: 12, height: 12, color: Colors.purple), SizedBox(width: 6), Text("10", style: TextStyle(fontSize: 14))]),
+        SizedBox(width: 14),
+        Row(children: [Container(width: 12, height: 12, color: Colors.green), SizedBox(width: 6), Text("30", style: TextStyle(fontSize: 14))]),
+      ],
+    ),
+  ),
+),
+
       ],
     ),
   ],

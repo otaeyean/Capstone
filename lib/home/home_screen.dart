@@ -11,7 +11,7 @@ import 'searchable_stock_list.dart';
 import 'package:stockapp/data/user_stock_model.dart';
 import 'package:stockapp/server/userInfo/stock_service.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
-
+//웹웹
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
