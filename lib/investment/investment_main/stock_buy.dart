@@ -197,28 +197,29 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
           );
   }
 
-  Widget _buildPriceWidget() {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,  
-        borderRadius: BorderRadius.circular(12),
-      ),
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
-          SizedBox(height: 8),
-          Text(
-            _price != null ? '${_price!.toStringAsFixed(0)}원' : '0원',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
+    Widget _buildPriceWidget() {
+      return Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300), // 테두리 추가
+        ),
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
+            SizedBox(height: 8),
+            Text(
+              _price != null ? '${_price!.toStringAsFixed(0)}원' : '0원',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      );
+    }
+    
   Widget _buildQuantityWidget() {
     return Container(
       padding: EdgeInsets.all(16),
@@ -230,16 +231,33 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
           Text('수량', style: TextStyle(color: Colors.black, fontSize: 16)),
           SizedBox(height: 8),
           TextField(
-            controller: _quantityController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(hintText: '몇 주 매수할까요?', border: InputBorder.none),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            onChanged: (value) => _confirmQuantity(),
+          controller: _quantityController,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+          hintText: '몇 주 매수할까요?',
+          hintStyle: TextStyle(color: Colors.grey[400]),
+          filled: true,
+          fillColor: Colors.grey[100],
+          contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          prefixIcon: Icon(Icons.shopping_cart_outlined, color: Colors.grey),
+          suffixText: '주',
+          suffixStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey.shade300),
           ),
-        ],
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Color(0xFF22B379)),
+          ),
+        ),
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        onChanged: (value) => _confirmQuantity(),
       ),
-    );
-  }
+              ],
+            ),
+          );
+        }
 
   Widget _buildBuyButton() {
     return Container(

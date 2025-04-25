@@ -6,6 +6,21 @@ import 'package:stockapp/user_info/user_info_screen.dart';
 import 'package:stockapp/server/home/user_service.dart'; // ✅ 서버 요청 분리 후 추가
 
 class WelcomeBox extends StatelessWidget {
+  final Stream<Map<String, dynamic>>? _userStream;
+
+  WelcomeBox({Key? key})
+      : _userStream = _createUserStream(),
+        super(key: key);
+
+  static Stream<Map<String, dynamic>>? _createUserStream() {
+    return Stream.periodic(Duration(seconds: 5)).asyncMap((_) async {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('nickname');
+      if (userId == null) throw Exception('로그인 필요');
+      return UserService.fetchPortfolioData(userId);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String?>(
@@ -30,7 +45,7 @@ class WelcomeBox extends StatelessWidget {
 
   Widget _buildUserInfoStream(BuildContext context, String userId) {
     return StreamBuilder<Map<String, dynamic>>(
-      stream: Stream.periodic(Duration(seconds: 5)).asyncMap((_) => UserService.fetchPortfolioData(userId)), // ✅ 변경된 부분
+      stream: _userStream,
       builder: (context, snapshot) {
         String balance = '로딩 중...';
         String totalProfitRate = '로딩 중...';
@@ -56,17 +71,13 @@ class WelcomeBox extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 2, 25, 54), Color.fromRGBO(0, 23, 54, 1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(12.0),
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(16.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 5,
-              offset: Offset(2, 2),
+              color: Colors.black12,
+              blurRadius: 12,
+              offset: Offset(0, 6),
             ),
           ],
         ),
@@ -96,27 +107,21 @@ class WelcomeBox extends StatelessWidget {
                   children: [
                     Text(
                       '$userId 님',
-                      style: TextStyle(fontFamily: 'MinSans', fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white),
+                      style: TextStyle(fontFamily: 'MinSans', fontSize: 24, fontWeight: FontWeight.w800),
                     ),
                     SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.attach_money, color: Colors.white, size: 18),
+                        Icon(Icons.attach_money, size: 18),
                         SizedBox(width: 6),
-                        Text(
-                          '보유 금액: $balance',
-                          style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
-                        ),
+                        Text('보유 금액: $balance', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18)),
                       ],
                     ),
                     Row(
                       children: [
-                        Icon(Icons.trending_up, color: Colors.white, size: 18),
+                        Icon(Icons.trending_up, size: 18),
                         SizedBox(width: 6),
-                        Text(
-                          '수익률: $totalProfitRate',
-                          style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
-                        ),
+                        Text('수익률: $totalProfitRate', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18)),
                       ],
                     ),
                   ],
@@ -137,34 +142,33 @@ class WelcomeBox extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFF416C), Color(0xFFFF4B2B)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(12.0),
+          color: Colors.white.withOpacity(0.9), // ✅ 로그인 안된 상태도 같은 배경
+          borderRadius: BorderRadius.circular(16.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 5,
-              offset: Offset(2, 2),
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: Offset(0, 6),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('로그인이 필요합니다!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            Text('로그인이 필요합니다!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Row(
               children: [
-                CircleAvatar(radius: 35, backgroundColor: Colors.grey[800], child: Icon(Icons.person_outline, size: 32, color: Colors.white)),
+                CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Colors.grey[300],
+                    child: Icon(Icons.person_outline, size: 32, color: Colors.grey[800])),
                 SizedBox(width: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('총 자산: -', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
-                    Text('보유 주식: -', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+                    Text('총 자산: -', style: TextStyle(fontWeight: FontWeight.w900)),
+                    Text('보유 주식: -', style: TextStyle(fontWeight: FontWeight.w900)),
                   ],
                 ),
               ],
@@ -179,14 +183,23 @@ class WelcomeBox extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF56CCF2), Color(0xFF2F80ED)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white.withOpacity(0.9), // ✅ 로딩도 같은 배경
         borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, 6),
+          ),
+        ],
       ),
-      child: Center(child: CircularProgressIndicator(color: Colors.white)),
+      child: Center(
+        child: SizedBox(
+          height: 30,
+          width: 30,
+          child: CircularProgressIndicator(color: Colors.black87, strokeWidth: 3),
+        ),
+      ),
     );
   }
 }
