@@ -156,16 +156,20 @@ Future<void> _deleteReserveHistory(String historyId) async {
                                         Text("${order['transactionStatus']}", style: TextStyle(color: Colors.black, fontSize: 14)),
                                       ],
                                     ),
-                                    if (order["transactionStatus"] == "WAITING")
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: IconButton(
-                                          icon: Icon(Icons.delete, color: Colors.red),
-                                          onPressed: () {
-                                            _deleteReserveHistory(order["id"].toString());
-                                          },
-                                        ),
-                                      ),
+                                   if (order["transactionStatus"] == "WAITING")
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: TextButton.icon(
+                                              onPressed: () {
+                                                _deleteReserveHistory(order["id"].toString());
+                                              },
+                                              icon: Icon(Icons.delete, color: Colors.red),
+                                              label: Text(
+                                                "삭제",
+                                                style: TextStyle(color: Colors.red),
+                                              ),
+                                            ),
+                                          ),
                                     Divider(color: Colors.grey),
                                   ],
                                 ),

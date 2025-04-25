@@ -14,11 +14,8 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
   List<String> unrecommendedCategories = [];
   bool isLoading = true;
 
-  // 단일 색상 리스트로 변경
   final List<Color> iconColors = [
-    Color(0xFF25478C), // 네이비 블루
-    Color(0xFF135338), // 다크 그린
-    Color(0xFF804600), // 브라운
+ Color.fromARGB(255, 255, 255, 255),
   ];
 
   @override
@@ -45,137 +42,150 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
     }
   }
 
-  Widget buildCategoryItem(String name, Color backgroundColor) {
-    final icon = categoryIconMap[name] ?? Icons.category;
-    return Column(
+Widget buildCategoryItem(String name, Color backgroundColor) {
+  final icon = categoryIconMap[name] ?? Icons.category;
+
+  return Container(
+    //항목 박스로 묶음
+    width: 137, 
+    height: 140, 
+    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+    decoration: BoxDecoration(
+color: Color.fromARGB(255, 255, 255, 255),  //아이콘 큰 박스 색상 
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 60,
-          height: 60, //아이콘 크기 
+          height: 60,
           decoration: BoxDecoration(
-            color: backgroundColor, 
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(12),
+             border: Border.all(color: const Color.fromARGB(255, 182, 181, 181), width: 2), //아이콘 이미지 테두리 색상
           ),
-          child: Icon(icon, color: Colors.white),
+          child: Icon(icon,size: 40,color:  const Color.fromARGB(255, 0, 0, 0),), //이미지 색상상
         ),
-        const SizedBox(height: 6),
-        SizedBox(
-          width: 80, 
-          child: Text(
-            name,
-            style: const TextStyle(
-              fontSize: 15,
-              fontFamily: 'MinSans',
-              fontFamilyFallback: ['sans-serif'],
-              fontWeight: FontWeight.w800,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.visible,
+        const SizedBox(height: 12),
+        Text(
+          name,
+          style: const TextStyle(
+            fontSize: 13,
+            fontFamily: 'MinSans',
+            fontWeight: FontWeight.w800,
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
-  @override
-  Widget build(BuildContext context) {
+  Widget buildCategoryGroup(String title, List<String> categories) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: const [
-                  SizedBox(width: 18),
-                  Text(
-                    "오늘의 카테고리",
-                    style: TextStyle(
-                      fontFamily: 'MinSans',
-                      fontWeight: FontWeight.w800,
-                      fontSize: 22,
-                      color: Color.fromARGB(255, 0, 0, 0),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 17,
+            fontFamily: 'MinSans',
+            fontWeight: FontWeight.w800,
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
         ),
         const SizedBox(height: 10),
-
-        if (isLoading)
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(child: CircularProgressIndicator()),
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '추천',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontFamily: 'MinSans',
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF03314B),
-                      ),
-                    ),
-                  ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: List.generate(
+              categories.length,
+              (index) => Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: buildCategoryItem(
+                  categories[index],
+                  iconColors[index % iconColors.length],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(
-                    recommendedCategories.length,
-                    (index) => buildCategoryItem(
-                      recommendedCategories[index],
-                      iconColors[index % iconColors.length],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '비추천',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontFamily: 'MinSans',
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF03314B),
-                      ),
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(
-                    unrecommendedCategories.length,
-                    (index) => buildCategoryItem(
-                      unrecommendedCategories[index],
-                      iconColors[index % iconColors.length],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-
-        const SizedBox(height: 20),
+        ),
       ],
     );
   }
+Widget buildLoadingItem() {
+  return Container(
+    width: 137,
+    height: 140,
+    decoration: BoxDecoration(
+      color: Colors.white, // 흰색 배경
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Color(0xFFE0E0E0)), // 연한 테두리 추가 (선택사항)
+    ),
+  );
+}
+
+Widget buildLoadingGroup(String title) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: const TextStyle(
+          fontSize: 17,
+          fontFamily: 'MinSans',
+          fontWeight: FontWeight.w800,
+          color: Color.fromARGB(255, 199, 199, 199),
+        ),
+      ),
+      const SizedBox(height: 10),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(
+            5, // 로딩 시 5개 빈박스스
+            (index) => Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: buildLoadingItem(),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+@override
+Widget build(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "오늘의 카테고리",
+          style: TextStyle(
+            fontFamily: 'MinSans',
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 16),
+        isLoading
+            ? buildLoadingGroup("추천")
+            : buildCategoryGroup("추천", recommendedCategories),
+        const SizedBox(height: 20),
+        isLoading
+            ? buildLoadingGroup("비추천")
+            : buildCategoryGroup("비추천", unrecommendedCategories),
+      ],
+    ),
+  );
+}
+
 }

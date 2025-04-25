@@ -12,6 +12,7 @@ import 'package:stockapp/data/user_stock_model.dart';
 import 'package:stockapp/server/userInfo/stock_service.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import './recommended_stocks.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -20,14 +21,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoggedIn = false;
   List<Map<String, String>> stockList = [];
-  List<UserStockModel> _userStocks = []; 
+  List<UserStockModel> _userStocks = [];
+  bool isSearchVisible = false;
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
     _fetchStockList();
-    _fetchUserStocks(); 
+    _fetchUserStocks();
   }
 
   _checkLoginStatus() async {
@@ -43,9 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
       List<dynamic> data = json.decode(response.body);
       setState(() {
         stockList = data.map((item) => {
-          'stockCode': item['stockCode'].toString(),
-          'stockName': utf8.decode(item['stockName'].codeUnits),
-        }).toList();
+              'stockCode': item['stockCode'].toString(),
+              'stockName': utf8.decode(item['stockName'].codeUnits),
+            }).toList();
       });
     } else {
       throw Exception('Failed to load stock list');
@@ -71,113 +74,153 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            "WithYou",
-            style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w800),
-          ),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Color(0xFF67CA98 ),
-        elevation: 0,
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (isLoggedIn) {
-                _logout();
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                ).then((_) => _checkLoginStatus());
-              }
-            },
-            child: Text(
-              isLoggedIn ? "로그아웃" : "로그인",
-              style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w900, color: Colors.black),
-            ),
-          ),
-        ],
-      ),
-      resizeToAvoidBottomInset: false,
-      body: SingleChildScrollView(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SingleChildScrollView(
+      child: Container(
+        color: Color(0xFFF5F5F5),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: SearchableStockList(stockList: stockList),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: WelcomeBox(),
-            ),
-            SizedBox(height: 20),
-                     if (isLoggedIn && _userStocks.isNotEmpty) ...[
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => UserInfoScreen()),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // 상단 배경 + 검색창 + WelcomeBox
+            Container(
+              height: 370,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF7CC993), Color(0xFF22B379)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(width: 8),
                           Text(
-                            "내 종목보기",style: TextStyle(fontFamily: 'MinSans',fontWeight: FontWeight.w800,fontSize: 22,color: Color.fromARGB(255, 0, 0, 0)),
+                            "WithYou",
+                            style: TextStyle(
+                              fontFamily: 'MinSans',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 24,
+                              color: Colors.white,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              if (isLoggedIn) {
+                                _logout();
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => LoginPage()),
+                                ).then((_) => _checkLoginStatus());
+                              }
+                            },
+                            child: Text(
+                              isLoggedIn ? "로그아웃" : "로그인",
+                              style: TextStyle(
+                                fontFamily: 'MinSans',
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFF03314B)),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: '주식 검색',
+                          hintStyle: TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.2),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                        ),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      SizedBox(height: 40),
+                      WelcomeBox(),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 10),
-              SizedBox(
-                height: 150,
-                child: Padding(padding: EdgeInsets.symmetric(horizontal:16.0),
-                  child: StockListWidget(stocks: _userStocks),
-                ),
-              ),
-              Divider(
-                color: const Color.fromARGB(255, 241, 241, 241), thickness:8, height: 20),
-              SizedBox(height: 5),
-            ],
-            RecommendedStocks(),
-            Divider(
-                color: const Color.fromARGB(255, 241, 241, 241), thickness:8, height: 20),
-              SizedBox(height: 5),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  SizedBox(width: 8),
-                  Text(
-                    "주식 랭킹", 
-                    style: TextStyle(fontFamily: 'MinSans', fontWeight: FontWeight.w800, fontSize: 22,color: Color.fromARGB(255, 0, 0, 0))
+            ),
+
+            SizedBox(height: 20),
+
+            // 보유 주식 목록
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
+              child: StockListWidget(stocks: _userStocks),
             ),
-            SizedBox(height: 10),
-            SizedBox(height: 600,child: Padding(padding: EdgeInsets.symmetric(horizontal: 16.0),child: StockRanking(),), 
+
+            SizedBox(height: 30),
+
+            // 추천 주식
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: RecommendedStocks(),
             ),
-          ],
+
+            SizedBox(height: 30),
+
+            // 주식 랭킹
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: SizedBox(
+                height: 600,
+                child: StockRanking(),
+              ),
+            ),
+
+            SizedBox(height: 30),
+           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

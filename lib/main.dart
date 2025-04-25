@@ -26,9 +26,9 @@ class MyApp extends StatelessWidget {
         fontFamily: 'NotoSans',
         primarySwatch: Colors.blue,
         canvasColor: Colors.white ,
-        scaffoldBackgroundColor: Colors.white, // 전체 배경을 흰색으로 설정
+        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255), // 전체 배경색 조정정
       ),
-      debugShowCheckedModeBanner: false, // 디버그 배너 제거
+      debugShowCheckedModeBanner: false, 
       home: MainScreen(),
     );
   }

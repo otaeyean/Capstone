@@ -88,7 +88,7 @@ final Map<String, IconData> categoryIconMap = {
   '개인 생활 필수 용품': Icons.house,
   '석탄': Icons.exposure,
   '개인 서비스': Icons.person,
-'타이어 및 고무 제품': Icons.directions_car,  
+  '타이어 및 고무 제품': Icons.directions_car,  
   '지상 및 해상 여객 운송': Icons.directions_boat,
   '건설 자재': Icons.build,
   '폐쇄형 펀드': Icons.pie_chart,
@@ -101,7 +101,6 @@ final Map<String, IconData> categoryIconMap = {
   '천연가스 유틸리티': Icons.nature_people,
   '초, 중, 고등 교육기관': Icons.school,
   '배달, 우편, 항공 화물 및 육상 물류': Icons.local_shipping,
-  // 추가된 카테고리
   '생명 및 건강 보험': Icons.local_hospital,
   '알루미늄': Icons.build,
   '기타 핀테크 인프라': Icons.settings_applications,
