@@ -51,34 +51,49 @@ class _StockRankingState extends State<StockRanking> {
 
 @override
 Widget build(BuildContext context) {
-  return Container(
-    color: Colors.white,
-    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-    child: Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildMarketButton("국내"),
-            SizedBox(width: 16),
-            _buildMarketButton("해외"),
-          ],
+return Container(
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(255, 255, 255, 255),
+    borderRadius: BorderRadius.circular(24),  //이게 테두리 만지는건데데
+  ),
+  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+  child: Column(
+    children: [
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          "주식 랭킹",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
-        SizedBox(height: 16),
-        if (isLoading)
-          Center(child: CircularProgressIndicator(color: Color(0xFF03314B)))
-        else if (isError)
-          Center(
-            child: Text(
-              "데이터를 불러올 수 없습니다.",
-              style: TextStyle(color: Colors.red, fontSize: 16),
-            ),
-          )
-        else
-          _buildDualColumnList(),
-      ],
-    ),
-  );
+      ),
+      SizedBox(height: 16),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildMarketButton("국내"),
+          SizedBox(width: 16),
+          _buildMarketButton("해외"),
+        ],
+      ),
+      SizedBox(height: 16),
+      if (isLoading)
+        Center(child: CircularProgressIndicator(color: Color(0xFF03314B)))
+      else if (isError)
+        Center(
+          child: Text(
+            "데이터를 불러올 수 없습니다.",
+            style: TextStyle(color: Colors.red, fontSize: 16),
+          ),
+        )
+      else
+        _buildDualColumnList(),
+    ],
+  ),
+);
 }
 
 
@@ -170,7 +185,7 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
             padding: EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(10), 
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.05),
