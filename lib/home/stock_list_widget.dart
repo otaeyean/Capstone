@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stockapp/data/user_stock_model.dart'; // UserStockModel import
+import 'package:stockapp/data/user_stock_model.dart';
 
 class StockListWidget extends StatelessWidget {
   final List<UserStockModel>? stocks; // nullable로 변경 (로딩 고려)
@@ -48,7 +48,7 @@ class StockListWidget extends StatelessWidget {
   }
 
   Widget _buildLoadingList() {
-    // 로딩 중인 상태에서 shimmer나 skeleton 대신 회색 박스 보여줌
+    // 로딩 중인 상태에서 skeleton 박스 보여줌
     return ListView.separated(
       scrollDirection: Axis.horizontal,
       itemCount: 3,
@@ -107,6 +107,8 @@ class StockListWidget extends StatelessWidget {
             "${profitRate >= 0 ? "+" : ""}${profitRate.toStringAsFixed(2)}%";
         final changeColor = profitRate >= 0 ? Colors.red : Colors.blue;
 
+        final String stockImage = 'assets/images/${stock.name}_${stock.stockCode}.png';
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -115,9 +117,31 @@ class StockListWidget extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFEFF9F8),
+                color: Color(0xFFF4F4F6), // 거의 흰색에 가까운 중립 배경
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.15),
+                    blurRadius: 6,
+                    offset: Offset(2, 2),
+                  ),
+                ],
               ),
-              child: Icon(Icons.android, size: 36, color: Color(0xFF03314B)),
+              child: ClipOval(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset(
+                    stockImage,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.business,
+                        color: Colors.black45,
+                        size: 32,
+                      );
+                    },
+                  ),
+                ),
+              ),
             ),
             SizedBox(height: 8),
             SizedBox(
@@ -132,6 +156,7 @@ class StockListWidget extends StatelessWidget {
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
+                textAlign: TextAlign.center,
               ),
             ),
             SizedBox(
@@ -146,6 +171,7 @@ class StockListWidget extends StatelessWidget {
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
+                textAlign: TextAlign.center,
               ),
             ),
           ],
