@@ -14,12 +14,8 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
   List<String> unrecommendedCategories = [];
   bool isLoading = true;
 
-  // 단일 색상 리스트로 변경
-  final List<Color> iconColors = [
-    Color(0xFF25478C), // 네이비 블루
-    Color(0xFF135338), // 다크 그린
-    Color(0xFF804600), // 브라운
-  ];
+  // 통일된 색상 리스트
+  final Color unifiedColor = Color(0xFF25478C); // 네이비 블루
 
   @override
   void initState() {
@@ -45,33 +41,41 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
     }
   }
 
-  Widget buildCategoryItem(String name, Color backgroundColor) {
+  Widget buildCategoryItem(String name) {
     final icon = categoryIconMap[name] ?? Icons.category;
     return Column(
       children: [
         Container(
-          width: 60,
-          height: 60, //아이콘 크기 
+          width: 70,
+          height: 70, //아이콘 크기 증가
           decoration: BoxDecoration(
-            color: backgroundColor, 
+            color: unifiedColor, 
             borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: unifiedColor.withOpacity(0.4),
+                blurRadius: 6,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
-          child: Icon(icon, color: Colors.white),
+          child: Icon(icon, color: Colors.white, size: 35),  //아이콘 크기
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         SizedBox(
           width: 80, 
           child: Text(
             name,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               fontFamily: 'MinSans',
               fontFamilyFallback: ['sans-serif'],
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
             textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.visible,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,  // 텍스트 넘침 처리
           ),
         ),
       ],
@@ -97,7 +101,7 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
                       fontFamily: 'MinSans',
                       fontWeight: FontWeight.w800,
                       fontSize: 22,
-                      color: Color.fromARGB(255, 0, 0, 0),
+                      color: Color(0xFF03314B),
                     ),
                   ),
                 ],
@@ -136,10 +140,7 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: List.generate(
                     recommendedCategories.length,
-                    (index) => buildCategoryItem(
-                      recommendedCategories[index],
-                      iconColors[index % iconColors.length],
-                    ),
+                    (index) => buildCategoryItem(recommendedCategories[index]),
                   ),
                 ),
 
@@ -164,10 +165,7 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: List.generate(
                     unrecommendedCategories.length,
-                    (index) => buildCategoryItem(
-                      unrecommendedCategories[index],
-                      iconColors[index % iconColors.length],
-                    ),
+                    (index) => buildCategoryItem(unrecommendedCategories[index]),
                   ),
                 ),
               ],

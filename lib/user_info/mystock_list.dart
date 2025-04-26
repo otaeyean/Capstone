@@ -68,25 +68,50 @@ class MyStockList extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // 왼쪽: 주식명 + 수량
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          // 왼쪽: 종목 이미지 + 이름/수량
+                          Row(
                             children: [
-                              Text(
-                                stockName,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Color(0xFF003366),
+                              // ✅ 동그란 이미지 추가
+                              Container(
+                                width: 40,
+                                height: 40,
+                                margin: EdgeInsets.only(right: 12),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFEFF9F8),
+                                ),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    'assets/images/${stockName}_${stockCode}.png',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(Icons.broken_image, color: Colors.grey, size: 24);
+                                    },
+                                  ),
                                 ),
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                '$stockQuantity 주 · ${formatter.format(totalValue)} 원',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 13,
-                                ),
+
+                              // 종목명 및 보유량/총액
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    stockName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Color(0xFF003366),
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '$stockQuantity 주 · ${formatter.format(totalValue)} 원',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
