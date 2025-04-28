@@ -37,9 +37,9 @@ class StockList extends StatelessWidget {
         double changePrice = (stock['stockChange'] ?? stock['changePrice'] ?? 0).toDouble();
         double currentPrice = (stock['stockCurrentPrice'] ?? stock['currentPrice'] ?? 0).toDouble();
         int tradeVolume = (stock['acml_vol'] ?? stock['tradeVolume'] ?? 0).toInt();
-    // 🔍 해외 여부 정확히 판단
-bool isOverseas = stock.containsKey("excd") ||
-    (stock['stockCode'] is String && RegExp(r'[A-Za-z]').hasMatch(stock['stockCode']));
+
+        bool isOverseas = stock.containsKey("excd") ||
+            (stock['stockCode'] is String && RegExp(r'[A-Za-z]').hasMatch(stock['stockCode']));
 
         if (isOverseas && percent < 0) changePrice = -changePrice;
 
@@ -47,8 +47,7 @@ bool isOverseas = stock.containsKey("excd") ||
             ? "+${percent.toStringAsFixed(2)}%"
             : "${percent.toStringAsFixed(2)}%";
 
-        // ✅ 변경된 색상: 상승은 파랑, 하락은 빨강
-        Color changeColor = percent >= 0 ? Colors.red : Colors.blue;
+        Color changeColor = percent >= 0 ? gainColor : lossColor;
 
         String changePriceText = changePrice >= 0
             ? "+${changePrice.toStringAsFixed(2)}"
@@ -56,101 +55,136 @@ bool isOverseas = stock.containsKey("excd") ||
 
         Color priceColor = isTradeVolumeSelected ? Colors.black : changeColor;
 
-    // 💸 가격 표시 형식
-String priceText = isOverseas
-    ? "\$${currentPrice.toStringAsFixed(2)}"
-    : "${formatKoreanPrice(currentPrice)} 원";
+        String priceText = isOverseas
+            ? "\$${currentPrice.toStringAsFixed(2)}"
+            : "${formatKoreanPrice(currentPrice)} 원";
+
         return GestureDetector(
-         onTap: () {
-  final enrichedStock = {
-    ...stock,
-    'currentPrice': stock['stockCurrentPrice'] ?? stock['currentPrice'] ?? stock['price'] ?? 0,
-    'changeRate': stock['stockChangePercent'] ?? stock['changeRate'] ?? stock['rise_percent'] ?? stock['fall_percent'] ?? 0,
-  };
+          onTap: () {
+            final enrichedStock = {
+              ...stock,
+              'currentPrice': stock['stockCurrentPrice'] ??
+                  stock['currentPrice'] ??
+                  stock['price'] ??
+                  0,
+              'changeRate': stock['stockChangePercent'] ??
+                  stock['changeRate'] ??
+                  stock['rise_percent'] ??
+                  stock['fall_percent'] ??
+                  0,
+            };
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => StockDetailScreen(stock: enrichedStock),
-    ),
-  );
-},
-
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StockDetailScreen(stock: enrichedStock),
+              ),
+            );
+          },
           child: Container(
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(24),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.04),
-        blurRadius: 10,
-        offset: Offset(0, 6),
-      ),
-    ],
-  ),
-  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            stock['stockName'] ?? '이름 없음',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: darkTextColor,
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: percent >= 0 ? gainColor.withOpacity(0.1) : lossColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: Offset(0, 6),
+                ),
+              ],
             ),
-            child: Text(
-              changeText,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: changeColor,
-              ),
-            ),
-          )
-        ],
-      ),
-      SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            priceText,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: priceColor,
+            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ✅ 동그란 이미지
+                Container(
+                  width: 48,
+                  height: 48,
+                  margin: EdgeInsets.only(right: 16),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFEFF9F8),
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/${stock['stockName']}_${stock['stockCode']}.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(Icons.broken_image, color: Colors.grey, size: 24);
+                      },
+                    ),
+                  ),
+                ),
+
+                // ✅ 이름, 가격, 거래량 등 기존 정보
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            stock['stockName'] ?? '이름 없음',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: darkTextColor,
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: percent >= 0
+                                  ? gainColor.withOpacity(0.1)
+                                  : lossColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              changeText,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: changeColor,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            priceText,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: priceColor,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.bar_chart, size: 16, color: Colors.grey[400]),
+                              SizedBox(width: 4),
+                              Text(
+                                formatTradeVolume(tradeVolume),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          Row(
-            children: [
-              Icon(Icons.bar_chart, size: 16, color: Colors.grey[400]),
-              SizedBox(width: 4),
-              Text(
-                formatTradeVolume(tradeVolume),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          )
-        ],
-      )
-    ],
-  ),
-)
-,
         );
       },
     );
