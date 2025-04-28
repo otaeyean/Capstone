@@ -44,17 +44,20 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
 
 Widget buildCategoryItem(String name, Color backgroundColor) {
   final icon = categoryIconMap[name] ?? Icons.category;
+  final screenWidth = MediaQuery.of(context).size.width;
+  final containerWidth = screenWidth * 0.17; // 조금 작게 25%로 조정
 
   return Container(
-    //항목 박스로 묶음
-    width: 137, 
-    height: 140, 
-    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+    width: containerWidth,
+    height: containerWidth * 1.05,
+    // 패딩 줄임
+    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 1),
     decoration: BoxDecoration(
-color: Color.fromARGB(255, 255, 255, 255),  //아이콘 큰 박스 색상 
+      color: Colors.white,
       borderRadius: BorderRadius.circular(12),
     ),
     child: Column(
+      mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
@@ -63,11 +66,15 @@ color: Color.fromARGB(255, 255, 255, 255),  //아이콘 큰 박스 색상
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(12),
-             border: Border.all(color: const Color.fromARGB(255, 182, 181, 181), width: 2), //아이콘 이미지 테두리 색상
+            border: Border.all(color: const Color.fromARGB(255, 0, 0, 0), width: 2),
           ),
-          child: Icon(icon,size: 40,color:  const Color.fromARGB(255, 0, 0, 0),), //이미지 색상상
+          child: Icon(
+            icon,
+            size: 40,
+            color: const Color.fromARGB(255, 23, 71, 43),
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 2), // 간격도 약간 줄임
         Text(
           name,
           style: const TextStyle(
