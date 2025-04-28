@@ -152,98 +152,101 @@ Future<void> _loadFavoriteStatus() async {
         ),
         elevation: 0,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+body: SingleChildScrollView(
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 5),
-                    StockInfo(stock: stock),
-                    StockChangeInfo(stock: stock), // ✅ StockInfo 제거
-                  ],
+                SizedBox(height: 5),
+                StockInfo(stock: stock),
+                StockChangeInfo(stock: stock),
+              ],
+            ),
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.star : Icons.star_border,
+                    color: isFavorite ? Colors.yellow : Colors.grey,
+                    size: 40,
+                  ),
+                  onPressed: _toggleFavorite,
                 ),
-                Row(
-                  children: [
-                  IconButton(
-  icon: Icon(
-    isFavorite ? Icons.star : Icons.star_border,
-    color: isFavorite ? Colors.yellow : Colors.grey,
-    size:  40, // ⭐ 예시: 30
-  ),
-  onPressed: _toggleFavorite,
-),
-SizedBox(width: 4), // 아이콘 간격 살짝
-Icon(
-  Icons.notifications_none,
-  color: Colors.grey,
-  size: 40, // 🔔 아이콘 크기도 같게
-),
-
-                  ],
+                SizedBox(width: 4),
+                Icon(
+                  Icons.notifications_none,
+                  color: Colors.grey,
+                  size: 40,
                 ),
               ],
             ),
-          ),
-          Divider(),
-          Expanded(
-            child: DefaultTabController(
-              length: 4,
-              child: Column(
-                children: [
-                  TabBar(
-                  tabs: [
-                    Tab(text: '차트'),
-                    Tab(text: '모의 투자'),
-                    Tab(text: '뉴스'),
-                    Tab(text: '상세 정보'),
-                  ],
-                  labelColor: Colors.green, // 선택된 탭 텍스트 색상
-                  unselectedLabelColor: Colors.black, // 선택되지 않은 탭 텍스트 색상
-                  indicatorColor: Colors.green, // 선택된 탭 아래 선 색상
-                ),
-
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        // 차트의 크기 동적으로 설정
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            double chartHeight = constraints.maxHeight * 0.5; // 화면 높이에 비례하여 차트 크기 설정
-                            return SizedBox(
-                              height: chartHeight,
-                              child: StockChartMain(stockCode: widget.stock['stockCode']), 
-                            );
-                          },
-                        ),
-                        MockInvestmentScreen(stockCode: stockCode), 
-                        NewsScreen(stockName: stockName),
-                        SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              isLoading
-                                  ? Center(child: CircularProgressIndicator())
-                                  : companyDescription != null
-                                      ? StockDescription(stock: stock, description: companyDescription!)
-                                      : Text('회사 소개 정보를 불러올 수 없습니다.', style: TextStyle(color: Colors.red)),
-                              if (stockCode.isNotEmpty) StockInfoDetail(stockCode: stockCode), 
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+      Divider(),
+
+      // TabController를 Column 안에 그냥 유지 (주의: DefaultTabController를 밖으로 빼야 더 깔끔해짐)
+      SizedBox(
+        height: 600, // TabView 고정 높이 설정 (이게 없으면 무한 높이 오류남)
+        child: DefaultTabController(
+          length: 4,
+          child: Column(
+            children: [
+              TabBar(
+                tabs: [
+                  Tab(text: '차트'),
+                  Tab(text: '모의 투자'),
+                  Tab(text: '뉴스'),
+                  Tab(text: '상세 정보'),
+                ],
+                labelColor: Colors.green,
+                unselectedLabelColor: Colors.black,
+                indicatorColor: Colors.green,
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        double chartHeight = constraints.maxHeight * 0.5;
+                        return SizedBox(
+                          height: chartHeight,
+                          child: StockChartMain(stockCode: widget.stock['stockCode']),
+                        );
+                      },
+                    ),
+                    MockInvestmentScreen(stockCode: stockCode),
+                    NewsScreen(stockName: stockName),
+                    SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          isLoading
+                              ? Center(child: CircularProgressIndicator())
+                              : companyDescription != null
+                                  ? StockDescription(stock: stock, description: companyDescription!)
+                                  : Text('회사 소개 정보를 불러올 수 없습니다.', style: TextStyle(color: Colors.red)),
+                          if (stockCode.isNotEmpty) StockInfoDetail(stockCode: stockCode),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
     );
   }
 }
