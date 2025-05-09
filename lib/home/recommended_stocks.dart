@@ -177,12 +177,12 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "오늘의 카테고리",
-            style: TextStyle(
-              fontFamily: 'MinSans',
-              fontWeight: FontWeight.w800,
-              fontSize: 22,
-              color: Colors.black,
+            "  현재 이 카테고리가 뜨고 있어요",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                fontFamily: 'MinSans',
+                color: Colors.black,
             ),
           ),
           const SizedBox(height: 16),

@@ -145,34 +145,38 @@ class _MockSellScreenState extends State<MockSellScreen> {
       });
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildBalanceWidget(),
-            SizedBox(height: 20),
-            _buildPriceWidget(),
-            SizedBox(height: 20),
-            _buildQuantityWidget(),
-            SizedBox(height: 16),
-            Divider(color: Colors.grey, thickness: 1),
-
-            BuyReservationSettingsScreen(currentPrice: _price ?? 0.0,stockCode: widget.stockCode),
-
-            SizedBox(height: 30),
-            Spacer(),
-            _buildSellButton(),
-            if (_errorMessage != null) _buildErrorMessageWidget(),
-          ],
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SafeArea( // (선택) 노치나 상태바 침범 방지
+      child: SingleChildScrollView( // <- 스크롤 가능하게 변경
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildBalanceWidget(),
+              SizedBox(height: 20),
+              _buildPriceWidget(),
+              SizedBox(height: 20),
+              _buildQuantityWidget(),
+              SizedBox(height: 16),
+              Divider(color: Colors.grey, thickness: 1),
+              BuyReservationSettingsScreen(
+                currentPrice: _price ?? 0.0,
+                stockCode: widget.stockCode,
+              ),
+              SizedBox(height: 30),
+              _buildSellButton(), 
+              if (_errorMessage != null) _buildErrorMessageWidget(),
+            ],
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildBalanceWidget() {
     return _balance != null
