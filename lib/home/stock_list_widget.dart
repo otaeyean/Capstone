@@ -23,7 +23,7 @@ class StockListWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              "내 종목 보기",
+              "  투자 종목을 한 눈에 볼 수 있어요",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,

@@ -62,7 +62,7 @@ return Container(
       Align(
         alignment: Alignment.centerLeft,
         child: Text(
-          "주식 랭킹",
+          "국내/해외, 상승/하락 종목을 빠르게 파악해보세요",
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,

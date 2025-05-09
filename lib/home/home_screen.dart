@@ -12,6 +12,8 @@ import 'package:stockapp/data/user_stock_model.dart';
 import 'package:stockapp/server/userInfo/stock_service.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import './recommended_stocks.dart';
+import '../home/my_stock_news.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key); // ✅ key 받아야 함
   @override
@@ -181,6 +183,24 @@ Widget build(BuildContext context) {
 
             SizedBox(height: 30),
 
+          // 내 종목 뉴스 불러오기
+            Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 6,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: const UserNewsScreen(), // 이제 정상 렌더링됨
+        ),
+        SizedBox(height: 30),
+        
             // 추천 주식
             Container(
               margin: EdgeInsets.symmetric(horizontal: 16),
