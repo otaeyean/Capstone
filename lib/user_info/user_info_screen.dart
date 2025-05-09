@@ -64,11 +64,17 @@ class UserInfoScreenState extends State<UserInfoScreen> {
     return userId.isEmpty
         ? Center(child: CircularProgressIndicator())
         : Scaffold(
-            backgroundColor: Color(0xFFF5F5F5),
-            appBar: PreferredSize(
-              preferredSize: Size.zero,
-              child: SizedBox.shrink(),
+            backgroundColor: const Color(0xFFF5F5F5),
+            // ✅ AppBar 추가 (투명 배경, 뒤로가기 버튼)
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
+            extendBodyBehindAppBar: true,
             body: SingleChildScrollView(
               child: Column(
                 children: [
@@ -78,7 +84,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                       Container(
                         width: double.infinity,
                         height: 250,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
                               Color(0xFF64C38C),
@@ -98,7 +104,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                       Positioned(bottom: 40, right: 60, child: _circleDot(26, Colors.white.withOpacity(0.1))),
                       Positioned(bottom: 60, left: 50, child: _circleDot(10, Colors.white.withOpacity(0.25))),
                       Padding(
-                        padding: EdgeInsets.only(left: 15, top: 50),
+                        padding: const EdgeInsets.only(left: 15, top: 90), // AppBar 공간 고려해 90으로 조정
                         child: Align(
                           alignment: Alignment.topLeft,
                           child: UserProfile(userId: userId),
@@ -109,7 +115,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
 
                   // ✅ 통합된 보유금액 + 수익요약 박스
                   Transform.translate(
-                    offset: Offset(0, -30),
+                    offset: const Offset(0, -30),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: CombinedBalanceSummary(userId: userId),
@@ -120,12 +126,12 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       children: [
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         SortDropdown(
                           stocks: _userStocks,
                           onSortChanged: _onSortChanged,
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         MyStockList(stocks: _userStocks),
                       ],
                     ),

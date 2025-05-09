@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stockapp/investment/detail_widgets/realtimetrade.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import './detail_widgets/stock_change_info.dart';
 import 'chart/chart_main.dart';
@@ -193,12 +194,13 @@ Icon(
           Divider(),
           Expanded(
             child: DefaultTabController(
-              length: 4,
+              length: 5,
               child: Column(
                 children: [
                   TabBar(
                   tabs: [
                     Tab(text: '차트'),
+                    Tab(text: '실시간 체결가'),
                     Tab(text: '모의 투자'),
                     Tab(text: '뉴스'),
                     Tab(text: '상세 정보'),
@@ -221,6 +223,16 @@ Icon(
                             );
                           },
                         ),
+                           // ✅ 실시간 체결가 탭 
+    LayoutBuilder(
+      builder: (context, constraints) {
+        double chartHeight = constraints.maxHeight * 0.5; // 원하는 비율로
+        return SizedBox(
+          height: chartHeight,
+          child: RealTimePriceChart(stockCode: stockCode),
+        );
+      },
+    ),
                         MockInvestmentScreen(stockCode: stockCode), 
                         NewsScreen(stockName: stockName),
                         SingleChildScrollView(
