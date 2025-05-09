@@ -12,13 +12,13 @@ import 'package:stockapp/data/user_stock_model.dart';
 import 'package:stockapp/server/userInfo/stock_service.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import './recommended_stocks.dart';
-
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key); // ✅ key 받아야 함
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   bool isLoggedIn = false;
   List<Map<String, String>> stockList = [];
   List<UserStockModel> _userStocks = [];
@@ -33,6 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchUserStocks();
   }
 
+  // ✅ 외부에서 호출할 수 있는 메서드 추가
+  void refreshUserStocks() {
+    _fetchUserStocks();
+  }
   _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -79,7 +83,7 @@ Widget build(BuildContext context) {
   return Scaffold(
     body: SingleChildScrollView(
       child: Container(
-        color: Color(0xFFF5F5F5),
+        color: Color(0xFFE9F8F2),
         child: Column(
           children: [
             // 상단 배경 + 검색창 + WelcomeBox
