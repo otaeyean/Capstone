@@ -144,41 +144,45 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
       },
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildBalanceWidget(),
-            SizedBox(height: 20),
-            _buildPriceWidget(),
-            SizedBox(height: 20),
-            _buildQuantityWidget(),
-            SizedBox(height: 16),
-           Container(
-            width: double.infinity,
-            child: Divider(
-              color: Colors.grey,
-              thickness: 1,
-              height: 1, // 높이 조절
-            ),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SafeArea( // (선택) 화면이 노치나 상태바를 침범하지 않게
+      child: SingleChildScrollView( // <- 추가
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildBalanceWidget(),
+              SizedBox(height: 20),
+              _buildPriceWidget(),
+              SizedBox(height: 20),
+              _buildQuantityWidget(),
+              SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                child: Divider(
+                  color: Colors.grey,
+                  thickness: 1,
+                  height: 1,
+                ),
+              ),
+              ReservationSettingsScreen(
+                currentPrice: _price ?? 0.0,
+                stockCode: widget.stockCode,
+              ),
+              SizedBox(height: 30),
+              _buildBuyButton(), // Spacer()는 삭제해야 함
+              if (_errorMessage != null) _buildErrorMessageWidget(),
+            ],
           ),
-
-            ReservationSettingsScreen(currentPrice: _price ?? 0.0,stockCode: widget.stockCode),
-
-            SizedBox(height: 30),
-            Spacer(),
-            _buildBuyButton(),
-            if (_errorMessage != null) _buildErrorMessageWidget(),
-          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildBalanceWidget() {
     return _balance != null
