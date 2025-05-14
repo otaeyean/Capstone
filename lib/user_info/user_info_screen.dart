@@ -6,7 +6,7 @@ import 'package:stockapp/user_info/mystock_list.dart';
 import 'package:stockapp/user_info/portfolio_summary.dart';
 import 'package:stockapp/user_info/sort_dropdown.dart';
 import 'package:stockapp/user_info/user_profile.dart';
-
+import 'achievement_rate_widget.dart';
 class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({Key? key}) : super(key: key);
 
@@ -113,14 +113,19 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                     ],
                   ),
 
-                  // ✅ 통합된 보유금액 + 수익요약 박스
-                  Transform.translate(
-                    offset: const Offset(0, -30),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: CombinedBalanceSummary(userId: userId),
-                    ),
+              Transform.translate(
+                offset: const Offset(0, -30),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      CombinedBalanceSummary(userId: userId),
+                      const SizedBox(height: 16),
+                      AchievementRateWidget(userId: userId), // 여기에 AchievementRateWidget을 사용
+                    ],
                   ),
+                ),
+              ),
 
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),

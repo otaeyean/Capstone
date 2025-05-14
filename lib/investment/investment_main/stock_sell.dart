@@ -82,44 +82,51 @@ class _MockSellScreenState extends State<MockSellScreen> {
       print("매도 실패");
     }
   }
+void _showConfirmationDialog() {
+  final isForeignStock = widget.stockCode.contains(RegExp(r'[A-Za-z]'));
+  final formattedPrice = isForeignStock
+      ? '\$${_price.toStringAsFixed(2)}'
+      : '${_price.toStringAsFixed(0)}원';
 
-  void _showConfirmationDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white, 
-          title: Row(
-            children: [
-              Text("매도 확인"),
-              SizedBox(width: 8), 
-              Icon(Icons.help_outline, color: Colors.black), 
-            ],
-          ),
-          content: Text(
-            "체결 가격: ${_price.toStringAsFixed(0)}원\n매도 수량: $confirmedQuantity주\n\n진행하시겠습니까?",
-            style: TextStyle(color: Colors.black), 
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(), 
-              child: Text("취소",style: TextStyle(color: Colors.black), 
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); 
-                _sellStock();
-              },
-              child: Text("확인", style: TextStyle(color: Colors.blue), 
-              ),
-            ),
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            Text("매도 확인"),
+            SizedBox(width: 8),
+            Icon(Icons.help_outline, color: Colors.black),
           ],
-        );
-      },
-    );
-  }
+        ),
+        content: Text(
+          "체결 가격: $formattedPrice\n매도 수량: $confirmedQuantity주\n\n진행하시겠습니까?",
+          style: TextStyle(color: Colors.black),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("취소", style: TextStyle(color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _sellStock();
+            },
+            child: Text("확인", style: TextStyle(color: Colors.blue)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+bool get _isForeignStock {
+  return widget.stockCode.contains(RegExp(r'[A-Za-z]'));
+}
 
   void _showSuccessDialog() {
     showDialog(
@@ -190,14 +197,13 @@ Widget build(BuildContext context) {
             child: Container(width: 180, height: 24, color: Colors.white),
           );
   }
-  
 Widget _buildPriceWidget() {
   return Container(
     padding: EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.grey.shade300), // 테두리 추가
+      border: Border.all(color: Colors.grey.shade300),
     ),
     width: double.infinity,
     child: Column(
@@ -206,13 +212,18 @@ Widget _buildPriceWidget() {
         Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
         SizedBox(height: 8),
         Text(
-          _price != null ? '${_price!.toStringAsFixed(0)}원' : '0원',
+          _price != null
+              ? _isForeignStock
+                  ? '\$${_price!.toStringAsFixed(2)}'
+                  : '${_price!.toStringAsFixed(0)}원'
+              : _isForeignStock ? '\$0.00' : '0원',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ],
     ),
   );
 }
+
 
     Widget _buildQuantityWidget() {
     return Container(

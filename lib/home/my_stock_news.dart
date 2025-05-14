@@ -85,18 +85,56 @@ class _UserNewsScreenState extends State<UserNewsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16.0),  // 위에 마진 추가
-          child: Text(
-            "  투자 종목 관련 뉴스를 확인해보세요",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              fontFamily: 'MinSans',
-              color: Colors.black,
-            ),
+       const Padding(
+  padding: EdgeInsets.all(16.0),
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.center, // ✅ 수직 가운데 정렬
+    children: [
+      Icon(
+        Icons.auto_awesome, // ✅ 예시 아이콘 (귀엽고 통용 가능)
+        color: Color(0xFF0F1E46),
+        size: 24,
+      ),
+      SizedBox(width: 8),
+      Expanded(
+        child: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: '투자 종목 관련 ',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'MinSans',
+                  color: Colors.black,
+                ),
+              ),
+              TextSpan(
+                text: '뉴스',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'MinSans',
+                  color: Colors.green,
+                ),
+              ),
+              TextSpan(
+                text: ' 확인',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'MinSans',
+                  color: Colors.black,
+                ),
+              ),
+            ],
           ),
         ),
+      ),
+    ],
+  ),
+),
+
         SizedBox(
           height: 380,
           child: PageView.builder(

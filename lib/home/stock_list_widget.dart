@@ -11,40 +11,68 @@ class StockListWidget extends StatelessWidget {
     required this.stocks,
     this.isLoading = false,
   }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 타이틀
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              "  투자 종목을 한 눈에 볼 수 있어요",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                fontFamily: 'MinSans',
-                color: Colors.black,
+@override
+Widget build(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 타이틀
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center, // ✅ 수직 정렬
+            children: [
+              Icon(
+               Icons.face ,  // ✅ 귀엽고 통용될 수 있는 아이콘 (⭐)
+                color: Color(0xFF0F1E46),
+                size: 24,
               ),
-            ),
+              SizedBox(width: 8),  // 아이콘과 텍스트 사이 공간
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '투자 종목',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: 'MinSans',
+                          color: Colors.green, // ✅ 초록색 강조
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' 한 눈에 보기',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: 'MinSans',
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 30),
-          SizedBox(
-            height: 130,
-            child: isLoading
-                ? _buildLoadingList()
-                : (stocks == null || stocks!.isEmpty)
-                    ? _buildEmptyMessage()
-                    : _buildStockList(context),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+        SizedBox(height: 30),
+        SizedBox(
+          height: 130,
+          child: isLoading
+              ? _buildLoadingList()
+              : (stocks == null || stocks!.isEmpty)
+                  ? _buildEmptyMessage()
+                  : _buildStockList(context),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildLoadingList() {
     return ListView.separated(

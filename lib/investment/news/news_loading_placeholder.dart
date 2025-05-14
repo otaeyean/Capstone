@@ -7,7 +7,7 @@ class NewsLoadingPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(5, (index) => _buildShimmerItem()),
+      children: List.generate(7, (index) => _buildShimmerItem()),
     );
   }
 

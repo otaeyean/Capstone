@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stockapp/server/investment/recommend/recommend_list_server.dart';
 import 'package:stockapp/data/category_icon_map.dart';
 import 'dart:math';
+import 'package:flutter_animate/flutter_animate.dart'; // 애니메이션 효과를 위한 패키지 추가
 
 class RecommendationTab extends StatefulWidget {
   @override
@@ -14,7 +15,8 @@ class _RecommendationTabState extends State<RecommendationTab> {
   final RecommendListServer apiService = RecommendListServer();
 
   final List<Color> iconColors = [
-      Color.fromARGB(150, 38, 107, 234), // 브라운
+    Color.fromARGB(255, 133, 216, 170),
+
   ];
 
   @override
@@ -54,20 +56,11 @@ class _RecommendationTabState extends State<RecommendationTab> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Divider(thickness: 1),
-          SizedBox(height: 8),
-          Text(
-            "전체 카테고리 리스트",
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF03314B),
-            ),
-          ),
           SizedBox(height: 8),
           allCategories.isEmpty
               ? Center(child: CircularProgressIndicator())
@@ -76,50 +69,71 @@ class _RecommendationTabState extends State<RecommendationTab> {
                   physics: NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 25,
-                    mainAxisSpacing: 25,
-                    childAspectRatio: 5.0,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    childAspectRatio: 2.8,
                   ),
                   itemCount: allCategories.length,
                   itemBuilder: (context, index) {
                     String categoryName = allCategories[index];
-                    IconData? categoryIcon = categoryIconMap[categoryName] ?? Icons.disabled_by_default;
-                    return Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Container(
-                              width: 70,
-                              height: 70,
+                    IconData? categoryIcon = categoryIconMap[categoryName] ?? Icons.category;
+                    Color bgColor = getRandomColor();
+
+                    return GestureDetector(
+                      onTap: () {
+                        // 선택 동작 추가할 수 있음
+                      },
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(width: 12),
+                            Container(
+                              width: 60,
+                              height: 60,
                               decoration: BoxDecoration(
-                                color: getRandomColor(),
-                                borderRadius: BorderRadius.circular(8),
+                                color: bgColor,
+                                shape: BoxShape.circle,
                               ),
                               child: Center(
                                 child: Icon(
                                   categoryIcon,
-                                  size: 40,
+                                  size: 30,
                                   color: Colors.white,
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              categoryName,
-                              style: TextStyle(fontSize: 18),
-                              textAlign: TextAlign.left,
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                categoryName,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                            SizedBox(width: 12),
+                          ],
+                        ),
+                      ).animate().scale(
+                            duration: 400.ms,
+                            curve: Curves.easeOutBack,
+                          ), // Flutter Animate 애니메이션
                     );
                   },
                 ),

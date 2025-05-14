@@ -48,54 +48,68 @@ class _StockRankingState extends State<StockRanking> {
       });
     }
   }
-
 @override
 Widget build(BuildContext context) {
-return Container(
-  decoration: BoxDecoration(
-    color: const Color.fromARGB(255, 255, 255, 255),
-    borderRadius: BorderRadius.circular(24),  //이게 테두리 만지는건데데
-  ),
-  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-  child: Column(
-    children: [
-      Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          "국내/해외, 상승/하락 종목을 빠르게 파악해보세요",
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+  return Container(
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 255, 255, 255),
+      borderRadius: BorderRadius.circular(24),
+    ),
+    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+    child: Column(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Row(
+            children: [
+              Icon(Icons.flash_on, color: const Color.fromARGB(255, 15, 30, 70), size: 24),
+              SizedBox(width: 8),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'MinSans',
+                    color: Colors.black,
+                  ),
+                  children: [
+                    TextSpan(text: "주식 "),
+                    TextSpan(
+                      text: "랭킹",
+                      style: TextStyle(color: Colors.green), // 초록색
+                    ),
+                    TextSpan(text: " 확인"),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-      ),
-      SizedBox(height: 16),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildMarketButton("국내"),
-          SizedBox(width: 16),
-          _buildMarketButton("해외"),
-        ],
-      ),
-      SizedBox(height: 16),
-      if (isLoading)
-        Center(child: CircularProgressIndicator(color: Color(0xFF03314B)))
-      else if (isError)
-        Center(
-          child: Text(
-            "데이터를 불러올 수 없습니다.",
-            style: TextStyle(color: Colors.red, fontSize: 16),
-          ),
-        )
-      else
-        _buildDualColumnList(),
-    ],
-  ),
-);
+        SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildMarketButton("국내"),
+            SizedBox(width: 16),
+            _buildMarketButton("해외"),
+          ],
+        ),
+        SizedBox(height: 16),
+        if (isLoading)
+          Center(child: CircularProgressIndicator(color: Color(0xFF03314B)))
+        else if (isError)
+          Center(
+            child: Text(
+              "데이터를 불러올 수 없습니다.",
+              style: TextStyle(color: Colors.red, fontSize: 16),
+            ),
+          )
+        else
+          _buildDualColumnList(),
+      ],
+    ),
+  );
 }
-
 
 Widget _buildMarketButton(String market) {
   bool isSelected = selectedMarket == market;
