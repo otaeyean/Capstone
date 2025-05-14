@@ -102,6 +102,10 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
     }
   }
 
+bool get _isForeignStock {
+  return widget.stockCode.contains(RegExp(r'[A-Za-z]'));
+}
+
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -127,23 +131,29 @@ class _MockBuyScreenState extends State<MockBuyScreen> {
       });
     }
   }
+  
+_showConfirmationDialog() {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      final isForeign = widget.stockCode.contains(RegExp(r'[A-Za-z]'));
+      final formattedPrice = isForeign
+          ? '\$${_price!.toStringAsFixed(2)}'
+          : '${_price!.toStringAsFixed(0)}원';
 
-  void _showConfirmationDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return ConfirmationDialog(
-          price: _price != null ? _price!.toStringAsFixed(0) : '가격을 불러오는 중...',
-          quantity: confirmedQuantity!,
-          onConfirm: () {
-            Navigator.of(context).pop();
-            _buyStock();
-          },
-        );
-      },
-    );
-  }
+      return ConfirmationDialog(
+        price: formattedPrice,
+        quantity: confirmedQuantity!,
+        onConfirm: () {
+          Navigator.of(context).pop();
+          _buyStock();
+        },
+      );
+    },
+  );
+}
+
 @override
 Widget build(BuildContext context) {
   return Scaffold(
@@ -201,29 +211,33 @@ Widget build(BuildContext context) {
           );
   }
 
-    Widget _buildPriceWidget() {
-      return Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300), // 테두리 추가
+Widget _buildPriceWidget() {
+  return Container(
+    padding: EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.grey.shade300),
+    ),
+    width: double.infinity,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
+        SizedBox(height: 8),
+        Text(
+          _price != null
+              ? _isForeignStock
+                  ? '\$${_price!.toStringAsFixed(2)}'
+                  : '${_price!.toStringAsFixed(0)}원'
+              : _isForeignStock ? '\$0.00' : '0원',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('현재가', style: TextStyle(color: Colors.black, fontSize: 16)),
-            SizedBox(height: 8),
-            Text(
-              _price != null ? '${_price!.toStringAsFixed(0)}원' : '0원',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      );
-    }
-    
+      ],
+    ),
+  );
+}
+
   Widget _buildQuantityWidget() {
     return Container(
       padding: EdgeInsets.all(16),

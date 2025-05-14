@@ -15,7 +15,7 @@ import './recommended_stocks.dart';
 import '../home/my_stock_news.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key); // ✅ key 받아야 함
+  const HomeScreen({Key? key}) : super(key: key);
   @override
   HomeScreenState createState() => HomeScreenState();
 }
@@ -24,7 +24,6 @@ class HomeScreenState extends State<HomeScreen> {
   bool isLoggedIn = false;
   List<Map<String, String>> stockList = [];
   List<UserStockModel> _userStocks = [];
-  bool isSearchVisible = false;
   TextEditingController _searchController = TextEditingController();
 
   @override
@@ -35,10 +34,10 @@ class HomeScreenState extends State<HomeScreen> {
     _fetchUserStocks();
   }
 
-  // ✅ 외부에서 호출할 수 있는 메서드 추가
   void refreshUserStocks() {
     _fetchUserStocks();
   }
+
   _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -80,171 +79,237 @@ class HomeScreenState extends State<HomeScreen> {
     });
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: SingleChildScrollView(
-      child: Container(
-        color: Color(0xFFE9F8F2),
-        child: Column(
-          children: [
-            // 상단 배경 + 검색창 + WelcomeBox
-            Container(
-              height: 370,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF7CC993), Color(0xFF22B379)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "WithYou",
-                            style: TextStyle(
-                              fontFamily: 'MinSans',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 24,
-                              color: Colors.white,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Container(
+              color: Color(0xFFE9F8F2),
+              child: Column(
+                children: [
+                  // 상단 배경 + 검색창 + WelcomeBox
+                  Container(
+                    height: 370,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF7CC993), Color(0xFF22B379)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: SafeArea(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "WithYou",
+                                  style: TextStyle(
+                                    fontFamily: 'MinSans',
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 24,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    if (isLoggedIn) {
+                                      _logout();
+                                    } else {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => LoginPage()),
+                                      ).then((_) => _checkLoginStatus());
+                                    }
+                                  },
+                                  child: Text(
+                                    isLoggedIn ? "로그아웃" : "로그인",
+                                    style: TextStyle(
+                                      fontFamily: 'MinSans',
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              if (isLoggedIn) {
-                                _logout();
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => LoginPage()),
-                                ).then((_) => _checkLoginStatus());
-                              }
-                            },
-                            child: Text(
-                              isLoggedIn ? "로그아웃" : "로그인",
-                              style: TextStyle(
-                                fontFamily: 'MinSans',
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
+                            SizedBox(height: 10),
+                            TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: '주식 검색',
+                                hintStyle: TextStyle(color: Colors.white70),
+                                filled: true,
+                                fillColor: Colors.white.withOpacity(0.2),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12),
                               ),
+                              style: TextStyle(color: Colors.white),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: '주식 검색',
-                          hintStyle: TextStyle(color: Colors.white70),
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.2),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                            SizedBox(height: 40),
+                            WelcomeBox(),
+                          ],
                         ),
-                        style: TextStyle(color: Colors.white),
                       ),
-                      SizedBox(height: 40),
-                      WelcomeBox(),
+                    ),
+                  ),
+
+                  SizedBox(height: 20),
+
+                  // 보유 주식 목록
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: StockListWidget(stocks: _userStocks),
+                  ),
+
+                  SizedBox(height: 30),
+
+                  // 내 종목 뉴스
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const UserNewsScreen(),
+                  ),
+
+                  SizedBox(height: 30),
+
+                  // 추천 주식
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: RecommendedStocks(),
+                  ),
+
+                  SizedBox(height: 30),
+
+                  // 주식 랭킹
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: SizedBox(
+                      height: 600,
+                      child: StockRanking(),
+                    ),
+                  ),
+
+                  SizedBox(height: 30),
+                ],
+              ),
+            ),
+          ),
+
+          // ✅ 오른쪽 아래 떠 있는 카메라 + 말풍선
+          Positioned(
+            bottom: 30,
+            right: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  margin: EdgeInsets.only(bottom: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(2, 2),
+                      ),
                     ],
                   ),
+                  child: Text(
+                    '궁금하신 기업이 있으신가요?\n사진 찍어 검색해보세요!',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
                 ),
-              ),
-            ),
-
-            SizedBox(height: 20),
-
-            // 보유 주식 목록
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: StockListWidget(stocks: _userStocks),
-            ),
-
-            SizedBox(height: 30),
-
-          // 내 종목 뉴스 불러오기
-            Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 6,
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: const UserNewsScreen(), // 이제 정상 렌더링됨
-        ),
-        SizedBox(height: 30),
-        
-            // 추천 주식
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: RecommendedStocks(),
-            ),
-
-            SizedBox(height: 30),
-
-            // 주식 랭킹
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: SizedBox(
-                height: 600,
-                child: StockRanking(),
-              ),
-            ),
-
-            SizedBox(height: 30),
-           ],
-        ),
+              // 기존 FloatingActionButton 부분 교체
+GestureDetector(
+  onTap: () {
+    // TODO: 카메라 기능 연결
+  },
+  child: Container(
+    width: 65,
+    height: 65,
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Color(0xFFFA709A), Color(0xFFFEE140)], // 예: 핑크-옐로우 그라데이션
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
       ),
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black26,
+          blurRadius: 6,
+          offset: Offset(2, 2),
+        ),
+      ],
     ),
-  );
-}
+    child: Icon(Icons.camera_alt, color: Colors.white),
+  ),
+),
+
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

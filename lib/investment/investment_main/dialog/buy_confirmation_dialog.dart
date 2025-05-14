@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
 class ConfirmationDialog extends StatelessWidget {
-  final String price;
+  final String price; 
   final int quantity;
   final VoidCallback onConfirm;
 
@@ -10,6 +9,8 @@ class ConfirmationDialog extends StatelessWidget {
     required this.quantity,
     required this.onConfirm,
   });
+
+  bool get _isWon => price.contains('원');
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,7 @@ class ConfirmationDialog extends StatelessWidget {
         ],
       ),
       content: Text(
-        "체결 가격: $price 원\n구매 수량: $quantity 주\n\n진행하시겠습니까?",
+        "체결 가격: $price\n구매 수량: $quantity 주\n\n진행하시겠습니까?",
         style: TextStyle(color: Colors.black),
       ),
       actions: [

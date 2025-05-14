@@ -114,21 +114,21 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text("체결 가격", style: TextStyle(color: Colors.grey, fontSize: 14)),
-                                        Text("${order['purchasePrice']}", style: TextStyle(color: Colors.black, fontSize: 14)),
+                                       Text("${formatNumber(order['purchasePrice'])}", style: TextStyle(color: Colors.black, fontSize: 14)),
                                       ],
                                     ),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text("체결 수량", style: TextStyle(color: Colors.grey, fontSize: 14)),
-                                        Text("${order['quantity']}", style: TextStyle(color: Colors.black, fontSize: 14)),
+                                        Text("${formatNumber(order['quantity'])}", style: TextStyle(color: Colors.black, fontSize: 14)),
                                       ],
                                     ),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text("체결 금액", style: TextStyle(color: Colors.grey, fontSize: 14)),
-                                        Text("${order['totalAmount']}원", style: TextStyle(color: Colors.black, fontSize: 14)),
+                                        Text("${formatNumber(order['totalAmount'])}원", style: TextStyle(color: Colors.black, fontSize: 14)),
                                       ],
                                     ),
                                     Divider(color: Colors.grey), 
@@ -158,4 +158,13 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       ),
     );
   }
+
+  String formatNumber(dynamic value) {
+  if (value is int || value == (value as num).floor()) {
+    return value.toStringAsFixed(0);
+  } else {
+    return value.toStringAsFixed(1);
+  }
+}
+
 }

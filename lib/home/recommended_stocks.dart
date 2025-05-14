@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stockapp/server/home/recommended_server.dart';
 import 'package:stockapp/data/category_icon_map.dart';
+import './company_list_page.dart';
 
 class RecommendedStocks extends StatefulWidget {
   const RecommendedStocks({Key? key});
@@ -13,10 +14,6 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
   List<String> recommendedCategories = [];
   List<String> unrecommendedCategories = [];
   bool isLoading = true;
-
-  final List<Color> iconColors = [
-    Color.fromARGB(255, 255, 255, 255),
-  ];
 
   @override
   void initState() {
@@ -46,54 +43,145 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
     final icon = categoryIconMap[name] ?? Icons.category;
     final imagePath = 'assets/images/$name.png';
 
-    return Container(
-      width: 137,
-      height: 140,
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Color.fromARGB(255, 255, 255, 255),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color.fromARGB(255, 182, 181, 181),
-                width: 2,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(icon, size: 40, color: const Color.fromARGB(255, 0, 0, 0));
-                },
-              ),
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CompanyListPage(category: name),
           ),
-          const SizedBox(height: 12),
-          Text(
-            name,
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: 'MinSans',
-              fontWeight: FontWeight.w800,
-              color: Color.fromARGB(255, 0, 0, 0),
+        );
+      },
+      child: Container(
+        width: 137,
+        height: 140,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 255, 255, 255),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color.fromARGB(255, 182, 181, 181),
+                  width: 2,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(icon, size: 40, color: Colors.black);
+                  },
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            const SizedBox(height: 12),
+            Text(
+              name,
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: 'MinSans',
+                fontWeight: FontWeight.w800,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildStyledTitle(String title) {
+    IconData icon;
+    String greenPart;
+    String before = '';
+    String after = '';
+
+    if (title.contains("뜨고 있는")) {
+      icon = Icons.bookmark;
+      greenPart = "뜨고 있는";
+    } else if (title.contains("관망이 필요")) {
+      icon = Icons.bookmark;
+      greenPart = "관망이 필요";
+    } else {
+      icon = Icons.category;
+      return Row(
+        children: [
+          Icon(icon, color: Colors.black),
+          const SizedBox(width: 6),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              fontFamily: 'MinSans',
+              color: Colors.black,
+            ),
           ),
         ],
+      );
+    }
+
+    final parts = title.split(greenPart);
+    before = parts[0];
+    after = parts.length > 1 ? parts[1] : '';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(
+        Icons.bookmark, // 📰 뉴스 느낌의 아이콘
+        color: const Color.fromARGB(255, 15, 30, 70),
+        size: 24,
       ),
+        const SizedBox(width: 6),
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: before,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'MinSans',
+                  color: Colors.black,
+                ),
+              ),
+              TextSpan(
+                text: greenPart,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'MinSans',
+                  color: Colors.green,
+                ),
+              ),
+              TextSpan(
+                text: after,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'MinSans',
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -101,15 +189,7 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 17,
-            fontFamily: 'MinSans',
-            fontWeight: FontWeight.w800,
-            color: Color.fromARGB(255, 0, 0, 0),
-          ),
-        ),
+        buildStyledTitle(title),
         const SizedBox(height: 10),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -143,15 +223,7 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 17,
-            fontFamily: 'MinSans',
-            fontWeight: FontWeight.w800,
-            color: Color.fromARGB(255, 199, 199, 199),
-          ),
-        ),
+        buildStyledTitle(title),
         const SizedBox(height: 10),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -176,23 +248,14 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "  현재 이 카테고리가 뜨고 있어요",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                fontFamily: 'MinSans',
-                color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           isLoading
-              ? buildLoadingGroup("추천")
-              : buildCategoryGroup("추천", recommendedCategories),
+              ? buildLoadingGroup("현재 뜨고 있는 카테고리")
+              : buildCategoryGroup("현재 뜨고 있는 카테고리", recommendedCategories),
           const SizedBox(height: 20),
           isLoading
-              ? buildLoadingGroup("비추천")
-              : buildCategoryGroup("비추천", unrecommendedCategories),
+              ? buildLoadingGroup("현재 관망이 필요한 카테고리")
+              : buildCategoryGroup("현재 관망이 필요한 카테고리", unrecommendedCategories),
         ],
       ),
     );

@@ -53,6 +53,10 @@ class _BuyReservationSettingsScreenState
     }
   }
 
+  bool get _isForeignStock {
+  return _stockCode.contains(RegExp(r'[A-Za-z]'));
+}
+
   void _increasePrice(double percentage) {
     setState(() {
       _currentPrice += _currentPrice * (percentage / 100);
@@ -190,11 +194,10 @@ class _BuyReservationSettingsScreenState
             onDecrease: _decreasePrice,
           ),
           SizedBox(height: 20),
-          Text(
-            '설정된 가격: ${_currentPrice.toStringAsFixed(0)}원, 수량: $_quantity주',
-            style: TextStyle(fontSize: 18),
-            
-          ),
+         Text(
+          '설정된 가격: ${_isForeignStock ? '\$${_currentPrice.toStringAsFixed(2)}' : '${_currentPrice.toStringAsFixed(0)}원'}, 수량: $_quantity주',
+          style: TextStyle(fontSize: 18),
+        ),
         ],
       ),
     );

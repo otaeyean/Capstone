@@ -56,7 +56,7 @@ class RankingTile extends StatelessWidget {
     final percentFormat = NumberFormat("###,###.##", "en_US");
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
       decoration: BoxDecoration(
         color: getBackgroundColor(),
