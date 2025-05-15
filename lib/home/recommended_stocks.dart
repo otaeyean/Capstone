@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:stockapp/category/company_list_page.dart';
 import 'package:stockapp/server/home/recommended_server.dart';
 import 'package:stockapp/data/category_icon_map.dart';
-import './company_list_page.dart';
+
 
 class RecommendedStocks extends StatefulWidget {
   const RecommendedStocks({Key? key});
