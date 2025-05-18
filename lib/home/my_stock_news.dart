@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'news_model.dart';
 import '../server/SharedPreferences/user_nickname.dart';
 import '../server/home/news_api.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class UserNewsScreen extends StatefulWidget {
   const UserNewsScreen({super.key});
@@ -18,6 +19,8 @@ class _UserNewsScreenState extends State<UserNewsScreen> {
   late Timer _timer;
   String? _userId;
   late PageController _pageController;
+
+  final unescape = HtmlUnescape();
 
   @override
   void initState() {
@@ -145,46 +148,70 @@ class _UserNewsScreenState extends State<UserNewsScreen> {
                 _currentPage = page;
               });
             },
-            itemBuilder: (context, index) {
-              final news = _newsList.skip(index * 3).take(3).toList();
-              return Column(
-                children: news.map((newsItem) {
-                  return GestureDetector(
-                    onTap: () => launchUrl(Uri.parse(newsItem.link), mode: LaunchMode.externalApplication),
-                    child: Card(
-                      color: const Color(0xFFF7F9FC),
-                      margin: const EdgeInsets.all(8),
-                      elevation: 1,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
-                            child: Image.network(newsItem.imageUrl, width: 100, height: 100, fit: BoxFit.cover),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(newsItem.title, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
-                                  const SizedBox(height: 4),
-                                  Text(newsItem.summary, maxLines: 2, overflow: TextOverflow.ellipsis),
-                                  const SizedBox(height: 4),
-                                  Text('${newsItem.press} | ${newsItem.date}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                ],
-                              ),
+          itemBuilder: (context, index) {
+            final news = _newsList.skip(index * 3).take(3).toList();
+            return Column(
+              children: news.map((newsItem) {
+                return GestureDetector(
+                  onTap: () => launchUrl(Uri.parse(newsItem.link), mode: LaunchMode.externalApplication),
+                  child: Card(
+                    color: const Color(0xFFF7F9FC),
+                    margin: const EdgeInsets.all(8),
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                          child: newsItem.imageUrl != null
+                              ? Image.network(
+                                  newsItem.imageUrl!,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  width: 100,
+                                  height: 100,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.image_not_supported, size: 50),
+                                ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  unescape.convert(newsItem.title),
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  unescape.convert(newsItem.summary),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${newsItem.press} | ${newsItem.date}',
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  );
-                }).toList(),
-              );
-            },
+                  ),
+                );
+              }).toList(),
+            );
+          },
           ),
         ),
       ],

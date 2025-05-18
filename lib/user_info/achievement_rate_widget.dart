@@ -17,20 +17,24 @@ class _AchievementRateWidgetState extends State<AchievementRateWidget> {
   bool isLoadingGoal = false;
   final TextEditingController _goalController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedProfitGoal();
-    _fetchAchievementRate();
-  }
+ @override
+void initState() {
+  super.initState();
+  _initializeGoalAndRate();
+}
 
-  Future<void> _loadSavedProfitGoal() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedGoal = prefs.getDouble('profitGoal_${widget.userId}') ?? 0.0;
-    setState(() {
-      _profitGoal = savedGoal;
-    });
-  }
+Future<void> _initializeGoalAndRate() async {
+  final prefs = await SharedPreferences.getInstance();
+  final savedGoal = prefs.getDouble('profitGoal_${widget.userId}') ?? 0.0;
+  final rate = await ProfitGoalService.getAchievementRate(widget.userId);
+
+  setState(() {
+    _profitGoal = savedGoal;
+    if (rate != null) {
+      _achievementRate = rate;
+    }
+  });
+}
 
   Future<void> _saveProfitGoal(double goal) async {
     final prefs = await SharedPreferences.getInstance();
@@ -109,7 +113,7 @@ class _AchievementRateWidgetState extends State<AchievementRateWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "달성률 (목표: ${_profitGoal.toStringAsFixed(1)}%)",
+                  "달성률 (목표 수익률: ${_profitGoal.toStringAsFixed(1)}%)",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -122,47 +126,95 @@ class _AchievementRateWidgetState extends State<AchievementRateWidget> {
                 ),
               ],
             ),
+            SizedBox(
+              height: 60,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  double fullWidth = constraints.maxWidth;
+                  double halfWidth = fullWidth / 2;
 
-              SizedBox(height: 8),
-              SizedBox(
-                height: 20,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    double fullWidth = constraints.maxWidth;
-                    double rate = _achievementRate.clamp(-100, 100);
-                    double coloredWidth = (rate.abs() / 100) * fullWidth;
+                  double rate = _achievementRate.clamp(-100, 100);
+                  bool isPositive = rate >= 0;
+                  double barWidth = (rate.abs() / 100) * (isPositive ? fullWidth : halfWidth);
+                  double barLeft = isPositive ? 0 : halfWidth - barWidth;
+                  double labelCenter = barLeft + barWidth / 2;
+                  double textWidth = 80;
 
-                    return Stack(
-                      children: [
-                        Container(
+                  double labelLeft = (labelCenter - textWidth / 2).clamp(0, fullWidth - textWidth);
+
+                  return Stack(
+                    children: [
+                      Container(
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+
+                      // // 기준선 
+                      // if (!isPositive)
+                      //   Positioned(
+                      //     left: halfWidth - 1,
+                      //     top: 0,
+                      //     bottom: 0,
+                      //     child: Container(
+                      //       width: 0.5,
+                      //       color: Colors.grey[500],
+                      //     ),
+                      //   ),
+
+                      // 수익률 바
+                      Positioned(
+                        left: barLeft,
+                        child: Container(
                           height: 20,
+                          width: barWidth,
                           decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(10),
+                            color: isPositive ? Colors.red : Colors.blue,
+                            borderRadius: BorderRadius.horizontal(
+                              left: Radius.circular(10),
+                              right: isPositive ? Radius.circular(10) : Radius.zero,
+                            ),
                           ),
                         ),
-                        Container(
-                          height: 20,
-                          width: coloredWidth,
-                          decoration: BoxDecoration(
-                            color: rate >= 0 ? Colors.green : Colors.red,
-                            borderRadius: BorderRadius.circular(10),
+                      ),
+
+                      // 기준선 아래에 0 텍스트
+                      if (!isPositive)
+                        Positioned(
+                          left: halfWidth - 6,
+                          top: 24,
+                          child: Text(
+                            "0",
+                            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                           ),
                         ),
-                      ],
-                    );
-                  },
-                ),
+
+                      // 달성률 텍스트 
+                      Positioned(
+                        left: labelLeft,
+                        top: 36,
+                        child: SizedBox(
+                          width: textWidth,
+                          child: Center(
+                            child: Text(
+                              "${_achievementRate.toStringAsFixed(2)}%",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: _achievementRate >= 0 ? Colors.red : Colors.blue,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
-              SizedBox(height: 8),
-              Text(
-                "${_achievementRate.toStringAsFixed(2)} %",
-                style: TextStyle(
-                  color: _achievementRate >= 0 ? Colors.green : Colors.red,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
+            ),
+
             ],
           ),
         ),
