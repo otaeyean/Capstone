@@ -114,9 +114,9 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
     if (title.contains("뜨고 있는")) {
       icon = Icons.bookmark;
       greenPart = "뜨고 있는";
-    } else if (title.contains("관망이 필요")) {
+    } else if (title.contains("주의가 필요")) {
       icon = Icons.bookmark;
-      greenPart = "관망이 필요";
+      greenPart = "주의가 필요";
     } else {
       icon = Icons.category;
       return Row(
@@ -255,8 +255,8 @@ class _RecommendedStocksState extends State<RecommendedStocks> {
               : buildCategoryGroup("현재 뜨고 있는 카테고리", recommendedCategories),
           const SizedBox(height: 20),
           isLoading
-              ? buildLoadingGroup("현재 관망이 필요한 카테고리")
-              : buildCategoryGroup("현재 관망이 필요한 카테고리", unrecommendedCategories),
+              ? buildLoadingGroup("현재 주의가 필요한 카테고리")
+              : buildCategoryGroup("현재 주의가 필요한 카테고리", unrecommendedCategories),
         ],
       ),
     );

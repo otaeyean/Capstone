@@ -81,7 +81,6 @@ class _RecommendationTabState extends State<RecommendationTab> {
 
                     return GestureDetector(
                       onTap: () {
-                        // 선택 동작 추가할 수 있음
                       },
                       child: AnimatedContainer(
                         duration: Duration(milliseconds: 300),
@@ -120,7 +119,7 @@ class _RecommendationTabState extends State<RecommendationTab> {
                               child: Text(
                                 categoryName,
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black,
                                 ),
@@ -133,7 +132,7 @@ class _RecommendationTabState extends State<RecommendationTab> {
                       ).animate().scale(
                             duration: 400.ms,
                             curve: Curves.easeOutBack,
-                          ), // Flutter Animate 애니메이션
+                          ),
                     );
                   },
                 ),
