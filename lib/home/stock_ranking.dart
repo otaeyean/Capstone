@@ -157,7 +157,6 @@ Widget _buildMarketButton(String market) {
       ],
     );
   }
-
 Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,21 +221,23 @@ Widget _buildStockList(List<Map<String, dynamic>> stocks, bool isRising) {
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4),
-                    Text(
-                      "${stock['currentPrice']} 원",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: textColor,
-                      ),
-                    ),
+                  Text(
+                selectedMarket == '국내'
+                    ? "${stock['currentPrice']} 원"
+                    : "\$${stock['currentPrice']}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: textColor,
+                ),
+              ),
+
                   ],
                 ),
-                // 오른쪽: 상승/하락률 + 거래량
+                // 오른쪽: 상승/하락률 
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // 상승률/하락률 
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
