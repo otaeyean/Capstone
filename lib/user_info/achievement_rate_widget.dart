@@ -214,7 +214,6 @@ Future<void> _initializeGoalAndRate() async {
                 },
               ),
             ),
-
             ],
           ),
         ),
