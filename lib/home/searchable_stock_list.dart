@@ -42,21 +42,23 @@ class _SearchableStockListState extends State<SearchableStockList> {
         TextField(
           controller: _controller,
           onChanged: _filterStocks,
-          decoration: InputDecoration(
-            hintText: '원하는 종목을 검색해보세요', // ✅ 힌트 텍스트
-            hintStyle: TextStyle(color: Colors.grey),
-            prefixIcon: Icon(Icons.search, color: Colors.grey),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.green, width: 2), // ✅ 초록색 테두리
-              borderRadius: BorderRadius.circular(12),
-            ),
-            contentPadding:
-                EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-          ),
+        decoration: InputDecoration(
+  hintText: '원하는 종목을 검색해보세요',
+  hintStyle: TextStyle(color: Colors.grey),
+  prefixIcon: Icon(Icons.search, color: Colors.grey),
+  filled: true,
+  fillColor: Colors.white, // ✅ 배경을 흰색으로!
+  enabledBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: Colors.white), // ✅ 흰색 테두리
+    borderRadius: BorderRadius.circular(12),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: Colors.green, width: 2),
+    borderRadius: BorderRadius.circular(12),
+  ),
+  contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+),
+
           style: TextStyle(fontSize: 16),
         ),
 

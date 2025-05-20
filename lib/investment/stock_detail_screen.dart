@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stockapp/investment/detail_widgets/realtimetrade.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
@@ -26,16 +27,34 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   bool isFavorite = false;
   bool isLoading = true;
   String? companyDescription;
+  Map<String, dynamic> _priceData = {}; // ✅ 가격 데이터 저장용
 
   @override
   void initState() {
     super.initState();
-     _loadFavoriteStatus();    
+    _loadFavoriteStatus();    
     _fetchCompanyDescription();
+    _fetchPriceData(); // ✅ 가격/변동률 API 호출
+  }
+
+  Future<void> _fetchPriceData() async {
+    final stockCode = widget.stock['stockCode'];
+    try {
+      final response = await http.get(
+        Uri.parse('http://withyou.me:8080/current-price?stockCode=$stockCode'),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          _priceData = jsonDecode(response.body);
+        });
+      }
+    } catch (e) {
+      print('❌ 가격 정보 로드 실패: $e');
+    }
   }
 
   Future<void> _fetchCompanyDescription() async {
-    if (widget.stock['stockName'] == null || widget.stock['stockName'] ==  'N/A') {
+    if (widget.stock['stockName'] == null || widget.stock['stockName'] == 'N/A') {
       setState(() {
         companyDescription = '주식 이름이 없습니다.';
         isLoading = false;
@@ -57,71 +76,58 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     }
   }
 
-  // 관심 추가/삭제 API 호출
-// 관심 상태 토글 함수
-Future<void> _toggleFavorite() async {
-  final userId = await AuthService.getUserId(); // 로그인된 사용자 ID 가져오기
-  if (userId == null) {
-    final snackBar = SnackBar(content: Text('로그인이 필요합니다.'));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    return;
-  }
+  Future<void> _toggleFavorite() async {
+    final userId = await AuthService.getUserId();
+    if (userId == null) {
+      final snackBar = SnackBar(content: Text('로그인이 필요합니다.'));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
 
-  final stockCode = widget.stock['stockCode'];
+    final stockCode = widget.stock['stockCode'];
 
-  setState(() {
-    isFavorite = !isFavorite;
-  });
+    setState(() {
+      isFavorite = !isFavorite;
+    });
 
-  // 로컬 저장소에 관심 상태 저장
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.setBool(stockCode, isFavorite);  // 관심 상태 저장
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(stockCode, isFavorite);
 
-  try {
-    final url = Uri.parse('http://withyou.me:8080/watchlist/${isFavorite ? 'add' : 'remove'}');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: '{"userId": "$userId", "stockCode": "$stockCode"}',
-    );
+    try {
+      final url = Uri.parse('http://withyou.me:8080/watchlist/${isFavorite ? 'add' : 'remove'}');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: '{"userId": "$userId", "stockCode": "$stockCode"}',
+      );
 
-    if (response.statusCode == 200) {
       final snackBar = SnackBar(
         content: Text(isFavorite ? '관심 항목으로 등록되었습니다' : '관심 항목에서 삭제되었습니다'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    } else {
-      final errorMessage = 'API 요청 실패: ${response.statusCode}';
-      final snackBar = SnackBar(content: Text(errorMessage));
+    } catch (e) {
+      setState(() {
+        isFavorite = !isFavorite;
+      });
+      final snackBar = SnackBar(content: Text('관심 항목 추가/삭제에 실패했습니다.'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      print('에러 발생: $e');
     }
-  } catch (e) {
-    setState(() {
-      isFavorite = !isFavorite; // API 실패 시 상태 되돌리기
-    });
-    final snackBar = SnackBar(content: Text('관심 항목 추가/삭제에 실패했습니다.'));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    print('에러 발생: $e');
   }
-}
 
-// 앱 로딩 시 관심 상태 불러오기
-Future<void> _loadFavoriteStatus() async {
-  final stockCode = widget.stock['stockCode'];
+  Future<void> _loadFavoriteStatus() async {
+    final stockCode = widget.stock['stockCode'];
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool? savedFavorite = prefs.getBool(stockCode);  // 로컬 저장소에서 관심 상태 불러오기
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? savedFavorite = prefs.getBool(stockCode);
 
-  if (savedFavorite != null) {
-    setState(() {
-      isFavorite = savedFavorite;  // 저장된 상태를 UI에 반영
-    });
+    if (savedFavorite != null) {
+      setState(() {
+        isFavorite = savedFavorite;
+      });
+    }
   }
-}
 
-
-
-  // ✅ 안전한 문자열 -> double 변환 함수
   double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is double) return value;
@@ -129,20 +135,24 @@ Future<void> _loadFavoriteStatus() async {
     if (value is String) return double.tryParse(value) ?? 0.0;
     return 0.0;
   }
+String _formatPrice(dynamic value) {
+  final doubleVal = _parseDouble(value);
+  return NumberFormat("#,###").format(doubleVal); // 예: 55,900
+}
 
   @override
   Widget build(BuildContext context) {
     final stock = {
       'name': widget.stock['stockName'] ?? '이름 없음',
-      'price': widget.stock['currentPrice'].toString(),
-      'rise_percent': _parseDouble(widget.stock['changeRate']), 
-      'fall_percent': _parseDouble(widget.stock['changeRate']), 
+      'price': _formatPrice(_priceData['stockPrice'] ?? widget.stock['currentPrice']),
+      'rise_percent': _parseDouble(_priceData['changeRate'] ?? widget.stock['changeRate']), 
+      'fall_percent': _parseDouble(_priceData['changeRate'] ?? widget.stock['changeRate']), 
       'quantity': widget.stock['tradeVolume'] ?? 0,
       'stockCode': widget.stock['stockCode'] ?? '',
     };
 
     final String stockName = stock['name'];
-    final String stockCode = widget.stock['stockCode'] ?? '';
+    final String stockCode = stock['stockCode'];
 
     return Scaffold(
       appBar: AppBar(
@@ -166,26 +176,25 @@ Future<void> _loadFavoriteStatus() async {
                   children: [
                     SizedBox(height: 5),
                     StockInfo(stock: stock),
-                    StockChangeInfo(stock: stock), // ✅ StockInfo 제거
+                    StockChangeInfo(stock: stock),
                   ],
                 ),
                 Row(
                   children: [
-                  IconButton(
-  icon: Icon(
-    isFavorite ? Icons.star : Icons.star_border,
-    color: isFavorite ? Colors.yellow : Colors.grey,
-    size:  40, // ⭐ 예시: 30
-  ),
-  onPressed: _toggleFavorite,
-),
-SizedBox(width: 4), // 아이콘 간격 살짝
-Icon(
-  Icons.notifications_none,
-  color: Colors.grey,
-  size: 40, // 🔔 아이콘 크기도 같게
-),
-
+                    IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.star : Icons.star_border,
+                        color: isFavorite ? Colors.yellow : Colors.grey,
+                        size: 40,
+                      ),
+                      onPressed: _toggleFavorite,
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.notifications_none,
+                      color: Colors.grey,
+                      size: 40,
+                    ),
                   ],
                 ),
               ],
@@ -198,42 +207,39 @@ Icon(
               child: Column(
                 children: [
                   TabBar(
-                  tabs: [
-                    Tab(text: '차트'),
-                    Tab(text: '실시간 체결가'),
-                    Tab(text: '모의 투자'),
-                    Tab(text: '뉴스'),
-                    Tab(text: '상세 정보'),
-                  ],
-                  labelColor: Colors.green, // 선택된 탭 텍스트 색상
-                  unselectedLabelColor: Colors.black, // 선택되지 않은 탭 텍스트 색상
-                  indicatorColor: Colors.green, // 선택된 탭 아래 선 색상
-                ),
-
+                    tabs: [
+                      Tab(text: '차트'),
+                      Tab(text: '실시간 체결가'),
+                      Tab(text: '모의 투자'),
+                      Tab(text: '뉴스'),
+                      Tab(text: '상세 정보'),
+                    ],
+                    labelColor: Colors.green,
+                    unselectedLabelColor: Colors.black,
+                    indicatorColor: Colors.green,
+                  ),
                   Expanded(
                     child: TabBarView(
                       children: [
-                        // 차트의 크기 동적으로 설정
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            double chartHeight = constraints.maxHeight * 0.5; // 화면 높이에 비례하여 차트 크기 설정
+                            double chartHeight = constraints.maxHeight * 0.5;
                             return SizedBox(
                               height: chartHeight,
-                              child: StockChartMain(stockCode: widget.stock['stockCode']), 
+                              child: StockChartMain(stockCode: stockCode),
                             );
                           },
                         ),
-                           // ✅ 실시간 체결가 탭 
-    LayoutBuilder(
-      builder: (context, constraints) {
-        double chartHeight = constraints.maxHeight * 0.5; // 원하는 비율로
-        return SizedBox(
-          height: chartHeight,
-          child: RealTimePriceChart(stockCode: stockCode),
-        );
-      },
-    ),
-                        MockInvestmentScreen(stockCode: stockCode), 
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            double chartHeight = constraints.maxHeight * 0.5;
+                            return SizedBox(
+                              height: chartHeight,
+                              child: RealTimePriceChart(stockCode: stockCode),
+                            );
+                          },
+                        ),
+                        MockInvestmentScreen(stockCode: stockCode),
                         NewsScreen(stockName: stockName),
                         SingleChildScrollView(
                           child: Column(
@@ -243,7 +249,7 @@ Icon(
                                   : companyDescription != null
                                       ? StockDescription(stock: stock, description: companyDescription!)
                                       : Text('회사 소개 정보를 불러올 수 없습니다.', style: TextStyle(color: Colors.red)),
-                              if (stockCode.isNotEmpty) StockInfoDetail(stockCode: stockCode), 
+                              if (stockCode.isNotEmpty) StockInfoDetail(stockCode: stockCode),
                             ],
                           ),
                         ),

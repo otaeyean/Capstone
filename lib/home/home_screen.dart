@@ -7,7 +7,7 @@ import 'stock_list_widget.dart';
 import 'stock_ranking.dart';
 import 'welcome_box.dart';
 import '/login/login.dart';
-import 'searchable_stock_list.dart';
+import 'searchable_stock_list.dart'; // ✅ 검색 위젯 import
 import 'package:stockapp/data/user_stock_model.dart';
 import 'package:stockapp/server/userInfo/stock_service.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
@@ -24,7 +24,6 @@ class HomeScreenState extends State<HomeScreen> {
   bool isLoggedIn = false;
   List<Map<String, String>> stockList = [];
   List<UserStockModel> _userStocks = [];
-  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -89,9 +88,8 @@ class HomeScreenState extends State<HomeScreen> {
               color: Color(0xFFE9F8F2),
               child: Column(
                 children: [
-                  // 상단 배경 + 검색창 + WelcomeBox
+                  // 상단 배경 + 검색 + WelcomeBox
                   Container(
-                    height: 370,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [Color(0xFF7CC993), Color(0xFF22B379)],
@@ -99,6 +97,7 @@ class HomeScreenState extends State<HomeScreen> {
                         end: Alignment.bottomRight,
                       ),
                     ),
+                    padding: EdgeInsets.only(bottom: 24),
                     child: SafeArea(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
@@ -139,23 +138,14 @@ class HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
+
                             SizedBox(height: 10),
-                            TextField(
-                              controller: _searchController,
-                              decoration: InputDecoration(
-                                hintText: '주식 검색',
-                                hintStyle: TextStyle(color: Colors.white70),
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.2),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  borderSide: BorderSide.none,
-                                ),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                              ),
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            SizedBox(height: 40),
+
+                            // ✅ 검색창 + 자동완성 리스트 삽입
+                            SearchableStockList(stockList: stockList),
+
+                            SizedBox(height: 20),
+
                             WelcomeBox(),
                           ],
                         ),
@@ -165,7 +155,7 @@ class HomeScreenState extends State<HomeScreen> {
 
                   SizedBox(height: 20),
 
-                  // 보유 주식 목록
+                  // 보유 주식
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
@@ -248,7 +238,7 @@ class HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // ✅ 오른쪽 아래 떠 있는 카메라 + 말풍선
+          // 카메라 말풍선
           Positioned(
             bottom: 30,
             right: 20,
@@ -271,40 +261,35 @@ class HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Text(
                     '궁금하신 기업이 있으신가요?\n사진 찍어 검색해보세요!',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.black87),
                     textAlign: TextAlign.right,
                   ),
                 ),
-              // 기존 FloatingActionButton 부분 교체
-GestureDetector(
-  onTap: () {
-    // TODO: 카메라 기능 연결
-  },
-  child: Container(
-    width: 65,
-    height: 65,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Color(0xFFFA709A), Color(0xFFFEE140)], // 예: 핑크-옐로우 그라데이션
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      shape: BoxShape.circle,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black26,
-          blurRadius: 6,
-          offset: Offset(2, 2),
-        ),
-      ],
-    ),
-    child: Icon(Icons.camera_alt, color: Colors.white),
-  ),
-),
-
+                GestureDetector(
+                  onTap: () {
+                    // TODO: 카메라 기능 연결
+                  },
+                  child: Container(
+                    width: 65,
+                    height: 65,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFFA709A), Color(0xFFFEE140)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 6,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(Icons.camera_alt, color: Colors.white),
+                  ),
+                ),
               ],
             ),
           ),
