@@ -76,6 +76,8 @@ class StockPrice {
 
 Future<Map<String, dynamic>?> fetchStockData(String stockCode) async {
   try {
+    stockCode = stockCode.trim();
+
     final infoUrl = Uri.parse("http://withyou.me:8080/stock-info/$stockCode");
     final chartUrl = Uri.parse("http://withyou.me:8080/prices/$stockCode?period=D");
 
