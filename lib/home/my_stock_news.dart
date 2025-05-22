@@ -139,7 +139,7 @@ class _UserNewsScreenState extends State<UserNewsScreen> {
 ),
 
         SizedBox(
-          height: 380,
+          height: 450,
           child: PageView.builder(
             controller: _pageController,
             itemCount: (_newsList.length ~/ 3),

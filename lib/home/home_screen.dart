@@ -13,6 +13,7 @@ import 'package:stockapp/server/userInfo/stock_service.dart';
 import 'package:stockapp/server/SharedPreferences/user_nickname.dart';
 import './recommended_stocks.dart';
 import '../home/my_stock_news.dart';
+import '../tf_logo/screens/detection_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -227,7 +228,7 @@ class HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     child: SizedBox(
-                      height: 600,
+                      height: 650,
                       child: StockRanking(),
                     ),
                   ),
@@ -267,7 +268,10 @@ class HomeScreenState extends State<HomeScreen> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    // TODO: 카메라 기능 연결
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const DetectionScreen()),
+                    );
                   },
                   child: Container(
                     width: 65,
