@@ -237,13 +237,20 @@ class StockLineChart extends StatelessWidget {
 
 class StockInfoCard extends StatelessWidget {
   final StockInfoDTO stock;
+  final String stockName;
 
-  const StockInfoCard({super.key, required this.stock});
+  const StockInfoCard({
+    super.key,
+    required this.stock,
+    required this.stockName,
+  });
 
-  String formatNumber(String raw, {int unitDivisor = 1, String? suffix}) {
-    final number = int.tryParse(raw.replaceAll(',', '')) ?? 0;
-    final divided = number ~/ unitDivisor;
-    final formatted = NumberFormat.decimalPattern().format(divided);
+  String formatNumber(String raw, {int unitDivisor = 1, String? suffix, bool decimal = false}) {
+    final number = double.tryParse(raw.replaceAll(',', '')) ?? 0;
+    final divided = number / unitDivisor;
+    final formatted = decimal
+        ? divided.toStringAsFixed(1)
+        : NumberFormat.decimalPattern().format(divided.floor());
     return "$formatted${suffix ?? ''}";
   }
 
@@ -251,43 +258,73 @@ class StockInfoCard extends StatelessWidget {
     final totalEok = int.tryParse(raw.replaceAll(',', '')) ?? 0;
     final cho = totalEok ~/ 10000;
     final ok = totalEok % 10000;
-
     if (cho > 0) {
-      return '${NumberFormat.decimalPattern().format(cho)}조 '
-          '${NumberFormat.decimalPattern().format(ok)}억';
+      return '${NumberFormat.decimalPattern().format(cho)}조 ${NumberFormat.decimalPattern().format(ok)}억';
     } else {
       return '${NumberFormat.decimalPattern().format(ok)}억';
     }
   }
 
+  Text _labelValue(String label, String value) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: "$label: ",
+            style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black),
+          ),
+          TextSpan(
+            text: value,
+            style: const TextStyle(fontWeight: FontWeight.w400, color: Colors.black54),
+          ),
+        ],
+      ),
+      style: const TextStyle(fontSize: 12),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: DefaultTextStyle(
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.black,
+    return Container(
+      constraints: const BoxConstraints(minWidth: 260),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Text(
+              "📈 $stockName",
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text("주식 코드: ${stock.stockCode}", style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text("전일가: ${stock.pdpr}  시가: ${stock.oppr}"),
-              Text("고가: ${stock.hypr}  저가: ${stock.lopr}"),
-              Text("거래량: ${formatNumber(stock.tvol)}  "
-                  "거래대금: ${formatNumber(stock.tamt, unitDivisor: 1000000, suffix: ' 백만')}"),
-              Text("시가총액: ${formatToChoOk(stock.tomv)}"),
-              Text("52주 최고: ${stock.h52p}  52주 최저: ${stock.l52p}"),
-              Text("PER: ${stock.per}  PBR: ${stock.pbr}  EPS: ${stock.eps}  BPS: ${stock.bps}"),
-            ],
-          ),
-        ),
+          const SizedBox(height: 6),
+          _infoRow("전일가", stock.pdpr, "시가", stock.oppr),
+          _infoRow("고가", stock.hypr, "저가", stock.lopr),
+          _infoRow("거래량", formatNumber(stock.tvol), "거래대금", formatNumber(stock.tamt, unitDivisor: 1000000, suffix: " 백만")),
+          _infoRow("시가총액", stock.tomv, "", ""),
+          _infoRow("52주 최고", stock.h52p, "52주 최저", stock.l52p),
+          _infoRow("PER", formatNumber(stock.per, decimal: true), "PBR", formatNumber(stock.pbr, decimal: true)),
+          _infoRow("EPS", formatNumber(stock.eps, decimal: true), "BPS", formatNumber(stock.bps, decimal: true)),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRow(String label1, String value1, String label2, String value2) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(child: _labelValue(label1, value1)),
+          if (label2.isNotEmpty)
+            Expanded(child: _labelValue(label2, value2)),
+        ],
       ),
     );
   }
