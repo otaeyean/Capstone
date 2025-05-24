@@ -34,7 +34,7 @@ class StockInfo extends StatelessWidget {
               imagePath,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) =>
-                  Icon(Icons.broken_image, size: 30, color: Colors.grey),
+                  Icon(Icons.account_balance, size: 30, color: Colors.grey),
             ),
           ),
         ),
