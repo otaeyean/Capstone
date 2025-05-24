@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stockapp/investment/stock_detail_screen.dart';
 import '../widgets/camera_view.dart';
 import '../models/recognition.dart';
 
@@ -10,15 +11,34 @@ class DetectionScreen extends StatefulWidget {
 }
 
 class _DetectionScreenState extends State<DetectionScreen> {
-  final List<String> detectedStocks = [];
+  final List<Map<String, String>> detectedStocks = [];
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _firstButtonKey = GlobalKey();
-  double _firstButtonWidth = 87; // 초기값 (fallback)
+  double _firstButtonWidth = 87;
+// 주식목록
+  final Map<String, String> _stockCodeToName = {
+    '000660': 'SK하이닉스',
+    '005380': '현대차',
+    '005930': '삼성전자',
+    '035420': 'NAVER',
+    'AAPL': '애플',
+    'AMZN': '아마존',
+    'MSFT': '마이크로소프트',
+    'NFLX': '넷플릭스',
+    'NVDA': '엔비디아',
+    'PEP': '펩시코',
+    'TSLA': '테슬라',
+  };
 
-  void _handleNewStock(String label) {
+  String _getStockNameFromCode(String code) {
+    return _stockCodeToName[code] ?? '이름 없음';
+  }
+
+  void _handleNewStock(String code) {
+    final name = _getStockNameFromCode(code);
     setState(() {
-      detectedStocks.remove(label);
-      detectedStocks.insert(0, label); // 최신 항목 맨 앞
+      detectedStocks.removeWhere((stock) => stock['stockCode'] == code);
+      detectedStocks.insert(0, {'stockCode': code, 'stockName': name});
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -37,70 +57,88 @@ class _DetectionScreenState extends State<DetectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color mainGreen = const Color(0xFF67CA98);
+    final Color lightGreen = const Color(0xFFE4F5EC);
+
     return Scaffold(
-      backgroundColor: Colors.green[120],
+      backgroundColor: Colors.white,
       body: SafeArea(
-        top: true,
-        bottom: false,
         child: Column(
           children: [
-            // 카메라: 화면 상단 영역만 차지하게
             Expanded(
-              child: CameraView(
-                resultsCallback: (List<Recognition> results) {},
-                updateElapsedTimeCallback: (int elapsed) {},
-                onNewStockDetected: _handleNewStock,
+              child: Stack(
+                children: [
+                  CameraView(
+                    resultsCallback: (List<Recognition> results) {},
+                    updateElapsedTimeCallback: (int elapsed) {},
+                    onNewStockDetected: _handleNewStock,
+                  ),
+                ],
               ),
             ),
-
-            // 버튼 영역: 하단에 고정된 높이
             Container(
-              color: Colors.green[120],
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              width: double.infinity,
+              color: lightGreen,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Center(
-                    child: Text(
-                      "인식한 주식 목록",
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
+                  Text(
+                    "주식 상세페이지",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 6),
-
+                  const SizedBox(height: 12),
                   SizedBox(
-                    height: 42,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: detectedStocks.length,
-                      itemBuilder: (context, index) {
-                        final stock = detectedStocks[index];
-
-                        final isFirst = index == 0;
-                        final paddingLeft = isFirst
-                            ? MediaQuery.of(context).size.width / 2 - _firstButtonWidth / 2 - 10 // ← 보정값 추가
-                            : 6.0;
-
-                        return Padding(
-                          padding: EdgeInsets.only(left: paddingLeft, right: 6),
-                          child: ElevatedButton(
-                            key: isFirst ? _firstButtonKey : null, // ✅ key 부여
-                            onPressed: () {
-                              print('Navigate to detail page for $stock');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              minimumSize: const Size(0, 48), // ← 높이만 높임
+                    height: 46,
+                    child: detectedStocks.isEmpty
+                        ? Center(
+                            child: Text(
+                              "아직 인식된 주식이 없습니다",
+                              style: TextStyle(color: Colors.grey),
                             ),
-                            child: Text(stock),
+                          )
+                        : ListView.builder(
+                            controller: _scrollController,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: detectedStocks.length,
+                            itemBuilder: (context, index) {
+                              final stock = detectedStocks[index];
+                              final isFirst = index == 0;
+                              final paddingLeft = isFirst
+                                  ? MediaQuery.of(context).size.width / 2 - _firstButtonWidth / 2 - 10
+                                  : 8.0;
+
+                              return Padding(
+                                padding: EdgeInsets.only(left: paddingLeft, right: 8),
+                                child: ElevatedButton(
+                                  key: isFirst ? _firstButtonKey : null,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => StockDetailScreen(stock: stock),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: mainGreen,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  ),
+                                  child: Text(
+                                    stock['stockName'] ?? '',
+                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                  )
+                  ),
                 ],
               ),
             ),

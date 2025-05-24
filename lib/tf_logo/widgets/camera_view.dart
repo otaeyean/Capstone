@@ -8,7 +8,6 @@ import './apicall.dart';
 class CameraView extends StatefulWidget {
   final Function(List<Recognition>) resultsCallback;
   final Function(int) updateElapsedTimeCallback;
-
   final Function(String)? onNewStockDetected;
 
   const CameraView({
@@ -34,6 +33,23 @@ class _CameraViewState extends State<CameraView> {
   List<TimedRecognition> _activeRecognitions = [];
   Map<String, Map<String, dynamic>> _stockCache = {};
   String? _lastRequestedLabel;
+final Map<String, String> _stockCodeToName = {
+  '000660': 'SK하이닉스',
+  '005380': '현대차',
+  '005930': '삼성전자',
+  '035420': 'NAVER',
+  'AAPL': '애플',
+  'AMZN': '아마존',
+  'MSFT': '마이크로소프트',
+  'NFLX': '넷플릭스',
+  'NVDA': '엔비디아',
+  'PEP': '펩시코',
+  'TSLA': '테슬라',
+};
+
+  String _getStockName(String code) {
+    return _stockCodeToName[code] ?? code;
+  }
 
   @override
   void initState() {
@@ -59,16 +75,18 @@ class _CameraViewState extends State<CameraView> {
     final results = await _classifier.predict(image);
     final now = DateTime.now();
 
-    // 결과 업데이트
     for (var result in results) {
       if (result.score < inThreshold) continue;
+
       final existing = _activeRecognitions.firstWhere(
-            (r) => r.recognition.id == result.id,
+        (r) => r.recognition.id == result.id,
         orElse: () => TimedRecognition(result, now),
       );
+
       if (result.score > outThreshold) {
         existing.lastSeen = now;
       }
+
       existing.recognition = result;
       if (!_activeRecognitions.contains(existing)) {
         _activeRecognitions.add(existing);
@@ -78,7 +96,6 @@ class _CameraViewState extends State<CameraView> {
     if (_activeRecognitions.isNotEmpty) {
       final label = _activeRecognitions.first.recognition.label;
 
-      // ✅ 외부에 주식 이름 알림
       if (widget.onNewStockDetected != null) {
         widget.onNewStockDetected!(label);
       }
@@ -95,7 +112,7 @@ class _CameraViewState extends State<CameraView> {
     }
 
     _activeRecognitions.removeWhere(
-          (r) => now.difference(r.lastSeen).inMilliseconds > removalDelayMs,
+      (r) => now.difference(r.lastSeen).inMilliseconds > removalDelayMs,
     );
 
     setState(() {});
@@ -135,7 +152,7 @@ class _CameraViewState extends State<CameraView> {
               ),
             ),
             if (_activeRecognitions.isNotEmpty)
-              ..._buildOverlayWidgets(), // ✅ 여기에 있어야 표시됨
+              ..._buildOverlayWidgets(),
           ],
         );
       },
@@ -159,7 +176,10 @@ class _CameraViewState extends State<CameraView> {
           child: IntrinsicWidth(
             child: Container(
               padding: const EdgeInsets.all(12),
-              child: StockInfoCard(stock: stockData['info']),
+              child: StockInfoCard(
+                stock: stockData['info'],
+                stockName: _getStockName(label), 
+              ),
             ),
           ),
         ),
