@@ -90,12 +90,11 @@
 ---
 
 ## 기능 시연
-### 백 엔드 GitHub 링크
- [링크](#) (추가 예정)
+### 백엔드 GitHub 링크  
+[withYouBE (Spring Boot)](https://github.com/Urasica/withYouBE)
 
 ### 📽 시연 영상
- [시연 영상 링크](#) (추가 예정)
-
+[▶️ 유튜브 시연 영상 보기](https://youtu.be/MdASFg5RunY?si=fSKkqbFd2yMPpxcE)
 ### 주요 기능 GIF
 - [추가 예정] 모의투자 인터페이스  
 - [추가 예정] 챗봇 질의응답 예시  
