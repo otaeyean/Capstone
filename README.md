@@ -78,7 +78,6 @@
 
 ## 시스템 아키텍처
 
-![시스템 구성도]  
 ![alt text](App.png)
 
 - **Spring Boot** 서버는 REST 및 WebSocket API 제공  
