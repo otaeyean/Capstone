@@ -94,9 +94,15 @@
 [withYouBE (Spring Boot)](https://github.com/Urasica/withYouBE)
 
 ### 📽 시연 영상
-[▶️ 유튜브 시연 영상 보기](https://youtu.be/MdASFg5RunY?si=fSKkqbFd2yMPpxcE)
+[시연 영상 링크](https://youtu.be/MdASFg5RunY?si=fSKkqbFd2yMPpxcE)
+
+[추가 영상 링크](https://youtu.be/9AfUkE9fNhE?si=J8epEDiTlXSqtxiw)
+
 ### 주요 기능 GIF
-- [추가 예정] 모의투자 인터페이스  
-- [추가 예정] 챗봇 질의응답 예시  
-- [추가 예정] 로고 인식 및 정보 표시 화면  
+- 모의투자 인터페이스
+  ![alt text](gif/차트탭.gif)
+- 챗봇 질의응답 예시
+  ![alt text](gif/챗봇.gif)
+- 로고 인식 및 정보 표시 화면 
+  ![alt text](gif/로고인식.gif)
 
