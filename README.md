@@ -63,7 +63,7 @@
 - Nginx (Web 서비스 역방향 프록시 및 정적 호스팅)  
 
 ### 프론트엔드
-- utter (모바일 및 웹 동시 대응)  
+- Flutter (모바일 및 웹 동시 대응)  
 - Dart 언어 기반
 - http (REST API 요청)
 - provider 상태관리
